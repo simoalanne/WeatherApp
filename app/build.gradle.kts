@@ -49,4 +49,18 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    // network
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+
+    // coroutines
+    implementation(libs.kotlinx.coroutines.android)
+
+    // lifecycle
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+
+    // async images
+    implementation(libs.coil)
 }
