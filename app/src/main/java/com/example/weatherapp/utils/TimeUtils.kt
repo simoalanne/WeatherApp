@@ -1,0 +1,78 @@
+package com.example.weatherapp.utils
+
+import android.util.Log
+import com.example.weatherapp.model.SunriseSunset
+import java.time.*
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
+
+/**
+ * Returns the LocalDateTime object for a given unix timestamp and timezone offset. For consistency
+ * with time and timezone handling each unix timestamp from API responses should be converted to
+ * a LocalDateTime object.
+ *
+ * @param timestamp the unix timestamp
+ * @param timezoneOffset the timezone offset in seconds
+ * @return the LocalDateTime object for the given timestamp and timezone offset
+ */
+fun getLocalDateTimeFromUnixTimestamp(timestamp: Long, timezoneOffset: Int): LocalDateTime {
+    val offset = ZoneOffset.ofTotalSeconds(timezoneOffset)
+    val instant = Instant.ofEpochSecond(timestamp).atOffset(offset)
+    return LocalDateTime.of(instant.toLocalDate(), instant.toLocalTime())
+}
+
+fun isDay(time: LocalDateTime, sunriseSunsetMap: Map<String, SunriseSunset>): Boolean {
+    val dateKey = time.toLocalDate().toString()
+    val entry = sunriseSunsetMap[dateKey]
+    if (entry == null) {
+        val allDates = sunriseSunsetMap.keys.joinToString(", ")
+        Log.e("isBeforeSunset", "No entry found for date: ${dateKey}. Available dates: $allDates")
+        return true
+    }
+    return time.isAfter(entry.sunrise) && time.isBefore(entry.sunset)
+}
+
+fun truncateToHours(time: LocalDateTime): LocalDateTime = time.truncatedTo(ChronoUnit.HOURS)
+
+fun getHoursBetweenTwoLocalDates(a: LocalDateTime, b: LocalDateTime): Int {
+
+    if (a.isAfter(b)) {
+        Log.e("getHourDifference", "First DateTime should be before second DateTime")
+        return 0
+    }
+    val roundedA = truncateToHours(a)
+    val roundedB = truncateToHours(b)
+
+    return Duration.between(roundedA, roundedB).toHours().toInt()
+}
+
+fun formatLocalDateTime(
+    dateTime: LocalDateTime,
+    use24HourFormat: Boolean = true,
+    accuracy: String = "minutes"
+): String {
+    val minute = dateTime.minute.toString().padStart(2, '0')
+    val second = dateTime.second.toString().padStart(2, '0')
+
+    return if (use24HourFormat) {
+        val base = "${dateTime.hour}:$minute"
+        if (accuracy == "seconds") "$base:$second" else base
+    } else {
+        val hour = dateTime.hour % 12
+        val hourFormatted = if (hour == 0) 12 else hour
+        val amPm = if (dateTime.hour < 12) "am" else "pm"
+        val base = "$hourFormatted:$minute $amPm"
+        if (accuracy == "seconds") "$hourFormatted:$minute:$second $amPm" else base
+    }
+}
+
+fun formatDate(date: LocalDate, timezoneOffset: Int): String {
+    val dayOfWeek = date.dayOfWeek
+    val monthFormatter = DateTimeFormatter.ofPattern("dd.MMM")
+    val now = LocalDateTime.now(ZoneOffset.UTC).plusSeconds(timezoneOffset.toLong()).toLocalDate()
+    return when (date) {
+        now -> "${date.format(monthFormatter)} Today"
+        now.plusDays(1) -> "${date.format(monthFormatter)} Tomorrow"
+        else -> "${date.format(monthFormatter)} ${dayOfWeek.name.lowercase().replaceFirstChar { it.uppercase()}}"
+    }
+}
