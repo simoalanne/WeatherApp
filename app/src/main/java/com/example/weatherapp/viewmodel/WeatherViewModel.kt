@@ -24,14 +24,18 @@ class WeatherViewModel : ViewModel() {
     private var _weather by mutableStateOf<WeatherData?>(null)
     private val _geocodeEntries: SnapshotStateList<GeocodeEntry> = mutableStateListOf()
     private var _error by mutableStateOf<String?>(null)
+    private var _isLoading by mutableStateOf(false)
+    private var _previousCityName by mutableStateOf<String?>(null)
 
     val weather: WeatherData? get() = _weather
     val geocodeEntries: List<GeocodeEntry> get() = _geocodeEntries
     val error: String? get() = _error
+    val isLoading: Boolean get() = _isLoading
 
     fun fetchWeatherData(coordinates: Coordinates, location: Location) {
         viewModelScope.launch {
             try {
+                _isLoading = true
                 _error = null
                 _geocodeEntries.clear()
                 val weatherResponse = WeatherAPI.service.getWeatherByCoordinates(
@@ -71,12 +75,24 @@ class WeatherViewModel : ViewModel() {
             } catch (e: Exception) {
                 Log.e("WeatherViewModel", "Error fetching weather", e)
                 _error = "Something went wrong..."
+            } finally {
+                _isLoading = false
             }
         }
     }
 
     fun fetchGeocodeEntries(cityName: String) {
+        if (cityName.isBlank()) {
+            _geocodeEntries.clear()
+            _error = "Location cannot be empty"
+            return
+        }
+        if (cityName == _previousCityName) {
+            return
+        }
+        _previousCityName = cityName
         viewModelScope.launch {
+            _isLoading = true
             try {
                 _geocodeEntries.clear()
                 _error = null
@@ -99,6 +115,8 @@ class WeatherViewModel : ViewModel() {
             } catch (e: Exception) {
                 Log.e("WeatherViewModel", "Error fetching geocode entries", e)
                 _error = "Something went wrong..."
+            } finally {
+                _isLoading = false
             }
         }
     }
@@ -106,5 +124,10 @@ class WeatherViewModel : ViewModel() {
     init {
         // TODO: the initial fetched city should come from persistent storage
         fetchWeatherData(Coordinates(61.4991, 23.7871), Location("Tampere", "FI", null))
+    }
+
+    fun resetGeocodeEntries() {
+        _geocodeEntries.clear()
+        _error = null
     }
 }

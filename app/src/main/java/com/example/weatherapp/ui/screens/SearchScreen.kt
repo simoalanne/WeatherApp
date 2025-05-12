@@ -1,10 +1,15 @@
 package com.example.weatherapp.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Arrangement.Absolute.spacedBy
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -21,12 +26,17 @@ import com.example.weatherapp.ui.composables.SearchTextField
 import com.example.weatherapp.viewmodel.WeatherViewModel
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.LinkAnnotation.Clickable
 import androidx.compose.ui.unit.dp
+import com.example.weatherapp.ui.composables.Margin
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,6 +48,7 @@ fun SearchScreen(navController: NavController, weatherViewModel: WeatherViewMode
     var isInitialLoad by remember { mutableStateOf(true) }
     val geocodeEntries = weatherViewModel.geocodeEntries
     val error = weatherViewModel.error
+    val isLoading = weatherViewModel.isLoading
 
 
     // Navigate back to the WeatherScreen when the weather data is fetched
@@ -78,14 +89,44 @@ fun SearchScreen(navController: NavController, weatherViewModel: WeatherViewMode
             horizontalAlignment = Alignment.Start,
             verticalArrangement = spacedBy(16.dp)
         ) {
-            SearchTextField(
-                query = query,
-                onQueryChange = { query = it },
-                onSearch = { weatherViewModel.fetchGeocodeEntries(query) })
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = spacedBy(8.dp),
+            ) {
+                SearchTextField(
+                    query = query,
+                    onQueryChange = { query = it },
+                    onSearch = { weatherViewModel.fetchGeocodeEntries(query) },
+                    modifier = Modifier.weight(0.5f)
+                )
+                TextButton(content = { Text(text = "Reset") }, onClick = {
+                    weatherViewModel.resetGeocodeEntries()
+                    query = ""
+                }, colors = ButtonDefaults.textButtonColors(contentColor = Color.White))
+            }
             if (geocodeEntries.isNotEmpty()) {
                 GeocodeResults(
                     geocodeEntries = geocodeEntries,
-                    onSelect = { coordinates, displayName -> weatherViewModel.fetchWeatherData(coordinates, displayName) })
+                    onSelect = { coordinates, displayName ->
+                        weatherViewModel.fetchWeatherData(
+                            coordinates,
+                            displayName
+                        )
+                    })
+            }
+            if (isLoading) {
+                Margin(100)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        CircularProgressIndicator()
+                        Text(text = "Loading...", color = Color.White)
+                    }
+                }
             }
             if (error != null) {
                 Text(text = error, color = Color.Red)
