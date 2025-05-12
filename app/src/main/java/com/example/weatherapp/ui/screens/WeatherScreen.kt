@@ -1,15 +1,22 @@
 package com.example.weatherapp.ui.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -33,7 +40,9 @@ fun WeatherScreen(navController: NavController, weatherViewModel: WeatherViewMod
     if (weatherData != null) {
         val now = weatherData.hourlyForecasts.first().time
         val weather24Hours = weatherData.hourlyForecasts.takeWhile {
-            truncateToHours(it.time).isBefore(now.plusHours(24)) || truncateToHours(it.time) == now.plusHours(24)
+            truncateToHours(it.time).isBefore(now.plusHours(24)) || truncateToHours(it.time) == now.plusHours(
+                24
+            )
         }
         val timeZone = weatherData.meta.timezoneOffsetInSeconds / 3600
         BackgroundImage(isDay = isDay(now, weatherData.meta.sunriseSunsetTimes))
@@ -47,7 +56,7 @@ fun WeatherScreen(navController: NavController, weatherViewModel: WeatherViewMod
                 timezoneOffset = weatherData.meta.timezoneOffsetInSeconds,
                 // TODO: The effect should be animated like fonts getting smaller than just sudden change
                 collapseHeader = scrollState.value > 150,
-                onSearchIconPress =  { navController.navigate("search") }
+                onSearchIconPress = { navController.navigate("search") }
             )
             Column(
                 modifier = Modifier
@@ -65,9 +74,33 @@ fun WeatherScreen(navController: NavController, weatherViewModel: WeatherViewMod
                     round = true
                 )
                 Margin(margin = 20)
-                WeatherList(hourlyWeathers = weather24Hours)
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(red = 0f, green = 0f, blue = 0f, alpha = 0.3f))
+                        .padding(horizontal = 8.dp, vertical = 16.dp)
+                ) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Text(
+                            text = "Next 24 hour forecast",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
+                        )
+                        HorizontalDivider(
+                            color = Color.White.copy(alpha = 0.5f),
+                            thickness = 0.5f.dp
+                        )
+                    }
+                    WeatherList(hourlyWeathers = weather24Hours)
+                }
                 Margin(margin = 8)
-                DailyForecasts(allHourlyForecasts = weatherData.hourlyForecasts, weatherData.meta.timezoneOffsetInSeconds)
+                DailyForecasts(
+                    allHourlyForecasts = weatherData.hourlyForecasts,
+                    weatherData.meta.timezoneOffsetInSeconds
+                )
                 Margin(margin = 8)
                 WeatherStatsGrid(current = weatherData.current)
                 Margin(margin = 100) // Should be possible to scroll further down so the last elements are better viewable

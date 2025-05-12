@@ -38,7 +38,7 @@ fun DailyForecastItem(
     val expandIcon =
         if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown
     val content = if (isExpanded) "Close" else "Expand"
-    Column() {
+    Column {
         Row(
             modifier = Modifier
                 .fillMaxWidth(),

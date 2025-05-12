@@ -1,5 +1,7 @@
 package com.example.weatherapp.ui.composables
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -50,14 +52,19 @@ fun AppBar(
         modifier = Modifier
             .fillMaxWidth()
             .statusBarsPadding()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 16.dp)
+            .animateContentSize(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = if (collapseHeader) Alignment.CenterVertically else Alignment.Top
     ) {
         Column(
             modifier = Modifier.weight(0.75f)
         ) {
-            Text(text = title, color = Color.White, fontSize = if (collapseHeader) 14.sp else 20.sp)
+            Text(
+                text = title,
+                color = Color.White,
+                fontSize = if (collapseHeader) 14.sp else 20.sp
+            )
             if (!collapseHeader) {
                 Text(text = "Last updated: $lastUpdated", color = Color.White, fontSize = 12.sp)
                 Text(text = "Local time: $currentTime", color = Color.White, fontSize = 12.sp)
@@ -71,7 +78,11 @@ fun AppBar(
                 Icon(Icons.Default.Search, tint = Color.White, contentDescription = "Search")
             }
             IconButton(onClick = { /* TODO */ }) {
-                Icon(Icons.Default.Settings, tint = Color.White, contentDescription = "Settings")
+                Icon(
+                    Icons.Default.Settings,
+                    tint = Color.White,
+                    contentDescription = "Settings"
+                )
             }
         }
     }
