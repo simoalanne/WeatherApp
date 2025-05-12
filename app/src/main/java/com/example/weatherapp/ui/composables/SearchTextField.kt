@@ -10,16 +10,23 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun SearchTextField(query: String, onQueryChange: (String) -> Unit, onSearch: () -> Unit) {
+fun SearchTextField(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    onSearch: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
     TextField(
+        modifier = modifier,
         value = query,
         colors = TextFieldDefaults.colors(
             focusedIndicatorColor = Color.Transparent,
