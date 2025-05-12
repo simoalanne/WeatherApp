@@ -17,7 +17,7 @@ import com.example.weatherapp.utils.formatLocalDateTime
 @Composable
 fun WeatherList(
     hourlyWeathers: List<HourlyWeather>,
-    isNext24Hours: Boolean = true
+    isNext24Hours: Boolean = true,
 ) {
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
