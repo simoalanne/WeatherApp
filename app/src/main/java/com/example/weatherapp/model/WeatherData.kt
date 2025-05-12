@@ -13,9 +13,7 @@ data class WeatherData(
 )
 
 data class Meta(
-    val cityName: String,
-    val country: String,
-    val flagUrl: String,
+    val location: Location,
     val coordinates: Coordinates,
     val population: Int?,
     val timezoneOffsetInSeconds: Int,

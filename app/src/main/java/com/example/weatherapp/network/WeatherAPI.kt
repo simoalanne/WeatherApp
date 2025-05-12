@@ -10,43 +10,23 @@ import retrofit2.http.Query
 
 interface WeatherAPI {
     /**
-     * Get current weather by city name.
-     */
-    @GET("weather")
-    suspend fun getWeatherByCityName(
-        @Query("q") city: String,
-        @Query("units") units: String = "metric",
-        @Query("appid") apiKey: String = BuildConfig.OPEN_WEATHER_MAP_API_KEY
-    ): WeatherResponse
-
-    /**
      * Get current weather by coordinates.
      */
     @GET("weather")
     suspend fun getWeatherByCoordinates(
-        @Query("lat") latitude: Double,
-        @Query("lon") longitude: Double,
+        @Query("lat") lat: Double,
+        @Query("lon") lon: Double,
         @Query("units") units: String = "metric",
         @Query("appid") apiKey: String = BuildConfig.OPEN_WEATHER_MAP_API_KEY
     ): WeatherResponse
-
-    /**
-     * Get 5 day / 3 hour forecast by city name.
-     */
-    @GET("forecast")
-    suspend fun getForecastByCityName(
-        @Query("q") city: String,
-        @Query("units") units: String = "metric",
-        @Query("appid") apiKey: String = BuildConfig.OPEN_WEATHER_MAP_API_KEY
-    ): ForecastResponse
 
     /**
      * Get 5 day / 3 hour forecast by coordinates.
      */
     @GET("forecast")
     suspend fun getForecastByCoordinates(
-        @Query("lat") latitude: Double,
-        @Query("lon") longitude: Double,
+        @Query("lat") lat: Double,
+        @Query("lon") lon: Double,
         @Query("units") units: String = "metric",
         @Query("appid") apiKey: String = BuildConfig.OPEN_WEATHER_MAP_API_KEY
     ): ForecastResponse
@@ -56,6 +36,7 @@ interface WeatherAPI {
             .baseUrl(BuildConfig.WEATHER_API_BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
+
         val service: WeatherAPI = retrofit.create(WeatherAPI::class.java)
     }
 }

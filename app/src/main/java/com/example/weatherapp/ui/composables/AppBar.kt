@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -33,7 +34,8 @@ fun AppBar(
     title: String,
     lastUpdated: String,
     timezoneOffset: Int,
-    collapseHeader: Boolean
+    collapseHeader: Boolean,
+    onSearchIconPress: () -> Unit
 ) {
     var currentTime by remember { mutableStateOf("") }
 
@@ -44,16 +46,17 @@ fun AppBar(
             delay(1000)
         }
     }
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .statusBarsPadding()
             .padding(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = if (collapseHeader) Alignment.CenterVertically else Alignment.Top
     ) {
-        Column {
+        Column(
+            modifier = Modifier.weight(0.75f)
+        ) {
             Text(text = title, color = Color.White, fontSize = if (collapseHeader) 14.sp else 20.sp)
             if (!collapseHeader) {
                 Text(text = "Last updated: $lastUpdated", color = Color.White, fontSize = 12.sp)
@@ -61,8 +64,10 @@ fun AppBar(
             }
         }
 
-        Row {
-            IconButton(onClick = { /* TODO */ }) {
+        Row(
+            modifier = Modifier.weight(0.25f),
+        ) {
+            IconButton(onClick = onSearchIconPress) {
                 Icon(Icons.Default.Search, tint = Color.White, contentDescription = "Search")
             }
             IconButton(onClick = { /* TODO */ }) {
@@ -70,4 +75,8 @@ fun AppBar(
             }
         }
     }
+    if (collapseHeader) HorizontalDivider(
+        color = Color.White.copy(alpha = 0.5f),
+        thickness = 0.5f.dp
+    )
 }
