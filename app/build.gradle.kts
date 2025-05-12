@@ -28,6 +28,18 @@ android {
         )
         buildConfigField(
             "String",
+            "GEOCODING_API_BASE_URL",
+            "\"${properties.getProperty("GEOCODING_API_BASE_URL")}\""
+        )
+        // How many fuzzy matches to return from the geocoding API.
+        // 5 is the maximum value supported by the API.
+        buildConfigField(
+            "String",
+            "GEOCODING_API_LIMIT",
+            "\"${properties.getProperty("GEOCODING_API_LIMIT")?.toInt() ?: 5}\""
+        )
+        buildConfigField(
+            "String",
             "OPEN_WEATHER_MAP_API_KEY",
             "\"${properties.getProperty("OPEN_WEATHER_MAP_API_KEY") ?: ""}\""
         )
@@ -73,6 +85,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    // navigation
+    implementation(libs.androidx.navigation.compose)
+
     // network
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
@@ -85,6 +100,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
 
+    // coil async images
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
 
