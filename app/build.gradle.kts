@@ -106,4 +106,7 @@ dependencies {
 
     // extra icons
     implementation(libs.androidx.material.icons.extended)
+
+    // permission handling
+    implementation(libs.accompanist.permissions)
 }
