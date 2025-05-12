@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.weatherapp.ui.composables.AppBar
 import com.example.weatherapp.ui.composables.BackgroundImage
 import com.example.weatherapp.ui.composables.DailyForecasts
@@ -19,13 +20,13 @@ import com.example.weatherapp.ui.composables.Margin
 import com.example.weatherapp.ui.composables.WeatherStatsGrid
 import com.example.weatherapp.ui.composables.WeatherInfo
 import com.example.weatherapp.ui.composables.WeatherList
+import com.example.weatherapp.utils.formatLocationName
 import com.example.weatherapp.utils.isDay
 import com.example.weatherapp.viewmodel.WeatherViewModel
 import com.example.weatherapp.utils.truncateToHours
 
 @Composable
-fun WeatherScreen() {
-    val weatherViewModel: WeatherViewModel = viewModel()
+fun WeatherScreen(navController: NavController, weatherViewModel: WeatherViewModel) {
     val weatherData = weatherViewModel.weather
     val scrollState = rememberScrollState()
 
@@ -41,11 +42,12 @@ fun WeatherScreen() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             AppBar(
-                title = "${weatherData.meta.cityName} (UTC${if (timeZone >= 0) "+" else ""}$timeZone)",
+                title = "${formatLocationName(weatherData.meta.location)} (UTC${if (timeZone >= 0) "+" else ""}$timeZone)",
                 lastUpdated = weatherData.current.time.toLocalTime().toString().substring(0, 5),
                 timezoneOffset = weatherData.meta.timezoneOffsetInSeconds,
                 // TODO: The effect should be animated like fonts getting smaller than just sudden change
-                collapseHeader = scrollState.value > 150
+                collapseHeader = scrollState.value > 150,
+                onSearchIconPress =  { navController.navigate("search") }
             )
             Column(
                 modifier = Modifier

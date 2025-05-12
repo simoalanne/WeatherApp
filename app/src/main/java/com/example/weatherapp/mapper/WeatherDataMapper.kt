@@ -3,12 +3,12 @@ package com.example.weatherapp.mapper
 import android.util.Log
 import com.example.weatherapp.R
 import com.example.weatherapp.model.*
+import com.example.weatherapp.utils.formatLocationName
 import com.example.weatherapp.utils.getHoursBetweenTwoLocalDates
 import com.example.weatherapp.utils.getInterpolationWeights
 import com.example.weatherapp.utils.getLocalDateTimeFromUnixTimestamp
 import com.example.weatherapp.utils.isDay
 import com.example.weatherapp.utils.truncateToHours
-import java.util.Locale
 import kotlin.math.abs
 import java.time.Duration
 
@@ -19,12 +19,14 @@ import java.time.Duration
  * @param weatherResponse the response from the OpenWeatherMap weather endpoint
  * @param forecastResponse the response from the OpenWeatherMap forecast endpoint
  * @param sunriseSunsetResponse the response from sunrisesunset API
+ * @param location the location of the weather data
  * @return a WeatherData object containing the mapped data
  */
 fun mapApiResponsesToWeatherData(
     weatherResponse: WeatherResponse,
     forecastResponse: ForecastResponse,
-    sunriseSunsetResponse: SunriseSunsetResponse
+    sunriseSunsetResponse: SunriseSunsetResponse,
+    location: Location,
 ): WeatherData {
     val timezoneOffset = forecastResponse.cityInfo.timezone
     val sunriseSunsetList = sunriseSunsetResponse.results
@@ -39,9 +41,7 @@ fun mapApiResponsesToWeatherData(
     val population = forecastResponse.cityInfo.population
 
     val meta = Meta(
-        cityName = forecastResponse.cityInfo.name,
-        country = Locale("", countryCode).getDisplayCountry(Locale.ENGLISH),
-        flagUrl = "https://flagcdn.com/h40/${forecastResponse.cityInfo.countryCode.lowercase()}.png",
+        location = location,
         coordinates = Coordinates(
             forecastResponse.cityInfo.coordinates.lon, forecastResponse.cityInfo.coordinates.lat
         ),
