@@ -1,5 +1,7 @@
 package com.example.weatherapp.utils
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import com.example.weatherapp.model.Accuracy
 import com.example.weatherapp.model.Location
 import java.util.Locale
@@ -41,3 +43,6 @@ fun formatLocationName(
         Accuracy.LOCATION_AND_STATE_AND_COUNTRY -> "${location.name}, ${location.state?.let { "$it, " } ?: ""} $country"
     }
 }
+
+@Composable
+fun getCurrentLocale(): Locale = LocalContext.current.resources.configuration.locales.get(0)

@@ -22,6 +22,8 @@
     <string name="back">Takaisin</string>
     <string name="next_24_hours">Seuraavan 24 tunnin ennuste</string>
     <string name="no_weather_data">Ei säätietoja...</string>
+    <string name="today">Tänään</string>
+    <string name="tomorrow">Huomenna</string>
 
     <!-- Kaikki säätilat -->
     <string name="weather_condition_thunderstorm_light_rain">Ukkonen ja kevyt sade</string>

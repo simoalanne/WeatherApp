@@ -1,6 +1,7 @@
 package com.example.weatherapp.ui.composables
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,38 +28,46 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.ui.res.stringResource
 import com.example.weatherapp.R
+import com.example.weatherapp.utils.getCurrentLocale
 
 @Composable
 fun DailyForecastItem(
     date: LocalDate, dayForecasts: List<HourlyWeather>, timezoneOffset: Int,
     isExpanded: Boolean, onExpand: () -> Unit
 ) {
-    val formattedDate = formatDate(date, timezoneOffset)
+    val formattedDate = formatDate(
+        date,
+        timezoneOffset,
+        locale = getCurrentLocale(),
+        stringResource(R.string.today),
+        stringResource(R.string.tomorrow)
+    )
     val dominantIcon = getDominantIcon(dayForecasts.map { it.iconId })
     val dayVariant = WeatherIcons.getDailyVariantFromIcon(dominantIcon)
     val (minTemp, maxTemp) = getMinMaxTemperature(dayForecasts)
     val expandIcon =
         if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown
-    val content = if (isExpanded) stringResource(R.string.collapse) else stringResource(R.string.expand)
+    val content =
+        if (isExpanded) stringResource(R.string.collapse) else stringResource(R.string.expand)
     Column {
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = formattedDate,
                 fontSize = 14.sp,
                 color = Color.White,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(0.55f)
             )
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.weight(0.45f)
             ) {
                 ResImage(dayVariant)
-
                 val minTempStr = "${minTemp.roundToInt()}°"
                 val maxTempStr = "${maxTemp.roundToInt()}°"
                 Text(
