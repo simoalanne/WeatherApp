@@ -13,8 +13,7 @@ data class WeatherData(
 )
 
 data class Meta(
-    val location: Location,
-    val coordinates: Coordinates,
+    val geocodeEntry: GeocodeEntry,
     val population: Int?,
     val timezoneOffsetInSeconds: Int,
     val sunriseSunsetTimes: Map<String, SunriseSunset> // key should be toString() of LocalDate

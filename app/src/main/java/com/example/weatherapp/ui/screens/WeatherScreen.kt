@@ -32,6 +32,7 @@ import com.example.weatherapp.utils.isDay
 import com.example.weatherapp.viewmodel.WeatherViewModel
 import com.example.weatherapp.utils.truncateToHours
 import com.example.weatherapp.R
+import com.example.weatherapp.utils.getCurrentLocale
 
 @Composable
 fun WeatherScreen(navController: NavController, weatherViewModel: WeatherViewModel) {
@@ -52,7 +53,7 @@ fun WeatherScreen(navController: NavController, weatherViewModel: WeatherViewMod
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             AppBar(
-                title = "${formatLocationName(weatherData.meta.location)} (UTC${if (timeZone >= 0) "+" else ""}$timeZone)",
+                title = "${formatLocationName(weatherData.meta.geocodeEntry, locale = getCurrentLocale())} (UTC${if (timeZone >= 0) "+" else ""}$timeZone)",
                 lastUpdated = weatherData.current.time.toLocalTime().toString().substring(0, 5),
                 timezoneOffset = weatherData.meta.timezoneOffsetInSeconds,
                 // TODO: The effect should be animated like fonts getting smaller than just sudden change

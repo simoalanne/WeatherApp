@@ -72,14 +72,11 @@ fun SearchScreen(navController: NavController, weatherViewModel: WeatherViewMode
         TopAppBar(
             title = {
                 Text(
-                    text = stringResource(R.string.manage_cities),
-                    color = Color.White
+                    text = stringResource(R.string.manage_cities), color = Color.White
                 )
-            },
-            colors = TopAppBarDefaults.topAppBarColors(
+            }, colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = Color.Transparent
-            ),
-            navigationIcon = {
+            ), navigationIcon = {
                 IconButton(onClick = { navController.popBackStack() }) {
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowBack,
@@ -87,8 +84,7 @@ fun SearchScreen(navController: NavController, weatherViewModel: WeatherViewMode
                         contentDescription = stringResource(R.string.back)
                     )
                 }
-            }
-        )
+            })
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -101,10 +97,11 @@ fun SearchScreen(navController: NavController, weatherViewModel: WeatherViewMode
                 horizontalArrangement = spacedBy(8.dp),
             ) {
                 SearchTextField(
-                    query = query,
-                    onQueryChange = { query = it },
-                    onSearch = { if (query.isNotBlank()) weatherViewModel.fetchGeocodeEntries(query) },
-                    modifier = Modifier.weight(0.5f)
+                    query = query, onQueryChange = { query = it }, onSearch = {
+                    if (query.isNotBlank()) weatherViewModel.fetchGeocodeEntries(
+                        query.trim().lowercase()
+                    )
+                }, modifier = Modifier.weight(0.5f)
                 )
                 TextButton(
                     content = { Text(text = stringResource(R.string.clear_results)) },
@@ -114,28 +111,21 @@ fun SearchScreen(navController: NavController, weatherViewModel: WeatherViewMode
                     },
                     // Button should be invisible but still take up space when it's not interactable
                     colors = ButtonDefaults.textButtonColors(
-                        contentColor = Color.White,
-                        disabledContentColor = Color.Transparent
+                        contentColor = Color.White, disabledContentColor = Color.Transparent
                     ),
                     enabled = geocodeEntries.isNotEmpty(),
                 )
             }
             if (geocodeEntries.isNotEmpty()) {
                 GeocodeResults(
-                    geocodeEntries = geocodeEntries,
-                    onSelect = { coordinates, displayName ->
-                        weatherViewModel.fetchWeatherData(
-                            coordinates,
-                            displayName
-                        )
-                    }
-                )
+                    geocodeEntries = geocodeEntries, onSelect = {
+                        weatherViewModel.fetchWeatherData(it)
+                    })
             }
             if (isLoading) {
                 Margin(100)
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
+                    modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
                 ) {
                     Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                         CircularProgressIndicator()
@@ -144,7 +134,9 @@ fun SearchScreen(navController: NavController, weatherViewModel: WeatherViewMode
                 }
             }
             if (error != null) {
-                Text(text = stringResource(error), color = Color(red = 255, green = 155, blue = 155))
+                Text(
+                    text = stringResource(error), color = Color(red = 255, green = 155, blue = 155)
+                )
             }
         }
     }
