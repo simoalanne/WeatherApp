@@ -32,10 +32,15 @@ fun mapApiResponsesToWeatherData(
     val timezoneOffset = forecastResponse.cityInfo.timezone
     val sunriseSunsetList = sunriseSunsetResponse.results
     val sunriseSunsetMap = sunriseSunsetList.associate {
-        val sunrise = getLocalDateTimeFromUnixTimestamp(it.sunrise.toLong(), timezoneOffset)
-        val sunset = getLocalDateTimeFromUnixTimestamp(it.sunset.toLong(), timezoneOffset)
+        val sunrise = getLocalDateTimeFromUnixTimestamp(it.sunrise?.toLongOrNull() ?: 0, timezoneOffset)
+        val sunset = getLocalDateTimeFromUnixTimestamp(it.sunset?.toLongOrNull() ?: 0, timezoneOffset)
         val key = sunrise.toLocalDate().toString()
         Pair(key, SunriseSunset(sunrise, sunset))
+    }
+
+    if (sunriseSunsetList.any { it.sunrise == null || it.sunset == null }) {
+        Log.e("mapApiResponsesToWeatherData", "sunriseSunset response contains null values: $sunriseSunsetResponse")
+        Log.e("mapApiResponsesToWeatherData", "resolved values are: $sunriseSunsetMap")
     }
 
     val countryCode = forecastResponse.cityInfo.countryCode
