@@ -3,6 +3,7 @@ package com.example.weatherapp.mapper
 import android.util.Log
 import com.example.weatherapp.R
 import com.example.weatherapp.model.*
+import com.example.weatherapp.model.WeatherIcons.Companion.getConditionString
 import com.example.weatherapp.utils.formatLocationName
 import com.example.weatherapp.utils.getHoursBetweenTwoLocalDates
 import com.example.weatherapp.utils.getInterpolationWeights
@@ -56,7 +57,7 @@ fun mapApiResponsesToWeatherData(
         time = currentTime,
         temperature = weatherResponse.weatherInfo.temp,
         feelsLike = weatherResponse.weatherInfo.feelsLike,
-        condition = weatherResponse.weatherCondition[0].description,
+        conditionId = getConditionString(weatherResponse.weatherCondition[0].code),
         iconId = WeatherIcons.fromCode(
             weatherResponse.weatherCondition[0].code, isDay(currentTime, sunriseSunsetMap)
         ),

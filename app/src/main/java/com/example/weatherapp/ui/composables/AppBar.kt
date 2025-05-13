@@ -30,6 +30,8 @@ import com.example.weatherapp.utils.formatLocalDateTime
 import kotlinx.coroutines.delay
 import java.time.LocalDateTime
 import java.time.ZoneOffset
+import androidx.compose.ui.res.stringResource
+import com.example.weatherapp.R
 
 @Composable
 fun AppBar(
@@ -66,8 +68,8 @@ fun AppBar(
                 fontSize = if (collapseHeader) 14.sp else 20.sp
             )
             if (!collapseHeader) {
-                Text(text = "Last updated: $lastUpdated", color = Color.White, fontSize = 12.sp)
-                Text(text = "Local time: $currentTime", color = Color.White, fontSize = 12.sp)
+                Text(text = "${stringResource(R.string.last_update)}: $lastUpdated", color = Color.White, fontSize = 12.sp)
+                Text(text = "${stringResource(R.string.local_time)}: $currentTime", color = Color.White, fontSize = 12.sp)
             }
         }
 
@@ -75,13 +77,13 @@ fun AppBar(
             modifier = Modifier.weight(0.25f),
         ) {
             IconButton(onClick = onSearchIconPress) {
-                Icon(Icons.Default.Search, tint = Color.White, contentDescription = "Search")
+                Icon(Icons.Default.Search, tint = Color.White, contentDescription = stringResource(R.string.search))
             }
             IconButton(onClick = { /* TODO */ }) {
                 Icon(
                     Icons.Default.Settings,
                     tint = Color.White,
-                    contentDescription = "Settings"
+                    contentDescription = stringResource(R.string.settings)
                 )
             }
         }

@@ -25,6 +25,8 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.ui.res.stringResource
+import com.example.weatherapp.R
 
 @Composable
 fun DailyForecastItem(
@@ -37,7 +39,7 @@ fun DailyForecastItem(
     val (minTemp, maxTemp) = getMinMaxTemperature(dayForecasts)
     val expandIcon =
         if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown
-    val content = if (isExpanded) "Close" else "Expand"
+    val content = if (isExpanded) stringResource(R.string.collapse) else stringResource(R.string.expand)
     Column {
         Row(
             modifier = Modifier

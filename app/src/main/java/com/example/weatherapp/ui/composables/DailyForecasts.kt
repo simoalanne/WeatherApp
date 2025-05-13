@@ -15,10 +15,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.weatherapp.model.HourlyWeather
 import java.time.LocalDate
+import com.example.weatherapp.R
 
 @Composable
 fun DailyForecasts(allHourlyForecasts: List<HourlyWeather>, timezoneOffset: Int) {
@@ -38,7 +40,7 @@ fun DailyForecasts(allHourlyForecasts: List<HourlyWeather>, timezoneOffset: Int)
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Text(text = "5 day forecast", color = Color.White, fontWeight = FontWeight.Bold)
+            Text(text = stringResource(R.string.five_day_forecast), color = Color.White, fontWeight = FontWeight.Bold)
             HorizontalDivider(color = Color.White.copy(alpha = 0.5f), thickness = 0.5f.dp)
         }
         groupedByDate.forEachIndexed { index, (date, dayForecasts) ->

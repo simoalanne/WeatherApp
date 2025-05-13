@@ -16,9 +16,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.weatherapp.ui.composables.AppBar
 import com.example.weatherapp.ui.composables.BackgroundImage
@@ -31,6 +31,7 @@ import com.example.weatherapp.utils.formatLocationName
 import com.example.weatherapp.utils.isDay
 import com.example.weatherapp.viewmodel.WeatherViewModel
 import com.example.weatherapp.utils.truncateToHours
+import com.example.weatherapp.R
 
 @Composable
 fun WeatherScreen(navController: NavController, weatherViewModel: WeatherViewModel) {
@@ -70,7 +71,7 @@ fun WeatherScreen(navController: NavController, weatherViewModel: WeatherViewMod
                     current = weatherData.current.temperature,
                     min = weather24Hours.minOf { it.temperature },
                     max = weather24Hours.maxOf { it.temperature },
-                    condition = weatherData.current.condition,
+                    condition = stringResource(id = weatherData.current.conditionId),
                     round = true
                 )
                 Margin(margin = 20)
@@ -85,7 +86,7 @@ fun WeatherScreen(navController: NavController, weatherViewModel: WeatherViewMod
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         Text(
-                            text = "Next 24 hour forecast",
+                            text = stringResource(R.string.next_24_hours),
                             color = Color.White,
                             fontWeight = FontWeight.Bold
                         )
@@ -107,7 +108,7 @@ fun WeatherScreen(navController: NavController, weatherViewModel: WeatherViewMod
             }
         }
     } else {
-        Text(text = "No weather data available")
+        Text(text = stringResource(R.string.no_weather_data))
     }
 }
 
