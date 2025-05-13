@@ -5,6 +5,6 @@ data class SunriseSunsetResponse(
 )
 
 data class Result(
-    val sunrise: String,
-    val sunset: String,
+    val sunrise: String?,
+    val sunset: String?,
 )
