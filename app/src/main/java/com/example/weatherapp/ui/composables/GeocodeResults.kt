@@ -22,13 +22,13 @@ import coil3.compose.AsyncImage
 import com.example.weatherapp.model.Accuracy
 import com.example.weatherapp.model.Coordinates
 import com.example.weatherapp.model.GeocodeEntry
-import com.example.weatherapp.model.Location
 import com.example.weatherapp.utils.formatLocationName
+import com.example.weatherapp.utils.getCurrentLocale
 
 @Composable
 fun GeocodeResults(
     geocodeEntries: List<GeocodeEntry>,
-    onSelect: (Coordinates, Location) -> Unit
+    onSelect: (GeocodeEntry) -> Unit
 ) {
     val scrollState = rememberScrollState()
 
@@ -36,18 +36,17 @@ fun GeocodeResults(
     Column(modifier = Modifier.verticalScroll(scrollState)) {
         geocodeEntries.forEach { entry ->
             val displayText = formatLocationName(
-                location = Location(entry.name, entry.countryCode, entry.state),
-                accuracy = Accuracy.LOCATION_AND_STATE_AND_COUNTRY
+                location = entry,
+                accuracy = Accuracy.LOCATION_AND_STATE_AND_COUNTRY,
+                locale = getCurrentLocale()
             )
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
-                        onSelect(
-                            Coordinates(entry.lat, entry.lon),
-                            Location(entry.name, entry.countryCode, entry.state)
-                        )
+                        onSelect(entry)
+
                     }
             ) {
                 Row(

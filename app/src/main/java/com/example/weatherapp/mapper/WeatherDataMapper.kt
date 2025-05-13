@@ -20,14 +20,14 @@ import java.time.Duration
  * @param weatherResponse the response from the OpenWeatherMap weather endpoint
  * @param forecastResponse the response from the OpenWeatherMap forecast endpoint
  * @param sunriseSunsetResponse the response from sunrisesunset API
- * @param location the location of the weather data
+ * @param geoCodeEntry the geocode entry that was used to fetch the coordinates
  * @return a WeatherData object containing the mapped data
  */
 fun mapApiResponsesToWeatherData(
     weatherResponse: WeatherResponse,
     forecastResponse: ForecastResponse,
     sunriseSunsetResponse: SunriseSunsetResponse,
-    location: Location,
+    geoCodeEntry: GeocodeEntry,
 ): WeatherData {
     val timezoneOffset = forecastResponse.cityInfo.timezone
     val sunriseSunsetList = sunriseSunsetResponse.results
@@ -43,14 +43,10 @@ fun mapApiResponsesToWeatherData(
         Log.e("mapApiResponsesToWeatherData", "resolved values are: $sunriseSunsetMap")
     }
 
-    val countryCode = forecastResponse.cityInfo.countryCode
     val population = forecastResponse.cityInfo.population
 
     val meta = Meta(
-        location = location,
-        coordinates = Coordinates(
-            forecastResponse.cityInfo.coordinates.lon, forecastResponse.cityInfo.coordinates.lat
-        ),
+        geocodeEntry = geoCodeEntry,
         population = if (population == 0) null else population,
         timezoneOffsetInSeconds = forecastResponse.cityInfo.timezone,
         sunriseSunsetTimes = sunriseSunsetMap

@@ -9,9 +9,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.weatherapp.mapper.mapApiResponsesToWeatherData
-import com.example.weatherapp.model.Coordinates
 import com.example.weatherapp.model.GeocodeEntry
-import com.example.weatherapp.model.Location
 import com.example.weatherapp.model.WeatherData
 import com.example.weatherapp.network.GeocodeAPI
 import com.example.weatherapp.network.SunriseSunsetAPI
@@ -19,6 +17,8 @@ import com.example.weatherapp.network.WeatherAPI
 import com.example.weatherapp.utils.getLocalDateTimeFromUnixTimestamp
 import kotlinx.coroutines.launch
 import com.example.weatherapp.R
+import kotlinx.coroutines.async
+import java.time.LocalDate
 
 class WeatherViewModel : ViewModel() {
 
@@ -33,38 +33,46 @@ class WeatherViewModel : ViewModel() {
     val error: Int? get() = _error
     val isLoading: Boolean get() = _isLoading
 
-    fun fetchWeatherData(coordinates: Coordinates, location: Location) {
+    fun fetchWeatherData(location: GeocodeEntry) {
         viewModelScope.launch {
             try {
                 _isLoading = true
                 _error = null
                 _geocodeEntries.clear()
-                val weatherResponse = WeatherAPI.service.getWeatherByCoordinates(
-                    lat = coordinates.lat,
-                    lon = coordinates.lon
-                )
-                val forecastResponse = WeatherAPI.service.getForecastByCoordinates(
-                    lat = coordinates.lat,
-                    lon = coordinates.lon
-                )
-                val (lat, lon) = forecastResponse.cityInfo.coordinates
 
-                val startDate = getLocalDateTimeFromUnixTimestamp(
-                    weatherResponse.timestamp,
-                    forecastResponse.cityInfo.timezone
-                ).toLocalDate().minusDays(1).toString()
+                val weatherDeferred = async {
+                    WeatherAPI.service.getWeatherByCoordinates(
+                        lat = location.lat,
+                        lon = location.lon
+                    )
+                }
 
-                val endDate = getLocalDateTimeFromUnixTimestamp(
-                    forecastResponse.forecastList.last().timestamp,
-                    forecastResponse.cityInfo.timezone
-                ).toLocalDate().toString()
+                val forecastDeferred = async {
+                    WeatherAPI.service.getForecastByCoordinates(
+                        lat = location.lat,
+                        lon = location.lon
+                    )
+                }
 
-                val sunriseSunsetResponse = SunriseSunsetAPI.service.getSunriseSunsetRange(
-                    lat,
-                    lon,
-                    startDate,
-                    endDate
-                )
+                // start and end date can be hardcoded because forecast last entry is after 5 days
+                // then minus 1 day for start is because we want to access the before "now"
+                // sunrise and sunset times that can possibly fall in previous day.
+                val startDate = LocalDate.now().minusDays(1).toString()
+                val endDate = LocalDate.now().plusDays(5).toString()
+
+                val sunriseSunsetDeferred = async {
+                    SunriseSunsetAPI.service.getSunriseSunsetRange(
+                        location.lat,
+                        location.lon,
+                        startDate,
+                        endDate
+                    )
+                }
+
+                // Calls can run in parallel because they are not dependent on each other
+                val weatherResponse = weatherDeferred.await()
+                val forecastResponse = forecastDeferred.await()
+                val sunriseSunsetResponse = sunriseSunsetDeferred.await()
 
                 val weatherData = mapApiResponsesToWeatherData(
                     weatherResponse,
@@ -74,13 +82,14 @@ class WeatherViewModel : ViewModel() {
                 )
                 _weather = weatherData
             } catch (e: Exception) {
-                Log.e("WeatherViewModel", "Error fetching weather", e)
+                Log.e("WeatherViewModel", "Error fetching weather data", e)
                 _error = R.string.something_went_wrong
             } finally {
                 _isLoading = false
             }
         }
     }
+
 
     fun fetchGeocodeEntries(cityName: String) {
         if (cityName.isBlank()) {
@@ -97,17 +106,18 @@ class WeatherViewModel : ViewModel() {
             try {
                 _geocodeEntries.clear()
                 _error = null
-                // If entry has same name, country code and state, only keep the first occurrence
-                val uniqueEntries = GeocodeAPI.service.geocode(cityName)
-                    .groupBy {
-                        Location(
-                            name = it.name,
-                            countryCode = it.countryCode,
-                            state = it.state
-                        )
-                    }
-                    .map { (_, entries) -> entries.first() }
+                val uniqueEntries = GeocodeAPI.service.geocode(cityName).map {
+                    GeocodeEntry(
+                        it.name,
+                        it.lat,
+                        it.lon,
+                        it.countryCode,
+                        it.state,
+                        it.localizedNames
+                    )
+                }.toSet().toList()
                 if (uniqueEntries.isEmpty()) {
+                    Log.d("WeatherViewModel", "No results for $cityName")
                     _error = R.string.no_results
                 } else {
                     _geocodeEntries.addAll(uniqueEntries)
@@ -124,11 +134,10 @@ class WeatherViewModel : ViewModel() {
 
     init {
         // TODO: the initial fetched city should come from persistent storage
-        fetchWeatherData(Coordinates(61.4991, 23.7871), Location("Tampere", "FI", null))
+        fetchWeatherData(GeocodeEntry("Tampere", 61.4991, 23.7871, "FI", null, null))
     }
 
     fun resetGeocodeEntries() {
         _geocodeEntries.clear()
-        _error = null
     }
 }
