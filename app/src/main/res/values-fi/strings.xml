@@ -1,0 +1,82 @@
+<resources>
+    <!-- Yleiset -->
+    <string name="app_name">Sääsovellus</string>
+    <string name="five_day_forecast">5 päivän ennuste</string>
+    <string name="collapse">sulje</string>
+    <string name="expand">avaa</string>
+    <string name="last_update">viimeksi päivitetty</string>
+    <string name="local_time">paikallinen kellonaika</string>
+    <string name="search_for_city">Hae kaupunkia</string>
+    <string name="manage_cities">Hallitse kaupunkeja</string>
+    <string name="search">Hae</string>
+    <string name="settings">asetukset</string>
+    <string name="now">Nyt</string>
+    <string name="feels_like">Tuntuu kuin</string>
+    <string name="humidity">Kosteus</string>
+    <string name="wind_speed">Tuulen nopeus</string>
+    <string name="air_pressure">Ilmanpaine</string>
+    <string name="cloud_cover">Pilvisyys</string>
+    <string name="visibility">Näkyvyys</string>
+    <string name="clear_results">Tyhjennä</string>
+    <string name="loading">Ladataan...</string>
+    <string name="back">Takaisin</string>
+    <string name="next_24_hours">Seuraavan 24 tunnin ennuste</string>
+    <string name="no_weather_data">Ei säätietoja...</string>
+
+    <!-- Kaikki säätilat -->
+    <string name="weather_condition_thunderstorm_light_rain">Ukkonen ja kevyt sade</string>
+    <string name="weather_condition_thunderstorm_rain">Ukkonen ja sade</string>
+    <string name="weather_condition_thunderstorm_heavy_rain">Ukkonen ja voimakas sade</string>
+    <string name="weather_condition_light_thunderstorm">Kevyt ukkonen</string>
+    <string name="weather_condition_thunderstorm">Ukkonen</string>
+    <string name="weather_condition_heavy_thunderstorm">Voimakas ukkonen</string>
+    <string name="weather_condition_ragged_thunderstorm">Raju ukkonen</string>
+    <string name="weather_condition_thunderstorm_light_drizzle">Ukkonen ja kevyt tihkusade</string>
+    <string name="weather_condition_thunderstorm_drizzle">Ukkonen ja tihkusade</string>
+    <string name="weather_condition_thunderstorm_heavy_drizzle">Ukkonen ja voimakas tihkusade</string>
+
+    <string name="weather_condition_light_intensity_drizzle">Kevyt tihkusade</string>
+    <string name="weather_condition_drizzle">Tihkusade</string>
+    <string name="weather_condition_heavy_intensity_drizzle">Voimakas tihkusade</string>
+    <string name="weather_condition_light_intensity_drizzle_rain">Kevyt tihkusade</string>
+    <string name="weather_condition_drizzle_rain">Kevyt tihkusade</string>
+    <string name="weather_condition_heavy_intensity_drizzle_rain">Voimakas tihkusade</string>
+    <string name="weather_condition_shower_rain_and_drizzle">Tihkusadekuuro</string>
+    <string name="weather_condition_heavy_shower_rain_and_drizzle">Voimakas tihkusadekuuro</string>
+    <string name="weather_condition_shower_drizzle">Tihkusadekuuro</string>
+
+    <string name="weather_condition_light_rain">Kevyt vesisade</string>
+    <string name="weather_condition_moderate_rain">Kohtalainen vesisade</string>
+    <string name="weather_condition_heavy_intensity_rain">Voimakas vesisade</string>
+    <string name="weather_condition_very_heavy_rain">Hyvin voimakas vesisade</string>
+    <string name="weather_condition_extreme_rain">Rankkasade</string>
+    <string name="weather_condition_freezing_rain">Jäätävä sade</string>
+    <string name="weather_condition_light_intensity_shower_rain">Kevyt sadekuuro</string>
+    <string name="weather_condition_shower_rain">Sadekuuro</string>
+    <string name="weather_condition_heavy_intensity_shower_rain">Voimakas sadekuuro</string>
+    <string name="weather_condition_ragged_shower_rain">Äkillinen sadekuuro</string>
+
+    <string name="weather_condition_light_snow">Kevyt lumisade</string>
+    <string name="weather_condition_snow">Lumisade</string>
+    <string name="weather_condition_heavy_snow">Voimakas lumisade</string>
+    <string name="weather_condition_sleet">Räntäsade</string>
+    <string name="weather_condition_light_shower_sleet">Kevyt räntäsadekuuro</string>
+    <string name="weather_condition_shower_sleet">Räntäsadekuuro</string>
+    <string name="weather_condition_light_rain_and_snow">Kevyt sade ja lumi</string>
+    <string name="weather_condition_rain_and_snow">Sade ja lumi</string>
+    <string name="weather_condition_light_shower_snow">Kevyt lumisadekuuro</string>
+    <string name="weather_condition_shower_snow">Lumisadekuuro</string>
+    <string name="weather_condition_heavy_shower_snow">Voimakas lumisadekuuro</string>
+
+    <string name="weather_condition_clear_sky">Aurinkoista</string>
+    <string name="weather_condition_few_clouds">Enimmäkseen aurinkoista</string>
+    <string name="weather_condition_scattered_clouds">Jonkin verran pilviä</string>
+    <string name="weather_condition_broken_clouds">Puolipilvistä</string>
+    <string name="weather_condition_overcast_clouds">Pilvistä</string>
+    <string name="weather_condition_unknown_condition">Tuntematon säätila</string>
+
+    <!-- Virheviestit -->
+    <string name="something_went_wrong">Jotain meni pieleen. Yritä uudelleen.</string>
+    <string name="city_name_cannot_be_empty">Kaupungin nimi ei voi olla tyhjä.</string>
+    <string name="no_results">Ei tuloksia haulle. Tarkista kirjoitusasu ja yritä uudelleen.</string>
+</resources>
