@@ -4,7 +4,9 @@ import android.util.Log
 import com.example.weatherapp.model.SunriseSunset
 import java.time.*
 import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
 import java.time.temporal.ChronoUnit
+import java.util.Locale
 
 /**
  * Returns the LocalDateTime object for a given unix timestamp and timezone offset. For consistency
@@ -66,13 +68,30 @@ fun formatLocalDateTime(
     }
 }
 
-fun formatDate(date: LocalDate, timezoneOffset: Int): String {
+// This could just be a composable rather than pure util function because it depends on data from composable
+// but for because all formatting is in util functions this stays here
+fun formatDate(
+    date: LocalDate,
+    timezoneOffset: Int,
+    locale: Locale,
+    todayLabel: String,
+    tomorrowLabel: String
+): String {
     val dayOfWeek = date.dayOfWeek
     val monthFormatter = DateTimeFormatter.ofPattern("dd.MMM")
+
     val now = LocalDateTime.now(ZoneOffset.UTC).plusSeconds(timezoneOffset.toLong()).toLocalDate()
+
     return when (date) {
-        now -> "${date.format(monthFormatter)} Today"
-        now.plusDays(1) -> "${date.format(monthFormatter)} Tomorrow"
-        else -> "${date.format(monthFormatter)} ${dayOfWeek.name.lowercase().replaceFirstChar { it.uppercase()}}"
+        now -> "${date.format(monthFormatter)} $todayLabel"
+        now.plusDays(1) -> "${date.format(monthFormatter)} $tomorrowLabel"
+        else -> "${date.format(monthFormatter)} ${
+            dayOfWeek.getDisplayName(
+                TextStyle.SHORT,
+                locale
+            )?.lowercase()?.replaceFirstChar { it.uppercase() } ?: dayOfWeek.name
+        }"
     }
 }
+
+

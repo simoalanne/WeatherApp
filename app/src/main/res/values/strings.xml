@@ -22,6 +22,8 @@
     <string name="back">Back</string>
     <string name="next_24_hours">Next 24 hours forecat</string>
     <string name="no_weather_data">No weather data...</string>
+    <string name="today">Today</string>
+    <string name="tomorrow">Tomorrow</string>
     
     <!-- All weather conditions -->
     <string name="weather_condition_thunderstorm_light_rain">Thunderstorm with light rain</string>
