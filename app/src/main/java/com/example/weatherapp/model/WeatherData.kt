@@ -25,7 +25,7 @@ data class CurrentWeather(
     val time: LocalDateTime,
     val temperature: Double,
     val feelsLike: Double,
-    val condition: String,
+    val conditionId: Int,
     val iconId: Int,
     val humidityPercentage: Int,
     val windSpeed: Double,

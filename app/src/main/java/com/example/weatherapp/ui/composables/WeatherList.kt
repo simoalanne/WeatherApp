@@ -10,9 +10,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.weatherapp.model.HourlyWeather
 import com.example.weatherapp.utils.formatLocalDateTime
+import com.example.weatherapp.R
 
 @Composable
 fun WeatherList(
@@ -27,7 +29,7 @@ fun WeatherList(
             .padding(12.dp)
     ) {
         itemsIndexed(hourlyWeathers) { index, hourlyWeather ->
-            val time = if (index == 0 && isNext24Hours) "Now" else formatLocalDateTime(hourlyWeather.time)
+            val time = if (index == 0 && isNext24Hours) stringResource(R.string.now) else formatLocalDateTime(hourlyWeather.time)
             WeatherListItem(time, hourlyWeather.iconId, hourlyWeather.temperature)
         }
     }

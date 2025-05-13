@@ -18,18 +18,19 @@ import com.example.weatherapp.network.SunriseSunsetAPI
 import com.example.weatherapp.network.WeatherAPI
 import com.example.weatherapp.utils.getLocalDateTimeFromUnixTimestamp
 import kotlinx.coroutines.launch
+import com.example.weatherapp.R
 
 class WeatherViewModel : ViewModel() {
 
     private var _weather by mutableStateOf<WeatherData?>(null)
     private val _geocodeEntries: SnapshotStateList<GeocodeEntry> = mutableStateListOf()
-    private var _error by mutableStateOf<String?>(null)
+    private var _error by mutableStateOf<Int?>(null)
     private var _isLoading by mutableStateOf(false)
     private var _previousCityName by mutableStateOf<String?>(null)
 
     val weather: WeatherData? get() = _weather
     val geocodeEntries: List<GeocodeEntry> get() = _geocodeEntries
-    val error: String? get() = _error
+    val error: Int? get() = _error
     val isLoading: Boolean get() = _isLoading
 
     fun fetchWeatherData(coordinates: Coordinates, location: Location) {
@@ -74,7 +75,7 @@ class WeatherViewModel : ViewModel() {
                 _weather = weatherData
             } catch (e: Exception) {
                 Log.e("WeatherViewModel", "Error fetching weather", e)
-                _error = "Something went wrong..."
+                _error = R.string.something_went_wrong
             } finally {
                 _isLoading = false
             }
@@ -84,7 +85,7 @@ class WeatherViewModel : ViewModel() {
     fun fetchGeocodeEntries(cityName: String) {
         if (cityName.isBlank()) {
             _geocodeEntries.clear()
-            _error = "Location cannot be empty"
+            _error = R.string.city_name_cannot_be_empty
             return
         }
         if (cityName == _previousCityName) {
@@ -107,14 +108,14 @@ class WeatherViewModel : ViewModel() {
                     }
                     .map { (_, entries) -> entries.first() }
                 if (uniqueEntries.isEmpty()) {
-                    _error = "No results found. Please try again."
+                    _error = R.string.no_results
                 } else {
                     _geocodeEntries.addAll(uniqueEntries)
                     _error = null
                 }
             } catch (e: Exception) {
                 Log.e("WeatherViewModel", "Error fetching geocode entries", e)
-                _error = "Something went wrong..."
+                _error = R.string.something_went_wrong
             } finally {
                 _isLoading = false
             }

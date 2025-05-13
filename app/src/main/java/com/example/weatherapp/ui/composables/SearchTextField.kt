@@ -13,8 +13,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import com.example.weatherapp.R
 
 @Composable
 fun SearchTextField(
@@ -33,11 +35,11 @@ fun SearchTextField(
             unfocusedIndicatorColor = Color.Transparent
         ),
         onValueChange = onQueryChange,
-        placeholder = { Text("Search") },
+        placeholder = { Text(stringResource(R.string.search_for_city)) },
         leadingIcon = {
             Icon(
                 imageVector = Icons.Default.Search,
-                contentDescription = "Search Icon"
+                contentDescription = stringResource(R.string.search)
             )
         },
         singleLine = true,

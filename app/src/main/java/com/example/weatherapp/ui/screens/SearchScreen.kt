@@ -1,5 +1,6 @@
 package com.example.weatherapp.ui.screens
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -34,9 +35,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.text.LinkAnnotation.Clickable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.weatherapp.ui.composables.Margin
+import com.example.weatherapp.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,6 +58,7 @@ fun SearchScreen(navController: NavController, weatherViewModel: WeatherViewMode
     // back to the WeatherScreen when user comes here.
     LaunchedEffect(weatherViewModel.weather) {
         if (isInitialLoad && weatherViewModel.weather != null) {
+            weatherViewModel.resetGeocodeEntries()
             isInitialLoad = false
         } else {
             navController.popBackStack()
@@ -65,10 +68,14 @@ fun SearchScreen(navController: NavController, weatherViewModel: WeatherViewMode
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
-
     ) {
         TopAppBar(
-            title = { Text(text = "Search for location", color = Color.White) },
+            title = {
+                Text(
+                    text = stringResource(R.string.manage_cities),
+                    color = Color.White
+                )
+            },
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = Color.Transparent
             ),
@@ -77,7 +84,7 @@ fun SearchScreen(navController: NavController, weatherViewModel: WeatherViewMode
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowBack,
                         tint = Color.White,
-                        contentDescription = "Back"
+                        contentDescription = stringResource(R.string.back)
                     )
                 }
             }
@@ -96,13 +103,22 @@ fun SearchScreen(navController: NavController, weatherViewModel: WeatherViewMode
                 SearchTextField(
                     query = query,
                     onQueryChange = { query = it },
-                    onSearch = { weatherViewModel.fetchGeocodeEntries(query) },
+                    onSearch = { if (query.isNotBlank()) weatherViewModel.fetchGeocodeEntries(query) },
                     modifier = Modifier.weight(0.5f)
                 )
-                TextButton(content = { Text(text = "Reset") }, onClick = {
-                    weatherViewModel.resetGeocodeEntries()
-                    query = ""
-                }, colors = ButtonDefaults.textButtonColors(contentColor = Color.White))
+                TextButton(
+                    content = { Text(text = stringResource(R.string.clear_results)) },
+                    onClick = {
+                        weatherViewModel.resetGeocodeEntries()
+                        query = ""
+                    },
+                    // Button should be invisible but still take up space when it's not interactable
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = Color.White,
+                        disabledContentColor = Color.Transparent
+                    ),
+                    enabled = geocodeEntries.isNotEmpty(),
+                )
             }
             if (geocodeEntries.isNotEmpty()) {
                 GeocodeResults(
@@ -112,7 +128,8 @@ fun SearchScreen(navController: NavController, weatherViewModel: WeatherViewMode
                             coordinates,
                             displayName
                         )
-                    })
+                    }
+                )
             }
             if (isLoading) {
                 Margin(100)
@@ -120,16 +137,14 @@ fun SearchScreen(navController: NavController, weatherViewModel: WeatherViewMode
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    ) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                         CircularProgressIndicator()
-                        Text(text = "Loading...", color = Color.White)
+                        Text(text = stringResource(R.string.loading), color = Color.White)
                     }
                 }
             }
             if (error != null) {
-                Text(text = error, color = Color.Red)
+                Text(text = stringResource(error), color = Color(red = 255, green = 155, blue = 155))
             }
         }
     }
