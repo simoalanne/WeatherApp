@@ -14,30 +14,55 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import com.example.weatherapp.model.Accuracy
 import com.example.weatherapp.model.Coordinates
+import com.example.weatherapp.model.GeoSearchFilterMode
 import com.example.weatherapp.model.GeocodeEntry
 import com.example.weatherapp.utils.formatLocationName
 import com.example.weatherapp.utils.getCurrentLocale
+import com.example.weatherapp.R
 
 @Composable
 fun GeocodeResults(
     geocodeEntries: List<GeocodeEntry>,
     onSelect: (GeocodeEntry) -> Unit
 ) {
-    val scrollState = rememberScrollState()
+    var geoSearchFilterMode by remember { mutableStateOf(GeoSearchFilterMode.BEST_MATCH) }
 
-    // TODO: Item could be it's own composable
-    Column(modifier = Modifier.verticalScroll(scrollState)) {
-        geocodeEntries.forEach { entry ->
+    Column {
+        FilterModeSelector(
+            selectedFilterMode = geoSearchFilterMode,
+            options = listOf(
+                Pair(R.string.best_match, GeoSearchFilterMode.BEST_MATCH),
+                Pair(R.string.most_relevant, GeoSearchFilterMode.MOST_RELEVANT),
+                Pair(R.string.all_results, GeoSearchFilterMode.ALL_RESULTS)
+            ),
+            onFilterModeSelected = { geoSearchFilterMode = it as GeoSearchFilterMode }
+        )
+        if (geocodeEntries.isEmpty()) return@Column
+        val filteredGeocodeEntries = when (geoSearchFilterMode) {
+            // whatever the API thought is most relevant is always first
+            GeoSearchFilterMode.BEST_MATCH -> listOf(geocodeEntries.first())
+            // only one city/town per country. If for example many cities in USA with same name
+            // in response only the most relevant one is left
+            GeoSearchFilterMode.MOST_RELEVANT -> geocodeEntries.distinctBy { it.countryCode }
+            // return all entries with only clear duplicate entries removed eg. "London, UK" or
+            // "Lontoo, UK" would be considered the same entry.
+            GeoSearchFilterMode.ALL_RESULTS -> geocodeEntries
+        }
+
+        filteredGeocodeEntries.forEach { entry ->
             val displayText = formatLocationName(
                 location = entry,
-                accuracy = Accuracy.LOCATION_AND_STATE_AND_COUNTRY,
+                accuracy = geoSearchFilterMode,
                 locale = getCurrentLocale()
             )
 

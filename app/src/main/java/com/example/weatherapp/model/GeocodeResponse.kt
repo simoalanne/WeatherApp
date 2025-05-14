@@ -1,5 +1,6 @@
 package com.example.weatherapp.model
 
+import android.util.Log
 import com.google.gson.annotations.SerializedName
 
 data class GeocodeResponseEntry(
@@ -15,10 +16,8 @@ data class GeocodeResponseEntry(
 
 /**
  * This is essentially the same data class as GeocodeResponseEntry but with customized
- * equals and hashCode methods. Because how Gson creates objects it skips the default
- * constructor which then means private variables will be set to null which
- * then in turn causes issues later on. Additionally usually the raw data class for the API
- * should not be used in the UI
+ * equals and hashCode methods. the raw API data class should not be customized so that's why
+ * this is separate.
  */
 data class GeocodeEntry(
     val name: String,
@@ -28,39 +27,54 @@ data class GeocodeEntry(
     val state: String?,
     val localizedNames: Map<String, String>?
 ) {
-    private val normalizedName = name.trim().lowercase()
-    private val normalizedLocalizedNames =
-        localizedNames?.map { it.value.trim().lowercase() }?.toSet() ?: emptySet()
 
+    // normalize both the name and the localized aliases and convert to set for fast lookup
+    // in the equals method
+    private val allNames = (listOf(name) + (localizedNames?.values ?: emptyList()))
+        .map { it.trim().lowercase() }
+        .toSet()
+
+    /**
+     * Customized equals method that considers two entries equal if they have:
+     * - the same country code
+     * - the same state (if state is in the data)
+     * - their names or localized names have any intersection
+     *
+     * This is just the baseline and more filtering can be done on the UI level.
+     */
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
+
         if (other !is GeocodeEntry) return false
 
-        if (normalizedName != other.normalizedName) return false
-        if (normalizedName !in other.normalizedLocalizedNames) return false
         if (countryCode != other.countryCode) return false
-        if (countryCode in stateMatters && state != other.state) return false
+
+        if (state != other.state) return false
+
+        if (allNames.intersect(other.allNames).isEmpty()) {
+            Log.d("names: ", "$name, ${other.name} are not equal")
+            Log.d("DEBUG", "other.allNames = ${other.allNames} this.allNames = ${this.allNames}")
+            return false
+        }
 
         return true
     }
 
+    /**
+     * Customized hashCode method that hashes the country code and state.
+     */
     override fun hashCode(): Int {
-        return if (countryCode in stateMatters) {
-            listOf(normalizedName, countryCode, state).hashCode()
-        } else {
-            listOf(normalizedName, countryCode).hashCode()
-        }
+        return listOf(countryCode, state).hashCode()
     }
 
     companion object {
-        val stateMatters = listOf("US", "CA", "AU")
+        val alwaysDisplayState = listOf("US")
     }
 }
 
 
-
-enum class Accuracy {
-    LOCATION,
-    LOCATION_AND_COUNTRY,
-    LOCATION_AND_STATE_AND_COUNTRY
+enum class GeoSearchFilterMode {
+    BEST_MATCH,
+    MOST_RELEVANT,
+    ALL_RESULTS
 }
