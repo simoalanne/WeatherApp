@@ -2,7 +2,7 @@ package com.example.weatherapp.utils
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-import com.example.weatherapp.model.Accuracy
+import com.example.weatherapp.model.GeoSearchFilterMode
 import com.example.weatherapp.model.GeocodeEntry
 import java.util.Locale
 
@@ -34,7 +34,7 @@ private fun getCountryNameFromCode(countryCode: String, locale: Locale): String 
  */
 fun formatLocationName(
     location: GeocodeEntry,
-    accuracy: Accuracy = Accuracy.LOCATION_AND_COUNTRY,
+    accuracy: GeoSearchFilterMode,
     locale: Locale
 ): String {
 
@@ -43,20 +43,20 @@ fun formatLocationName(
     // Generally state just clutters the entry for most countries so it should be displayed
     // only for countries where the same location actually can exist in multiple states
     // for now this hardcoded list handles those countries
+    val shouldDisplayState = location.countryCode in GeocodeEntry.alwaysDisplayState
     val state =
-        if (location.countryCode in shouldDisplayStateFor && location.state != null) {
-            "${location.state}, "
+        if (location.state != null) {
+            "${location.state},"
         } else {
             ""
         }
     return when (accuracy) {
-        Accuracy.LOCATION -> locationName
-        Accuracy.LOCATION_AND_COUNTRY -> "$locationName, $country"
-        Accuracy.LOCATION_AND_STATE_AND_COUNTRY -> "$locationName, $state $country"
+        GeoSearchFilterMode.BEST_MATCH -> "$locationName, ${if (shouldDisplayState) state else ""} $country"
+        GeoSearchFilterMode.MOST_RELEVANT -> "$locationName, $state $country"
+        GeoSearchFilterMode.ALL_RESULTS -> "$locationName, $state $country"
     }
 }
 
 @Composable
 fun getCurrentLocale(): Locale = LocalContext.current.resources.configuration.locales.get(0)
 
-val shouldDisplayStateFor = listOf("US", "CA", "AU")

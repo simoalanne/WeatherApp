@@ -81,4 +81,9 @@
     <string name="something_went_wrong">Something went wrong. Please try again.</string>
     <string name="city_name_cannot_be_empty">City name cannot be empty.</string>
     <string name="no_results">Found no results for the search. Check the spelling and try again.</string>
+
+    <!-- Settings -->
+    <string name="best_match">Best match</string>
+    <string name="most_relevant">Most relevant</string>
+    <string name="all_results">All results</string>
 </resources>

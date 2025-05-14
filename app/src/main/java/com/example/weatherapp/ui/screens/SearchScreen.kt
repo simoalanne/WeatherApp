@@ -98,10 +98,10 @@ fun SearchScreen(navController: NavController, weatherViewModel: WeatherViewMode
             ) {
                 SearchTextField(
                     query = query, onQueryChange = { query = it }, onSearch = {
-                    if (query.isNotBlank()) weatherViewModel.fetchGeocodeEntries(
-                        query.trim().lowercase()
-                    )
-                }, modifier = Modifier.weight(0.5f)
+                        if (query.isNotBlank()) weatherViewModel.fetchGeocodeEntries(
+                            query.trim().lowercase()
+                        )
+                    }, modifier = Modifier.weight(0.5f)
                 )
                 TextButton(
                     content = { Text(text = stringResource(R.string.clear_results)) },
@@ -116,12 +116,10 @@ fun SearchScreen(navController: NavController, weatherViewModel: WeatherViewMode
                     enabled = geocodeEntries.isNotEmpty(),
                 )
             }
-            if (geocodeEntries.isNotEmpty()) {
-                GeocodeResults(
-                    geocodeEntries = geocodeEntries, onSelect = {
-                        weatherViewModel.fetchWeatherData(it)
-                    })
-            }
+            GeocodeResults(
+                geocodeEntries = geocodeEntries, onSelect = {
+                    weatherViewModel.fetchWeatherData(it)
+                })
             if (isLoading) {
                 Margin(100)
                 Row(

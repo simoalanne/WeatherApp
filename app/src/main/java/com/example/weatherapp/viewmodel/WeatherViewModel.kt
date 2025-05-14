@@ -14,7 +14,6 @@ import com.example.weatherapp.model.WeatherData
 import com.example.weatherapp.network.GeocodeAPI
 import com.example.weatherapp.network.SunriseSunsetAPI
 import com.example.weatherapp.network.WeatherAPI
-import com.example.weatherapp.utils.getLocalDateTimeFromUnixTimestamp
 import kotlinx.coroutines.launch
 import com.example.weatherapp.R
 import kotlinx.coroutines.async
@@ -106,7 +105,7 @@ class WeatherViewModel : ViewModel() {
             try {
                 _geocodeEntries.clear()
                 _error = null
-                val uniqueEntries = GeocodeAPI.service.geocode(cityName).map {
+                val entries = GeocodeAPI.service.geocode(cityName).map {
                     GeocodeEntry(
                         it.name,
                         it.lat,
@@ -115,12 +114,13 @@ class WeatherViewModel : ViewModel() {
                         it.state,
                         it.localizedNames
                     )
-                }.toSet().toList()
-                if (uniqueEntries.isEmpty()) {
+                }.distinct()
+
+                if (entries.isEmpty()) {
                     Log.d("WeatherViewModel", "No results for $cityName")
                     _error = R.string.no_results
                 } else {
-                    _geocodeEntries.addAll(uniqueEntries)
+                    _geocodeEntries.addAll(entries)
                     _error = null
                 }
             } catch (e: Exception) {
@@ -139,5 +139,6 @@ class WeatherViewModel : ViewModel() {
 
     fun resetGeocodeEntries() {
         _geocodeEntries.clear()
+        _previousCityName = null
     }
 }
