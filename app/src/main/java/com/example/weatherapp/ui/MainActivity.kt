@@ -20,6 +20,8 @@ import com.example.weatherapp.ui.screens.SearchScreen
 import com.example.weatherapp.ui.screens.WeatherScreen
 import com.example.weatherapp.ui.theme.WeatherAppTheme
 import com.example.weatherapp.viewmodel.WeatherViewModel
+import com.google.android.gms.location.LocationServices
+import androidx.compose.runtime.LaunchedEffect
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,6 +31,12 @@ class MainActivity : ComponentActivity() {
             WeatherAppTheme {
                 val navController: NavHostController = rememberNavController()
                 val viewModel: WeatherViewModel = viewModel()
+                val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+                viewModel.setFusedLocationProviderClient(fusedLocationClient)
+
+                LaunchedEffect(Unit) {
+                    viewModel.locateUser(true)
+                }
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = Color.Black

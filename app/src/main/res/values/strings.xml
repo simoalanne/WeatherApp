@@ -86,4 +86,7 @@
     <string name="best_match">Best match</string>
     <string name="most_relevant">Most relevant</string>
     <string name="all_results">All results</string>
+    
+    <string name="current_location_label">Current location</string>
+    <string name="locate_me">Locate me</string>
 </resources>

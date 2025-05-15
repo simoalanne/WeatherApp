@@ -86,4 +86,7 @@
     <string name="best_match">Paras osuma</string>
     <string name="most_relevant">Relevanteimmat</string>
     <string name="all_results">Kaikki tulokset</string>
+
+    <string name="current_location_label">Tämänhetkinen sijainti</string>
+    <string name="locate_me">Paikanna minut</string>
 </resources>
