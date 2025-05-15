@@ -1,8 +1,6 @@
 package com.example.weatherapp.ui.screens
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Arrangement.Absolute.spacedBy
 import androidx.compose.foundation.layout.Column
@@ -10,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -39,6 +36,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.weatherapp.ui.composables.Margin
 import com.example.weatherapp.R
+import com.example.weatherapp.ui.composables.UserLocation
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -120,6 +118,15 @@ fun SearchScreen(navController: NavController, weatherViewModel: WeatherViewMode
                 geocodeEntries = geocodeEntries, onSelect = {
                     weatherViewModel.fetchWeatherData(it)
                 })
+            UserLocation(
+                userLocation = weatherViewModel.userLocation,
+                onLocateUser = {
+                    weatherViewModel.locateUser()
+                },
+                onLocationPress = {
+                    weatherViewModel.fetchWeatherDataForCurrentLocation()
+                }
+            )
             if (isLoading) {
                 Margin(100)
                 Row(

@@ -18,6 +18,14 @@ interface GeocodeAPI {
         @Query("appid") apiKey: String = BuildConfig.OPEN_WEATHER_MAP_API_KEY
     ): List<GeocodeResponseEntry>
 
+    @GET("reverse")
+    suspend fun reverseGeocode(
+        @Query("lat") lat: Double,
+        @Query("lon") lon: Double,
+        @Query("limit") limit: Int = BuildConfig.GEOCODING_API_LIMIT.toInt(),
+        @Query("appid") apiKey: String = BuildConfig.OPEN_WEATHER_MAP_API_KEY
+    ): List<GeocodeResponseEntry>
+
     companion object {
         private val retrofit: Retrofit = Retrofit.Builder()
             .baseUrl(BuildConfig.GEOCODING_API_BASE_URL)

@@ -109,4 +109,7 @@ dependencies {
 
     // permission handling
     implementation(libs.accompanist.permissions)
+
+    // Google play services to use fused location provider
+    implementation(libs.play.services.location)
 }

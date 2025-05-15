@@ -16,21 +16,37 @@ import com.example.weatherapp.network.SunriseSunsetAPI
 import com.example.weatherapp.network.WeatherAPI
 import kotlinx.coroutines.launch
 import com.example.weatherapp.R
+import com.example.weatherapp.model.Coordinates
+import com.google.android.gms.location.FusedLocationProviderClient
 import kotlinx.coroutines.async
 import java.time.LocalDate
 
-class WeatherViewModel : ViewModel() {
+// TODO: This is doing way too much work. No separation of concerns whatsoever in sight.
+// TODO: This should be refactored ASAP before adding more features.
+class WeatherViewModel() : ViewModel() {
+
+    private var fusedLocationProviderClient: FusedLocationProviderClient? = null
+
+    /**
+     * Main activity should call this method to set the fused location provider client.
+     * @param client The fused location provider client.
+     */
+    fun setFusedLocationProviderClient(client: FusedLocationProviderClient) {
+        fusedLocationProviderClient = client
+    }
 
     private var _weather by mutableStateOf<WeatherData?>(null)
     private val _geocodeEntries: SnapshotStateList<GeocodeEntry> = mutableStateListOf()
     private var _error by mutableStateOf<Int?>(null)
     private var _isLoading by mutableStateOf(false)
     private var _previousCityName by mutableStateOf<String?>(null)
+    private var _userLocation by mutableStateOf<GeocodeEntry?>(null)
 
     val weather: WeatherData? get() = _weather
     val geocodeEntries: List<GeocodeEntry> get() = _geocodeEntries
     val error: Int? get() = _error
     val isLoading: Boolean get() = _isLoading
+    val userLocation: GeocodeEntry? get() = _userLocation
 
     fun fetchWeatherData(location: GeocodeEntry) {
         viewModelScope.launch {
@@ -132,10 +148,81 @@ class WeatherViewModel : ViewModel() {
         }
     }
 
-    init {
-        // TODO: the initial fetched city should come from persistent storage
-        fetchWeatherData(GeocodeEntry("Tampere", 61.4991, 23.7871, "FI", null, null))
+    fun fetchWeatherDataForCurrentLocation() {
+        _userLocation.let {
+            if (it != null) {
+                fetchWeatherData(it)
+            } else {
+                Log.e(
+                    "WeatherViewModel",
+                    "Do not call this method if location hasn't been resolved"
+                )
+            }
+        }
     }
+
+    /**
+     * Tries to locate user and fetch weather data if fetchWeather is true.
+     * The UI should NOT call this function if permissions are not granted.
+     *
+     * @param fetchWeather Whether to fetch weather data after locating user.
+     */
+    fun locateUser(fetchWeather: Boolean = false) {
+        try {
+            val client = fusedLocationProviderClient
+            if (client == null) return
+            client.lastLocation.addOnSuccessListener { location ->
+                if (location != null) {
+                    viewModelScope.launch {
+                        val entry = reverseGeocode(Coordinates(location.latitude, location.longitude)).firstOrNull()
+                        _userLocation = entry
+                        if (fetchWeather && entry != null) {
+                            fetchWeatherData(entry)
+                        }
+                    }
+                } else {
+                    Log.e(
+                        "WeatherViewModel",
+                        "Could not get location — either unavailable or permissions missing"
+                    )
+                    if (fetchWeather) {
+                        fetchWeatherData(
+                            GeocodeEntry(
+                                "Tampere",
+                                61.4991,
+                                23.7871,
+                                "FI",
+                                null,
+                                null
+                            )
+                        )
+                    }
+                }
+            }.addOnFailureListener {
+                Log.e("WeatherViewModel", "Location error: ${it.message}")
+                if (fetchWeather) {
+                    fetchWeatherData(GeocodeEntry("Tampere", 61.4991, 23.7871, "FI", null, null))
+                }
+            }
+        } catch (e: SecurityException) {
+            Log.d("WeatherViewModel", "Location error: ${e.message}")
+        }
+    }
+
+    suspend fun reverseGeocode(coordinates: Coordinates): List<GeocodeEntry> {
+        val geocodeEntries = GeocodeAPI.service.reverseGeocode(coordinates.lat, coordinates.lon)
+        return geocodeEntries.map {
+            GeocodeEntry(
+                it.name,
+                it.lat,
+                it.lon,
+                it.countryCode,
+                it.state,
+                it.localizedNames
+            )
+        }.distinct()
+    }
+
 
     fun resetGeocodeEntries() {
         _geocodeEntries.clear()
