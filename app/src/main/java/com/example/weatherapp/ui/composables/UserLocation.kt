@@ -6,7 +6,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import coil3.compose.AsyncImage
 import com.example.weatherapp.model.GeoSearchFilterMode
-import com.example.weatherapp.model.GeocodeEntry
 import com.example.weatherapp.utils.formatLocationName
 import com.example.weatherapp.utils.getCurrentLocale
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -30,12 +29,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.weatherapp.R
+import com.example.weatherapp.model.LocationWeather
 
 // TODO: Terrible modularization should be refactored.
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun UserLocation(
-    userLocation: GeocodeEntry?,
+    userLocation: LocationWeather?,
     onLocateUser: () -> Unit,
     onLocationPress: () -> Unit
 ) {
@@ -60,9 +60,8 @@ fun UserLocation(
         when {
             userLocation != null -> {
                 val locationText = formatLocationName(
-                    userLocation,
-                    GeoSearchFilterMode.BEST_MATCH,
-                    getCurrentLocale()
+                    userLocation.location,
+                    locale = getCurrentLocale()
                 )
                 AssistChip(
                     onClick = onLocationPress,
@@ -81,7 +80,7 @@ fun UserLocation(
                     },
                     trailingIcon = {
                         AsyncImage(
-                            model = "https://flagcdn.com/h40/${userLocation.countryCode.lowercase()}.png",
+                            model = "https://flagcdn.com/h40/${userLocation.location.countryCode.lowercase()}.png",
                             contentDescription = null
                         )
                     }
