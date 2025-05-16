@@ -5,7 +5,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import coil3.compose.AsyncImage
-import com.example.weatherapp.model.GeoSearchFilterMode
 import com.example.weatherapp.utils.formatLocationName
 import com.example.weatherapp.utils.getCurrentLocale
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -22,7 +21,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -40,12 +38,6 @@ fun UserLocation(
     onLocationPress: () -> Unit
 ) {
     val locationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
-
-    LaunchedEffect(locationPermissionState.status.isGranted) {
-        if (locationPermissionState.status.isGranted) {
-            onLocateUser()
-        }
-    }
 
     Column(
         modifier = Modifier

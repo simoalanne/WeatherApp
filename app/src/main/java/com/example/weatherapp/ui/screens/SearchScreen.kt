@@ -54,10 +54,9 @@ fun SearchScreen(
     var isInitialLoad by remember { mutableStateOf(true) }
     val locations = searchScreenVm.uiState.locations
     val error = searchScreenVm.uiState.errorRecourseId
-    val isLoading = searchScreenVm.uiState.isLoading
 
     LaunchedEffect(mainViewModel.uiState.currentLocation) {
-        if (isInitialLoad) {
+        if (isInitialLoad && mainViewModel.uiState.currentLocation != null) {
             searchScreenVm.clearLocations()
             isInitialLoad = false
         } else {
@@ -114,6 +113,9 @@ fun SearchScreen(
                     enabled = locations.isNotEmpty()
                 )
             }
+            if (error != null) {
+                Text(text = stringResource(error), color = Color.Red)
+            }
             GeocodeResults(
                 geocodeEntries = locations, onSelect = {
                     mainViewModel.previewLocation(it)
@@ -129,22 +131,6 @@ fun SearchScreen(
                         { it.role == LocationRole.USER })
                 }
             )
-            if (isLoading) {
-                Margin(100)
-                Row(
-                    modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
-                ) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        CircularProgressIndicator()
-                        Text(text = stringResource(R.string.loading), color = Color.White)
-                    }
-                }
-            }
-            if (error != null) {
-                Text(
-                    text = stringResource(error), color = Color(red = 255, green = 155, blue = 155)
-                )
-            }
         }
     }
 }
