@@ -1,6 +1,6 @@
 <resources>
     <!-- Yleiset -->
-    <string name="app_name">Sääsovellus</string>
+    <string name="app_name">Sää</string>
     <string name="five_day_forecast">5 päivän ennuste</string>
     <string name="collapse">sulje</string>
     <string name="expand">avaa</string>

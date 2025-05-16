@@ -1,6 +1,6 @@
 <resources>
     <!-- Common strings -->
-    <string name="app_name">WeatherApp</string>
+    <string name="app_name">Weather</string>
     <string name="five_day_forecast">5 day forecast</string>
     <string name="collapse">collapse</string>
     <string name="expand">expand</string>
