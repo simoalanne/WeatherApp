@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.HorizontalDivider
@@ -23,17 +21,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import com.example.weatherapp.model.Coordinates
 import com.example.weatherapp.model.GeoSearchFilterMode
-import com.example.weatherapp.model.GeocodeEntry
 import com.example.weatherapp.utils.formatLocationName
 import com.example.weatherapp.utils.getCurrentLocale
 import com.example.weatherapp.R
+import com.example.weatherapp.model.LocationData
+import com.example.weatherapp.model.LocationDisplayAccuracy
 
 @Composable
 fun GeocodeResults(
-    geocodeEntries: List<GeocodeEntry>,
-    onSelect: (GeocodeEntry) -> Unit
+    geocodeEntries: List<LocationData>,
+    onSelect: (LocationData) -> Unit
 ) {
     var geoSearchFilterMode by remember { mutableStateOf(GeoSearchFilterMode.BEST_MATCH) }
 
@@ -62,7 +60,7 @@ fun GeocodeResults(
         filteredGeocodeEntries.forEach { entry ->
             val displayText = formatLocationName(
                 location = entry,
-                accuracy = geoSearchFilterMode,
+                accuracy = LocationDisplayAccuracy.CITY_AND_STATE_AND_COUNTRY,
                 locale = getCurrentLocale()
             )
 
