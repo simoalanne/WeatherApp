@@ -21,7 +21,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavController
 import com.example.weatherapp.ui.composables.GeocodeResults
 import com.example.weatherapp.ui.composables.SearchTextField
-import com.example.weatherapp.viewmodel.WeatherViewModel
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ButtonDefaults
@@ -36,27 +35,30 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.weatherapp.ui.composables.Margin
 import com.example.weatherapp.R
+import com.example.weatherapp.model.LocationRole
+import com.example.weatherapp.model.LocationWeather
 import com.example.weatherapp.ui.composables.UserLocation
+import com.example.weatherapp.viewmodel.MainViewModel
+import com.example.weatherapp.viewmodel.SearchScreenViewModel
+import com.example.weatherapp.viewmodel.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchScreen(navController: NavController, weatherViewModel: WeatherViewModel) {
-    // TODO: This screen should display users favorite locations as well current location if
-    // TODO: location permission is granted. Additionally could have an option to navigate to
-    // TODO: new screen where users can search for cities in a world map.
+fun SearchScreen(
+    navController: NavController,
+    mainViewModel: MainViewModel,
+    searchScreenVm: SearchScreenViewModel,
+    settingsVm: SettingsViewModel
+) {
     var query by remember { mutableStateOf("") }
     var isInitialLoad by remember { mutableStateOf(true) }
-    val geocodeEntries = weatherViewModel.geocodeEntries
-    val error = weatherViewModel.error
-    val isLoading = weatherViewModel.isLoading
+    val locations = searchScreenVm.uiState.locations
+    val error = searchScreenVm.uiState.errorRecourseId
+    val isLoading = searchScreenVm.uiState.isLoading
 
-
-    // Navigate back to the WeatherScreen when the weather data is fetched
-    // isInitialLoad is needed because otherwise this would instantly navigate
-    // back to the WeatherScreen when user comes here.
-    LaunchedEffect(weatherViewModel.weather) {
-        if (isInitialLoad && weatherViewModel.weather != null) {
-            weatherViewModel.resetGeocodeEntries()
+    LaunchedEffect(mainViewModel.uiState.currentLocation) {
+        if (isInitialLoad) {
+            searchScreenVm.clearLocations()
             isInitialLoad = false
         } else {
             navController.popBackStack()
@@ -96,35 +98,35 @@ fun SearchScreen(navController: NavController, weatherViewModel: WeatherViewMode
             ) {
                 SearchTextField(
                     query = query, onQueryChange = { query = it }, onSearch = {
-                        if (query.isNotBlank()) weatherViewModel.fetchGeocodeEntries(
-                            query.trim().lowercase()
-                        )
+                        if (query.isNotBlank()) searchScreenVm.geocode(query.trim().lowercase())
                     }, modifier = Modifier.weight(0.5f)
                 )
                 TextButton(
                     content = { Text(text = stringResource(R.string.clear_results)) },
                     onClick = {
-                        weatherViewModel.resetGeocodeEntries()
+                        searchScreenVm.clearLocations()
                         query = ""
                     },
                     // Button should be invisible but still take up space when it's not interactable
                     colors = ButtonDefaults.textButtonColors(
                         contentColor = Color.White, disabledContentColor = Color.Transparent
                     ),
-                    enabled = geocodeEntries.isNotEmpty(),
+                    enabled = locations.isNotEmpty()
                 )
             }
             GeocodeResults(
-                geocodeEntries = geocodeEntries, onSelect = {
-                    weatherViewModel.fetchWeatherData(it)
+                geocodeEntries = locations, onSelect = {
+                    mainViewModel.previewLocation(it)
                 })
             UserLocation(
-                userLocation = weatherViewModel.userLocation,
+                userLocation = mainViewModel.uiState.locations.find { it.role == LocationRole.USER },
                 onLocateUser = {
-                    weatherViewModel.locateUser()
+                    mainViewModel.locateUser()
                 },
                 onLocationPress = {
-                    weatherViewModel.fetchWeatherDataForCurrentLocation()
+                    mainViewModel.changeCurrentLocation(
+                        mainViewModel.uiState.locations.indexOfFirst
+                        { it.role == LocationRole.USER })
                 }
             )
             if (isLoading) {

@@ -2,6 +2,7 @@ package com.example.weatherapp.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,9 +10,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,88 +34,119 @@ import com.example.weatherapp.ui.composables.WeatherInfo
 import com.example.weatherapp.ui.composables.WeatherList
 import com.example.weatherapp.utils.formatLocationName
 import com.example.weatherapp.utils.isDay
-import com.example.weatherapp.viewmodel.WeatherViewModel
 import com.example.weatherapp.utils.truncateToHours
 import com.example.weatherapp.R
-import com.example.weatherapp.model.GeoSearchFilterMode
 import com.example.weatherapp.utils.getCurrentLocale
+import com.example.weatherapp.viewmodel.MainViewModel
+import com.example.weatherapp.viewmodel.SettingsViewModel
+import kotlinx.coroutines.delay
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WeatherScreen(navController: NavController, weatherViewModel: WeatherViewModel) {
-    val weatherData = weatherViewModel.weather
+fun WeatherScreen(
+    navController: NavController,
+    mainViewModel: MainViewModel,
+    settingsViewModel: SettingsViewModel
+) {
+    val currentLocation = mainViewModel.uiState.currentLocation
+    val currentWeather = currentLocation?.weather
+    val isLoading = mainViewModel.uiState.isLoading
+    val isRefreshing = mainViewModel.uiState.isRefreshing
     val scrollState = rememberScrollState()
 
-    if (weatherData != null) {
-        val now = weatherData.hourlyForecasts.first().time
-        val weather24Hours = weatherData.hourlyForecasts.takeWhile {
+    if (currentLocation != null && currentWeather != null) {
+        val now = currentWeather.hourlyForecasts.first().time
+        val weather24Hours = currentWeather.hourlyForecasts.takeWhile {
             truncateToHours(it.time).isBefore(now.plusHours(24)) || truncateToHours(it.time) == now.plusHours(
                 24
             )
         }
-        val timeZone = weatherData.meta.timezoneOffsetInSeconds / 3600
-        BackgroundImage(isDay = isDay(now, weatherData.meta.sunriseSunsetTimes))
+        val timeZone = currentWeather.meta.timezoneOffsetInSeconds / 3600
+        BackgroundImage(isDay = isDay(now, currentWeather.meta.sunriseSunsetTimes))
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             AppBar(
-                title = "${formatLocationName(weatherData.meta.geocodeEntry, accuracy = GeoSearchFilterMode.BEST_MATCH, locale = getCurrentLocale())} (UTC${if (timeZone >= 0) "+" else ""}$timeZone)",
-                lastUpdated = weatherData.current.time.toLocalTime().toString().substring(0, 5),
-                timezoneOffset = weatherData.meta.timezoneOffsetInSeconds,
+                title = "${
+                    formatLocationName(
+                        currentLocation.location,
+                        locale = getCurrentLocale()
+                    )
+                } (UTC${if (timeZone >= 0) "+" else ""}$timeZone)",
+                lastUpdated = currentWeather.current.time.toLocalTime().toString().substring(0, 5),
+                timezoneOffset = currentWeather.meta.timezoneOffsetInSeconds,
                 // TODO: The effect should be animated like fonts getting smaller than just sudden change
                 collapseHeader = scrollState.value > 150,
                 onSearchIconPress = { navController.navigate("search") }
             )
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .verticalScroll(scrollState),
-                horizontalAlignment = Alignment.CenterHorizontally
+            PullToRefreshBox(
+                isRefreshing = isRefreshing,
+                onRefresh = {
+                    mainViewModel.refreshCurrentLocation()
+                }
             ) {
-                Margin(margin = 20)
-                WeatherInfo(
-                    current = weatherData.current.temperature,
-                    min = weather24Hours.minOf { it.temperature },
-                    max = weather24Hours.maxOf { it.temperature },
-                    condition = stringResource(id = weatherData.current.conditionId),
-                    round = true
-                )
-                Margin(margin = 20)
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color(red = 0f, green = 0f, blue = 0f, alpha = 0.3f))
-                        .padding(horizontal = 8.dp, vertical = 16.dp)
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .verticalScroll(scrollState),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    Margin(margin = 20)
+                    WeatherInfo(
+                        current = currentWeather.current.temperature,
+                        min = weather24Hours.minOf { it.temperature },
+                        max = weather24Hours.maxOf { it.temperature },
+                        condition = stringResource(id = currentWeather.current.conditionId),
+                        round = true
+                    )
+                    Margin(margin = 20)
                     Column(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(red = 0f, green = 0f, blue = 0f, alpha = 0.3f))
+                            .padding(horizontal = 8.dp, vertical = 16.dp)
                     ) {
-                        Text(
-                            text = stringResource(R.string.next_24_hours),
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold
-                        )
-                        HorizontalDivider(
-                            color = Color.White.copy(alpha = 0.5f),
-                            thickness = 0.5f.dp
-                        )
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            Text(
+                                text = stringResource(R.string.next_24_hours),
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold
+                            )
+                            HorizontalDivider(
+                                color = Color.White.copy(alpha = 0.5f),
+                                thickness = 0.5f.dp
+                            )
+                        }
+                        WeatherList(hourlyWeathers = weather24Hours)
                     }
-                    WeatherList(hourlyWeathers = weather24Hours)
+                    Margin(margin = 8)
+                    DailyForecasts(
+                        allHourlyForecasts = currentWeather.hourlyForecasts,
+                        currentWeather.meta.timezoneOffsetInSeconds
+                    )
+                    Margin(margin = 8)
+                    WeatherStatsGrid(current = currentWeather.current)
+                    Margin(margin = 100) // Should be possible to scroll further down so the last elements are better viewable
                 }
-                Margin(margin = 8)
-                DailyForecasts(
-                    allHourlyForecasts = weatherData.hourlyForecasts,
-                    weatherData.meta.timezoneOffsetInSeconds
-                )
-                Margin(margin = 8)
-                WeatherStatsGrid(current = weatherData.current)
-                Margin(margin = 100) // Should be possible to scroll further down so the last elements are better viewable
             }
         }
     } else {
-        Text(text = stringResource(R.string.no_weather_data))
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            if (isLoading) {
+                CircularProgressIndicator()
+            } else {
+                LaunchedEffect(Unit) {
+                    delay(2000) // because state is not updated immediately. TODO: this can't stay
+                    if (mainViewModel.uiState.currentLocation == null) {
+                        navController.navigate("search")
+                    }
+                }
+            }
+        }
     }
 }
-

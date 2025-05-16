@@ -94,4 +94,18 @@ fun formatDate(
     }
 }
 
-
+/**
+ * Returns the current time at one second accuracy with the given timezone offset.
+ *
+ * @param timezoneOffset the timezone offset in seconds
+ * @param use24HourFormat whether to use 24 hour format or 12 hour format
+ * @return formatted time string with the given timezone offset
+ */
+fun getTimeAtOffset(timezoneOffset: Int = 0, use24HourFormat: Boolean = true): String {
+    val now = LocalDateTime.now(ZoneOffset.UTC).plusSeconds(timezoneOffset.toLong())
+    return formatLocalDateTime(
+        dateTime = now,
+        use24HourFormat = use24HourFormat,
+        accuracy = "seconds"
+    )
+}

@@ -89,4 +89,5 @@
 
     <string name="current_location_label">Tämänhetkinen sijainti</string>
     <string name="locate_me">Paikanna minut</string>
+    <string name="navigate_to_search">Selaa kaupunkeja</string>
 </resources>
