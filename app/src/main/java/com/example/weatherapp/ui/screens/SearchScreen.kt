@@ -56,10 +56,10 @@ fun SearchScreen(
     val error = searchScreenVm.uiState.errorRecourseId
 
     LaunchedEffect(mainViewModel.uiState.currentLocation) {
-        if (isInitialLoad && mainViewModel.uiState.currentLocation != null) {
+        if (isInitialLoad) {
             searchScreenVm.clearLocations()
             isInitialLoad = false
-        } else {
+        } else if (mainViewModel.uiState.currentLocation != null) {
             navController.popBackStack()
         }
     }
@@ -76,7 +76,11 @@ fun SearchScreen(
             }, colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = Color.Transparent
             ), navigationIcon = {
-                IconButton(onClick = { navController.popBackStack() }) {
+                IconButton(onClick = {
+                    if (mainViewModel.uiState.currentLocation != null) {
+                        navController.popBackStack()
+                    }
+                }) {
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowBack,
                         tint = Color.White,
@@ -97,8 +101,8 @@ fun SearchScreen(
             ) {
                 SearchTextField(
                     query = query, onQueryChange = { query = it }, onSearch = {
-                        if (query.isNotBlank()) searchScreenVm.geocode(query.trim().lowercase())
-                    }, modifier = Modifier.weight(0.5f)
+                    if (query.isNotBlank()) searchScreenVm.geocode(query.trim().lowercase())
+                }, modifier = Modifier.weight(0.5f)
                 )
                 TextButton(
                     content = { Text(text = stringResource(R.string.clear_results)) },
@@ -127,10 +131,8 @@ fun SearchScreen(
                 },
                 onLocationPress = {
                     mainViewModel.changeCurrentLocation(
-                        mainViewModel.uiState.locations.indexOfFirst
-                        { it.role == LocationRole.USER })
-                }
-            )
+                        mainViewModel.uiState.locations.indexOfFirst { it.role == LocationRole.USER })
+                })
         }
     }
 }
