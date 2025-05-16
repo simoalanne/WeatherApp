@@ -1,11 +1,13 @@
 package com.example.weatherapp.ui.composables
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.HorizontalDivider
@@ -79,9 +81,13 @@ fun GeocodeResults(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = displayText, color = Color.White, modifier = Modifier.weight(0.8f))
+                    MarqueeText(
+                        text = displayText,
+                        modifier = Modifier.weight(0.8f)
+                    )
                     AsyncImage(
-                        model = "https://flagcdn.com/160x120/${entry.countryCode.lowercase()}.png",
+                        model =
+                            "https://flagcdn.com/160x120/${entry.countryCode.lowercase()}.png",
                         contentDescription = null,
                         modifier = Modifier.weight(0.1f)
                     )
