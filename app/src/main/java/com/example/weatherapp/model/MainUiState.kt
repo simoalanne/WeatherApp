@@ -3,9 +3,7 @@ package com.example.weatherapp.model
 data class MainUiState(
     val locations: List<LocationWeather> = emptyList(),
     val currentLocation: LocationWeather? = null,
-    val isLoading: Boolean = false,
-    val isRefreshing: Boolean = false,
-    val errorRecourseId: Int? = null // TODO: Should be a enum class instead for better control
+    val uiStatus: WeatherUIStatus = WeatherUIStatus.LOADING,
 )
 
 /**
@@ -46,4 +44,12 @@ enum class LocationRole {
     USER,
     FAVORITE,
     PREVIEW
+}
+
+enum class WeatherUIStatus {
+    LOADING,
+    REFRESHING,
+    SUCCESS,
+    EMPTY,
+    ERROR
 }

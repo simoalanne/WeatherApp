@@ -14,17 +14,21 @@ import kotlinx.coroutines.launch
 /**
  * View model for the search screen.
  */
-class SearchScreenViewModel: ViewModel() {
+class SearchScreenViewModel : ViewModel() {
     var uiState by mutableStateOf(SearchUiState())
 
     fun geocode(query: String) {
         viewModelScope.launch {
             try {
                 uiState = uiState.copy(isLoading = true, errorRecourseId = null)
-                val locations = GeocodeAPI.service.geocode(query).distinct().map { it.toLocationData() }
-                uiState = uiState.copy(locations = locations)
+                val locations =
+                    GeocodeAPI.service.geocode(query).distinct().map { it.toLocationData() }
+                uiState = uiState.copy(
+                    locations = locations,
+                    errorRecourseId = if (locations.isEmpty()) R.string.no_results else null
+                )
             } catch (e: Exception) {
-                uiState = uiState.copy(errorRecourseId = R.string.something_went_wrong)
+                uiState = uiState.copy(errorRecourseId = R.string.no_results)
             } finally {
                 uiState = uiState.copy(isLoading = false)
             }
@@ -35,7 +39,8 @@ class SearchScreenViewModel: ViewModel() {
         viewModelScope.launch {
             try {
                 uiState = uiState.copy(isLoading = true, errorRecourseId = null)
-                val locations = GeocodeAPI.service.reverseGeocode(lat, lon).distinct().map { it.toLocationData() }
+                val locations = GeocodeAPI.service.reverseGeocode(lat, lon).distinct()
+                    .map { it.toLocationData() }
                 uiState = uiState.copy(locations = locations)
             } catch (e: Exception) {
                 uiState = uiState.copy(errorRecourseId = R.string.something_went_wrong)

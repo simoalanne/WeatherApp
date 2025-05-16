@@ -1,5 +1,6 @@
 package com.example.weatherapp.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,6 +37,7 @@ import com.example.weatherapp.utils.formatLocationName
 import com.example.weatherapp.utils.isDay
 import com.example.weatherapp.utils.truncateToHours
 import com.example.weatherapp.R
+import com.example.weatherapp.model.WeatherUIStatus
 import com.example.weatherapp.utils.getCurrentLocale
 import com.example.weatherapp.viewmodel.MainViewModel
 import com.example.weatherapp.viewmodel.SettingsViewModel
@@ -48,104 +50,107 @@ fun WeatherScreen(
     mainViewModel: MainViewModel,
     settingsViewModel: SettingsViewModel
 ) {
-    val currentLocation = mainViewModel.uiState.currentLocation
-    val currentWeather = currentLocation?.weather
-    val isLoading = mainViewModel.uiState.isLoading
-    val isRefreshing = mainViewModel.uiState.isRefreshing
-    val scrollState = rememberScrollState()
-
-    if (currentLocation != null && currentWeather != null) {
-        val now = currentWeather.hourlyForecasts.first().time
-        val weather24Hours = currentWeather.hourlyForecasts.takeWhile {
-            truncateToHours(it.time).isBefore(now.plusHours(24)) || truncateToHours(it.time) == now.plusHours(
-                24
-            )
+    val uiStatus = mainViewModel.uiState.uiStatus
+    Log.d("WeatherScreen", "WeatherScreen: $uiStatus")
+    when (uiStatus) {
+        WeatherUIStatus.LOADING -> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(text = stringResource(R.string.loading))
+                CircularProgressIndicator()
+            }
         }
-        val timeZone = currentWeather.meta.timezoneOffsetInSeconds / 3600
-        BackgroundImage(isDay = isDay(now, currentWeather.meta.sunriseSunsetTimes))
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            AppBar(
-                title = "${
-                    formatLocationName(
-                        currentLocation.location,
-                        locale = getCurrentLocale()
-                    )
-                } (UTC${if (timeZone >= 0) "+" else ""}$timeZone)",
-                lastUpdated = currentWeather.current.time.toLocalTime().toString().substring(0, 5),
-                timezoneOffset = currentWeather.meta.timezoneOffsetInSeconds,
-                // TODO: The effect should be animated like fonts getting smaller than just sudden change
-                collapseHeader = scrollState.value > 150,
-                onSearchIconPress = { navController.navigate("search") }
-            )
-            PullToRefreshBox(
-                isRefreshing = isRefreshing,
-                onRefresh = {
-                    mainViewModel.refreshCurrentLocation()
-                }
+
+        WeatherUIStatus.SUCCESS, WeatherUIStatus.REFRESHING -> {
+            val currentLocation = mainViewModel.uiState.currentLocation
+            val currentWeather = currentLocation?.weather ?: return
+            val scrollState = rememberScrollState()
+
+            val now = currentWeather.hourlyForecasts.first().time
+            val weather24Hours = currentWeather.hourlyForecasts.takeWhile {
+                truncateToHours(it.time).isBefore(now.plusHours(24)) || truncateToHours(it.time) == now.plusHours(
+                    24
+                )
+            }
+            val timeZone = currentWeather.meta.timezoneOffsetInSeconds / 3600
+            BackgroundImage(isDay = isDay(now, currentWeather.meta.sunriseSunsetTimes))
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .verticalScroll(scrollState),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                AppBar(
+                    title = "${
+                        formatLocationName(
+                            currentLocation.location,
+                            locale = getCurrentLocale()
+                        )
+                    } (UTC${if (timeZone >= 0) "+" else ""}$timeZone)",
+                    lastUpdated = currentWeather.current.time.toLocalTime().toString()
+                        .substring(0, 5),
+                    timezoneOffset = currentWeather.meta.timezoneOffsetInSeconds,
+                    // TODO: The effect should be animated like fonts getting smaller than just sudden change
+                    collapseHeader = scrollState.value > 150,
+                    onSearchIconPress = { navController.navigate("search") }
+                )
+                PullToRefreshBox(
+                    isRefreshing = uiStatus == WeatherUIStatus.REFRESHING,
+                    onRefresh = {
+                        mainViewModel.refreshCurrentLocation()
+                    }
                 ) {
-                    Margin(margin = 20)
-                    WeatherInfo(
-                        current = currentWeather.current.temperature,
-                        min = weather24Hours.minOf { it.temperature },
-                        max = weather24Hours.maxOf { it.temperature },
-                        condition = stringResource(id = currentWeather.current.conditionId),
-                        round = true
-                    )
-                    Margin(margin = 20)
                     Column(
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color(red = 0f, green = 0f, blue = 0f, alpha = 0.3f))
-                            .padding(horizontal = 8.dp, vertical = 16.dp)
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                            .verticalScroll(scrollState),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        Margin(margin = 20)
+                        WeatherInfo(
+                            current = currentWeather.current.temperature,
+                            min = weather24Hours.minOf { it.temperature },
+                            max = weather24Hours.maxOf { it.temperature },
+                            condition = stringResource(id = currentWeather.current.conditionId),
+                            round = true
+                        )
+                        Margin(margin = 20)
                         Column(
                             verticalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Color(red = 0f, green = 0f, blue = 0f, alpha = 0.3f))
+                                .padding(horizontal = 8.dp, vertical = 16.dp)
                         ) {
-                            Text(
-                                text = stringResource(R.string.next_24_hours),
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold
-                            )
-                            HorizontalDivider(
-                                color = Color.White.copy(alpha = 0.5f),
-                                thickness = 0.5f.dp
-                            )
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.next_24_hours),
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                HorizontalDivider(
+                                    color = Color.White.copy(alpha = 0.5f),
+                                    thickness = 0.5f.dp
+                                )
+                            }
+                            WeatherList(hourlyWeathers = weather24Hours)
                         }
-                        WeatherList(hourlyWeathers = weather24Hours)
+                        Margin(margin = 8)
+                        DailyForecasts(
+                            allHourlyForecasts = currentWeather.hourlyForecasts,
+                            currentWeather.meta.timezoneOffsetInSeconds
+                        )
+                        Margin(margin = 8)
+                        WeatherStatsGrid(current = currentWeather.current)
+                        Margin(margin = 100) // Should be possible to scroll further down so the last elements are better viewable
                     }
-                    Margin(margin = 8)
-                    DailyForecasts(
-                        allHourlyForecasts = currentWeather.hourlyForecasts,
-                        currentWeather.meta.timezoneOffsetInSeconds
-                    )
-                    Margin(margin = 8)
-                    WeatherStatsGrid(current = currentWeather.current)
-                    Margin(margin = 100) // Should be possible to scroll further down so the last elements are better viewable
                 }
             }
         }
-    } else {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            if (isLoading) {
-                CircularProgressIndicator()
-            } else {
-                LaunchedEffect(Unit) {
-                    delay(2000) // because state is not updated immediately. TODO: this can't stay
-                    if (mainViewModel.uiState.currentLocation == null) {
-                        navController.navigate("search")
-                    }
-                }
+
+        WeatherUIStatus.EMPTY, WeatherUIStatus.ERROR -> {
+            LaunchedEffect(Unit) {
+                navController.navigate("search")
             }
         }
     }
