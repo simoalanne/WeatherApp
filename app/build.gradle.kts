@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -42,6 +43,12 @@ android {
             "String",
             "OPEN_WEATHER_MAP_API_KEY",
             "\"${properties.getProperty("OPEN_WEATHER_MAP_API_KEY") ?: ""}\""
+        )
+
+        buildConfigField(
+            "String",
+            "MAX_FAVORITE_LOCATIONS",
+            "\"${properties.getProperty("MAX_FAVORITE_LOCATIONS")?.toInt() ?: 5}\""
         )
     }
 
@@ -112,4 +119,14 @@ dependencies {
 
     // Google play services to use fused location provider
     implementation(libs.play.services.location)
+    // To use coroutines with the play services for cleaner code
+    implementation(libs.kotlinx.coroutines.play.services)
+
+    // room database for storing locations data
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+
+    // Datastore for storing preferences
+    implementation(libs.androidx.datastore.preferences)
 }
