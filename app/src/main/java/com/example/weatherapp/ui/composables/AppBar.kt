@@ -17,19 +17,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.weatherapp.utils.formatLocalDateTime
-import kotlinx.coroutines.delay
-import java.time.LocalDateTime
-import java.time.ZoneOffset
 import androidx.compose.ui.res.stringResource
 import com.example.weatherapp.R
 
@@ -41,15 +32,7 @@ fun AppBar(
     collapseHeader: Boolean,
     onSearchIconPress: () -> Unit
 ) {
-    var currentTime by remember { mutableStateOf("") }
-
-    LaunchedEffect(Unit) {
-        while (true) {
-            val now = LocalDateTime.now(ZoneOffset.UTC).plusSeconds(timezoneOffset.toLong())
-            currentTime = formatLocalDateTime(now, accuracy = "seconds")
-            delay(1000)
-        }
-    }
+    var currentTime = rememberCurrentTime(timezoneOffset)
     Row(
         modifier = Modifier
             .fillMaxWidth()

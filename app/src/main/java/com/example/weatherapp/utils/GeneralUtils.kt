@@ -1,10 +1,10 @@
 package com.example.weatherapp.utils
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
-import com.example.weatherapp.model.GeoSearchFilterMode
-import com.example.weatherapp.model.GeocodeEntry
+import com.example.weatherapp.model.LocationData
+import com.example.weatherapp.model.LocationDisplayAccuracy
 import java.util.Locale
+import androidx.compose.ui.platform.LocalConfiguration
 
 /**
  * Returns the interpolation weights for a given step. For example:
@@ -33,30 +33,21 @@ private fun getCountryNameFromCode(countryCode: String, locale: Locale): String 
  * @return a formatted String
  */
 fun formatLocationName(
-    location: GeocodeEntry,
-    accuracy: GeoSearchFilterMode,
+    location: LocationData,
+    accuracy: LocationDisplayAccuracy = LocationDisplayAccuracy.CITY_AND_COUNTRY,
     locale: Locale
 ): String {
 
-    val locationName = location.localizedNames?.get(locale.language.lowercase()) ?: location.name
+    val locationName = (if (locale.language.lowercase() == "fi") location.finnishName else location.englishName)
+        ?: location.englishName
     val country = getCountryNameFromCode(location.countryCode, locale)
-    // Generally state just clutters the entry for most countries so it should be displayed
-    // only for countries where the same location actually can exist in multiple states
-    // for now this hardcoded list handles those countries
-    val shouldDisplayState = location.countryCode in GeocodeEntry.alwaysDisplayState
-    val state =
-        if (location.state != null) {
-            "${location.state},"
-        } else {
-            ""
-        }
+    val state = if (location.state != null) "${location.state}," else ""
     return when (accuracy) {
-        GeoSearchFilterMode.BEST_MATCH -> "$locationName, ${if (shouldDisplayState) state else ""} $country"
-        GeoSearchFilterMode.MOST_RELEVANT -> "$locationName, $state $country"
-        GeoSearchFilterMode.ALL_RESULTS -> "$locationName, $state $country"
+        LocationDisplayAccuracy.CITY -> locationName
+        LocationDisplayAccuracy.CITY_AND_COUNTRY -> "$locationName, $country"
+        LocationDisplayAccuracy.CITY_AND_STATE_AND_COUNTRY -> "$locationName, $state $country"
     }
 }
 
 @Composable
-fun getCurrentLocale(): Locale = LocalContext.current.resources.configuration.locales.get(0)
-
+fun getCurrentLocale(): Locale = LocalConfiguration.current.locales.get(0)
