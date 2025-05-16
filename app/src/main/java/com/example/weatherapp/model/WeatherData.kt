@@ -1,7 +1,6 @@
 package com.example.weatherapp.model
 
 import java.time.LocalDateTime
-import java.util.UUID
 
 /**
  * Data class representing the weather data, containing metadata about the location, the current
@@ -11,14 +10,9 @@ data class WeatherData(
     val meta: Meta,
     val current: CurrentWeather,
     val hourlyForecasts: List<HourlyWeather>,
-    // to force in search screen to navigate back as that relies on weather data state changing.
-    // not the best approach but should work for now
-    val fetchID: UUID = UUID.randomUUID()
 )
 
 data class Meta(
-    val geocodeEntry: GeocodeEntry,
-    val population: Int?,
     val timezoneOffsetInSeconds: Int,
     val sunriseSunsetTimes: Map<String, SunriseSunset> // key should be toString() of LocalDate
 

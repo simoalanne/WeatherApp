@@ -4,7 +4,6 @@ import android.util.Log
 import com.example.weatherapp.R
 import com.example.weatherapp.model.*
 import com.example.weatherapp.model.WeatherIcons.Companion.getConditionString
-import com.example.weatherapp.utils.formatLocationName
 import com.example.weatherapp.utils.getHoursBetweenTwoLocalDates
 import com.example.weatherapp.utils.getInterpolationWeights
 import com.example.weatherapp.utils.getLocalDateTimeFromUnixTimestamp
@@ -20,14 +19,12 @@ import java.time.Duration
  * @param weatherResponse the response from the OpenWeatherMap weather endpoint
  * @param forecastResponse the response from the OpenWeatherMap forecast endpoint
  * @param sunriseSunsetResponse the response from sunrisesunset API
- * @param geoCodeEntry the geocode entry that was used to fetch the coordinates
  * @return a WeatherData object containing the mapped data
  */
 fun mapApiResponsesToWeatherData(
     weatherResponse: WeatherResponse,
     forecastResponse: ForecastResponse,
     sunriseSunsetResponse: SunriseSunsetResponse,
-    geoCodeEntry: GeocodeEntry,
 ): WeatherData {
     val timezoneOffset = forecastResponse.cityInfo.timezone
     val sunriseSunsetList = sunriseSunsetResponse.results
@@ -43,11 +40,8 @@ fun mapApiResponsesToWeatherData(
         Log.e("mapApiResponsesToWeatherData", "resolved values are: $sunriseSunsetMap")
     }
 
-    val population = forecastResponse.cityInfo.population
 
     val meta = Meta(
-        geocodeEntry = geoCodeEntry,
-        population = if (population == 0) null else population,
         timezoneOffsetInSeconds = forecastResponse.cityInfo.timezone,
         sunriseSunsetTimes = sunriseSunsetMap
     )
