@@ -1,7 +1,6 @@
 package com.example.weatherapp.utils
 
 import android.util.Log
-import com.example.weatherapp.model.SunriseSunset
 import java.time.*
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
@@ -17,12 +16,13 @@ import java.util.Locale
  * @param timezoneOffset the timezone offset in seconds
  * @return the LocalDateTime object for the given timestamp and timezone offset
  */
-fun getLocalDateTimeFromUnixTimestamp(timestamp: Long, timezoneOffset: Int): LocalDateTime {
+fun getLocalDateTimeFromUnixTimestamp(timestamp: Long, timezoneOffset: Int = 0): LocalDateTime {
     val offset = ZoneOffset.ofTotalSeconds(timezoneOffset)
     val instant = Instant.ofEpochSecond(timestamp).atOffset(offset)
     return LocalDateTime.of(instant.toLocalDate(), instant.toLocalTime())
 }
 
+/*
 fun isDay(time: LocalDateTime, sunriseSunsetMap: Map<String, SunriseSunset>): Boolean {
     val dateKey = time.toLocalDate().toString()
     val entry = sunriseSunsetMap[dateKey]
@@ -32,7 +32,7 @@ fun isDay(time: LocalDateTime, sunriseSunsetMap: Map<String, SunriseSunset>): Bo
         return true
     }
     return time.isAfter(entry.sunrise) && time.isBefore(entry.sunset)
-}
+} */
 
 fun truncateToHours(time: LocalDateTime): LocalDateTime = time.truncatedTo(ChronoUnit.HOURS)
 

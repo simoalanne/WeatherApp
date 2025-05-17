@@ -1,143 +1,88 @@
 package com.example.weatherapp.mapper
 
-import android.util.Log
 import com.example.weatherapp.R
-import com.example.weatherapp.model.*
-import com.example.weatherapp.model.WeatherIcons.Companion.getConditionString
-import com.example.weatherapp.utils.getHoursBetweenTwoLocalDates
-import com.example.weatherapp.utils.getInterpolationWeights
+import com.example.weatherapp.model.CurrentWeather
+import com.example.weatherapp.model.DailyWeather
+import com.example.weatherapp.model.HourlyWeather
+import com.example.weatherapp.model.Meta
+import com.example.weatherapp.model.OpenMeteoCodes
+import com.example.weatherapp.model.OpenMeteoResponse
+import com.example.weatherapp.model.WeatherData
 import com.example.weatherapp.utils.getLocalDateTimeFromUnixTimestamp
-import com.example.weatherapp.utils.isDay
-import com.example.weatherapp.utils.truncateToHours
-import kotlin.math.abs
 import java.time.Duration
+import kotlin.math.abs
 
-/**
- * Maps the API responses to a WeatherData object. API responses are
- * either from OpenWeatherMap or from sunrisesunset.io
- *
- * @param weatherResponse the response from the OpenWeatherMap weather endpoint
- * @param forecastResponse the response from the OpenWeatherMap forecast endpoint
- * @param sunriseSunsetResponse the response from sunrisesunset API
- * @return a WeatherData object containing the mapped data
- */
-fun mapApiResponsesToWeatherData(
-    weatherResponse: WeatherResponse,
-    forecastResponse: ForecastResponse,
-    sunriseSunsetResponse: SunriseSunsetResponse,
-): WeatherData {
-    val timezoneOffset = forecastResponse.cityInfo.timezone
-    val sunriseSunsetList = sunriseSunsetResponse.results
-    val sunriseSunsetMap = sunriseSunsetList.associate {
-        val sunrise = getLocalDateTimeFromUnixTimestamp(it.sunrise?.toLongOrNull() ?: 0, timezoneOffset)
-        val sunset = getLocalDateTimeFromUnixTimestamp(it.sunset?.toLongOrNull() ?: 0, timezoneOffset)
-        val key = sunrise.toLocalDate().toString()
-        Pair(key, SunriseSunset(sunrise, sunset))
-    }
+fun OpenMeteoResponse.toWeatherData(): WeatherData {
 
-    if (sunriseSunsetList.any { it.sunrise == null || it.sunset == null }) {
-        Log.e("mapApiResponsesToWeatherData", "sunriseSunset response contains null values: $sunriseSunsetResponse")
-        Log.e("mapApiResponsesToWeatherData", "resolved values are: $sunriseSunsetMap")
-    }
-
-
-    val meta = Meta(
-        timezoneOffsetInSeconds = forecastResponse.cityInfo.timezone,
-        sunriseSunsetTimes = sunriseSunsetMap
-    )
-
-    val currentTime = getLocalDateTimeFromUnixTimestamp(weatherResponse.timestamp, timezoneOffset)
-
+    val meta = Meta(utcOffsetSeconds)
+    val isDay = this.currentWeather.isDay == 1
     val currentWeather = CurrentWeather(
-        time = currentTime,
-        temperature = weatherResponse.weatherInfo.temp,
-        feelsLike = weatherResponse.weatherInfo.feelsLike,
-        conditionId = getConditionString(weatherResponse.weatherCondition[0].code),
-        iconId = WeatherIcons.fromCode(
-            weatherResponse.weatherCondition[0].code, isDay(currentTime, sunriseSunsetMap)
+        time = getLocalDateTimeFromUnixTimestamp(this.currentWeather.time, utcOffsetSeconds),
+        temperature = this.currentWeather.temperature,
+        weatherIconId = OpenMeteoCodes.getIconFromCode(
+            this.currentWeather.weatherCode, isDay
         ),
-        humidityPercentage = weatherResponse.weatherInfo.humidity,
-        windSpeed = weatherResponse.wind.speed,
-        airPressure = weatherResponse.weatherInfo.airPressure,
-        cloudinessPercentage = weatherResponse.clouds.cloudinessPercentage,
-        visibilityInMeters = weatherResponse.visibility,
-        sunrise = sunriseSunsetMap[currentTime.toLocalDate().toString()]!!.sunrise,
-        sunset = sunriseSunsetMap[currentTime.toLocalDate().toString()]!!.sunset
+        conditionId = OpenMeteoCodes.getConditionFromCode(this.currentWeather.weatherCode),
+        isDay = isDay
     )
 
-    val firstHourlyForecast = HourlyWeather(
-        time = currentWeather.time,
-        temperature = currentWeather.temperature,
-        iconId = currentWeather.iconId,
-        rainProbability = (forecastResponse.forecastList.first().rainProbability * 100).toInt()
-    )
-
-    val forecastHourlyWeathers = forecastResponse.forecastList.map {
-        val time = getLocalDateTimeFromUnixTimestamp(it.timestamp, timezoneOffset)
-        val isDay = isDay(time, sunriseSunsetMap)
+    val hourlyWeatherGrouped = this.hourlyWeather.time.mapIndexed { index, time ->
         HourlyWeather(
-            time = time,
-            temperature = it.weatherInfo.temp,
-            iconId = WeatherIcons.fromCode(it.weatherCondition[0].code, isDay),
-            rainProbability = (it.rainProbability * 100).toInt()
-        )
-    }
-
-    Log.d("WeatherViewModel", "forecastHourlyWeathers: $forecastHourlyWeathers")
-
-    val interpolated = (listOf(firstHourlyForecast) + forecastHourlyWeathers).zipWithNext { a, b ->
-        interpolateHourlyWeatherData(a, b, sunriseSunsetMap)
-    }.flatten()
-
-    val hourlyForecasts = interpolated + forecastHourlyWeathers.last()
-
-    val sunriseAndSunsetsAsHourlyWeather = meta.sunriseSunsetTimes.values.flatMap { times ->
-        listOf(times.sunrise, times.sunset).map { eventTime ->
-            val nearestForecast =
-                hourlyForecasts.minBy { abs(Duration.between(it.time, eventTime).toMinutes()) }
-            HourlyWeather(
-                time = eventTime,
-                temperature = nearestForecast.temperature,
-                iconId = if (eventTime == times.sunrise) R.drawable.sunrise else R.drawable.sunset,
-                rainProbability = nearestForecast.rainProbability,
+            time = getLocalDateTimeFromUnixTimestamp(time, utcOffsetSeconds),
+            temperature = this.hourlyWeather.temperature[index],
+            weatherIconId = OpenMeteoCodes.getIconFromCode(
+                this.hourlyWeather.weatherCode[index], this.hourlyWeather.isDay[index] == 1
             )
-        }
-    }
-
-    // Sorts entries by time ascending then filters out entries that are before or after the forecast entries.
-    // So basically filters out sunrise and sunset entries from start and end that won't fall inside the forecast hours
-    val hourlyForecastWithSunriseAndSunsets =
-        (hourlyForecasts + sunriseAndSunsetsAsHourlyWeather).sortedBy { it.time }.filter { entry ->
-            (entry.time.isAfter(currentTime) || entry.time == currentTime) && (entry.time.isBefore(
-                forecastHourlyWeathers.last().time
-            ) || entry.time == forecastHourlyWeathers.last().time)
-        }
-
-    return WeatherData(meta, currentWeather, hourlyForecastWithSunriseAndSunsets)
-}
-
-private fun interpolateHourlyWeatherData(
-    startWeather: HourlyWeather,
-    endWeather: HourlyWeather,
-    sunriseSunsetMap: Map<String, SunriseSunset>
-): List<HourlyWeather> {
-
-    val hoursBetween = getHoursBetweenTwoLocalDates(startWeather.time, endWeather.time)
-
-    return List(hoursBetween) { index ->
-        if (index == 0) {
-            return@List startWeather
-        }
-
-        val weights = getInterpolationWeights(index, hoursBetween)
-        val isCloserToStart = weights.first > 0.5 // for values that can't be interpolated linearly
-        val time = startWeather.time.plusHours(index.toLong())
-        val isDay = isDay(time, sunriseSunsetMap)
-        HourlyWeather(
-            time = truncateToHours(startWeather.time).plusHours(index.toLong()),
-            temperature = startWeather.temperature * weights.first + endWeather.temperature * weights.second,
-            iconId = WeatherIcons.fromCode(startWeather.iconId, isDay),
-            rainProbability = if (isCloserToStart) startWeather.rainProbability else endWeather.rainProbability
         )
+    }.groupBy { it.time.toLocalDate() }
+
+    val dailyWeathers = this.dailyWeather.time.mapIndexed { index, time ->
+        val date = getLocalDateTimeFromUnixTimestamp(time, utcOffsetSeconds).toLocalDate()
+        val dailyWeather = DailyWeather(
+            date = date,
+            weatherIconId = OpenMeteoCodes.getIconFromCode(
+                dailyWeather.weatherCode[index], isDay = true
+            ),
+            maxTemperature = this.dailyWeather.maxTemperature[index],
+            minTemperature = this.dailyWeather.minTemperature[index],
+            sunrise = getLocalDateTimeFromUnixTimestamp(
+                this.dailyWeather.sunrise[index], utcOffsetSeconds
+            ),
+            sunset = getLocalDateTimeFromUnixTimestamp(
+                this.dailyWeather.sunset[index], utcOffsetSeconds
+            ),
+            hourlyWeathers = hourlyWeatherGrouped[date] ?: emptyList()
+        )
+
+        val sunriseAndSunsetAsHourly =
+            listOf(dailyWeather.sunrise, dailyWeather.sunset).mapIndexed { sunIndex, time ->
+                val tempToUse = dailyWeather.hourlyWeathers.minBy {
+                    abs(
+                        Duration.between(time, it.time).toMinutes()
+                    )
+                }.temperature
+
+                HourlyWeather(
+                    time = time,
+                    temperature = tempToUse,
+                    weatherIconId = if (sunIndex == 0) R.drawable.sunrise else R.drawable.sunset
+                )
+            }
+
+        val currentWeatherAsHourly = if (index == 0) {
+            HourlyWeather(
+                time = currentWeather.time,
+                temperature = currentWeather.temperature,
+                weatherIconId = currentWeather.weatherIconId
+            )
+        } else null
+
+        val newDailyWeather = (listOfNotNull(currentWeatherAsHourly).plus(sunriseAndSunsetAsHourly)
+            .plus(dailyWeather.hourlyWeathers)).sortedBy { it.time }
+            .filterNot { entry -> entry.time.isBefore(currentWeather.time) }
+
+        dailyWeather.copy(hourlyWeathers = newDailyWeather)
     }
+
+    return WeatherData(meta, currentWeather, dailyWeathers)
 }

@@ -1,7 +1,6 @@
 package com.example.weatherapp.ui.composables
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,14 +11,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.weatherapp.model.HourlyWeather
-import com.example.weatherapp.model.WeatherIcons
 import com.example.weatherapp.utils.formatDate
-import com.example.weatherapp.utils.getDominantIcon
-import com.example.weatherapp.utils.getMinMaxTemperature
-import java.time.LocalDate
 import kotlin.math.roundToInt
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -28,23 +21,25 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.ui.res.stringResource
 import com.example.weatherapp.R
+import com.example.weatherapp.model.DailyWeather
 import com.example.weatherapp.utils.getCurrentLocale
 
 @Composable
 fun DailyForecastItem(
-    date: LocalDate, dayForecasts: List<HourlyWeather>, timezoneOffset: Int,
-    isExpanded: Boolean, onExpand: () -> Unit
+    dailyWeather: DailyWeather,
+    isExpanded: Boolean, onExpand: () -> Unit,
+    timezoneOffset: Int,
 ) {
     val formattedDate = formatDate(
-        date,
+        dailyWeather.date,
         timezoneOffset,
         locale = getCurrentLocale(),
         stringResource(R.string.today),
         stringResource(R.string.tomorrow)
     )
-    val dominantIcon = getDominantIcon(dayForecasts.map { it.iconId })
-    val dayVariant = WeatherIcons.getDailyVariantFromIcon(dominantIcon)
-    val (minTemp, maxTemp) = getMinMaxTemperature(dayForecasts)
+    val dominantIcon = dailyWeather.weatherIconId
+    val minTemp = dailyWeather.minTemperature
+    val maxTemp = dailyWeather.maxTemperature
     val expandIcon =
         if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown
     val content =
@@ -67,7 +62,7 @@ fun DailyForecastItem(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.weight(0.45f)
             ) {
-                ResImage(dayVariant)
+                ResImage(dominantIcon)
                 val minTempStr = "${minTemp.roundToInt()}°"
                 val maxTempStr = "${maxTemp.roundToInt()}°"
                 Text(
@@ -82,7 +77,7 @@ fun DailyForecastItem(
             }
         }
         AnimatedVisibility(visible = isExpanded) {
-            WeatherList(dayForecasts, isNext24Hours = false)
+            WeatherList(dailyWeather.hourlyWeathers, isNext24Hours = false)
         }
     }
 }

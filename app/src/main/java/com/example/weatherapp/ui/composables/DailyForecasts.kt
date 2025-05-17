@@ -21,14 +21,12 @@ import androidx.compose.ui.unit.dp
 import com.example.weatherapp.model.HourlyWeather
 import java.time.LocalDate
 import com.example.weatherapp.R
+import com.example.weatherapp.model.DailyWeather
 
 @Composable
-fun DailyForecasts(allHourlyForecasts: List<HourlyWeather>, timezoneOffset: Int) {
-    val groupedByDate = allHourlyForecasts.groupBy {
-        it.time.toLocalDate()
-    }.toList()
-    var expandedDate by remember { mutableStateOf<LocalDate?>(null) }
+fun DailyForecasts(dailyForecasts: List<DailyWeather>, timezoneOffset: Int) {
 
+    var expandedDate by remember { mutableStateOf<LocalDate?>(null) }
 
     Column(
         verticalArrangement = Arrangement.spacedBy(2.dp),
@@ -43,13 +41,14 @@ fun DailyForecasts(allHourlyForecasts: List<HourlyWeather>, timezoneOffset: Int)
             Text(text = stringResource(R.string.five_day_forecast), color = Color.White, fontWeight = FontWeight.Bold)
             HorizontalDivider(color = Color.White.copy(alpha = 0.5f), thickness = 0.5f.dp)
         }
-        groupedByDate.forEachIndexed { index, (date, dayForecasts) ->
+        dailyForecasts.forEachIndexed { index, dailyForecast ->
             DailyForecastItem(
-                date, dayForecasts, timezoneOffset,
-                isExpanded = date == expandedDate,
+                dailyWeather = dailyForecast,
+                isExpanded = dailyForecast.date == expandedDate,
+                timezoneOffset = timezoneOffset,
                 onExpand = {
                     // Only one item can be expanded at a time
-                    expandedDate = if (expandedDate == date) null else date
+                    expandedDate = if (expandedDate == dailyForecast.date) null else dailyForecast.date
                 }
             )
         }
