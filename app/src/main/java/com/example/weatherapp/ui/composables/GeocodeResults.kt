@@ -1,18 +1,21 @@
 package com.example.weatherapp.ui.composables
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarOutline
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,7 +36,9 @@ import com.example.weatherapp.model.LocationDisplayAccuracy
 @Composable
 fun GeocodeResults(
     geocodeEntries: List<LocationData>,
-    onSelect: (LocationData) -> Unit
+    onSelect: (LocationData) -> Unit,
+    onFavoriteToggle: (LocationData) -> Unit,
+    favoriteLocations: List<LocationData> = emptyList()
 ) {
     var geoSearchFilterMode by remember { mutableStateOf(GeoSearchFilterMode.BEST_MATCH) }
 
@@ -66,6 +71,13 @@ fun GeocodeResults(
                 locale = getCurrentLocale()
             )
 
+            val isFavorite = entry in favoriteLocations
+            val favoriteIcon = if (isFavorite) {
+                Icons.Default.Star
+            } else {
+                Icons.Default.StarOutline
+            }
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -77,19 +89,25 @@ fun GeocodeResults(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    Icon(
+                        imageVector = favoriteIcon,
+                        contentDescription = "Favorite",
+                        tint = if (isFavorite) Color.Yellow else Color.White,
+                        modifier = Modifier.weight(0.1f).clickable { onFavoriteToggle(entry) }
+                    )
                     MarqueeText(
                         text = displayText,
-                        modifier = Modifier.weight(0.8f)
+                        modifier = Modifier.weight(0.7f)
                     )
                     AsyncImage(
                         model =
                             "https://flagcdn.com/160x120/${entry.countryCode.lowercase()}.png",
                         contentDescription = null,
-                        modifier = Modifier.weight(0.1f)
+                        modifier = Modifier.size(24.dp)
                     )
 
                     Icon(
@@ -99,7 +117,10 @@ fun GeocodeResults(
                         modifier = Modifier.weight(0.1f)
                     )
                 }
-                HorizontalDivider(color = Color.White.copy(alpha = 0.3f), thickness = 0.5f.dp)
+                HorizontalDivider(
+                    color = Color.White.copy(alpha = 0.3f),
+                    thickness = 0.5f.dp
+                )
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.example.weatherapp.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Arrangement.Absolute.spacedBy
@@ -101,8 +102,8 @@ fun SearchScreen(
             ) {
                 SearchTextField(
                     query = query, onQueryChange = { query = it }, onSearch = {
-                    if (query.isNotBlank()) searchScreenVm.geocode(query.trim().lowercase())
-                }, modifier = Modifier.weight(0.5f)
+                        if (query.isNotBlank()) searchScreenVm.geocode(query.trim().lowercase())
+                    }, modifier = Modifier.weight(0.5f)
                 )
                 TextButton(
                     content = { Text(text = stringResource(R.string.clear_results)) },
@@ -123,7 +124,20 @@ fun SearchScreen(
             GeocodeResults(
                 geocodeEntries = locations, onSelect = {
                     mainViewModel.previewLocation(it)
-                })
+                }, onFavoriteToggle = {
+                    val existing =
+                        mainViewModel.uiState.locations.find { locationWeather -> locationWeather.location == it }
+                    if (existing != null) {
+                        Log.d("SearchScreen", "Removing favorite location: $it")
+                        mainViewModel.removeFavoriteLocation(existing)
+                    } else {
+                        Log.d("SearchScreen", "Adding favorite location: $it")
+                        mainViewModel.addNewFavoriteLocation(it)
+                    }
+                },
+                favoriteLocations = mainViewModel.uiState.locations.filter { it.role == LocationRole.FAVORITE }
+                    .map { it.location }
+            )
             UserLocation(
                 userLocation = mainViewModel.uiState.locations.find { it.role == LocationRole.USER },
                 onLocateUser = {
