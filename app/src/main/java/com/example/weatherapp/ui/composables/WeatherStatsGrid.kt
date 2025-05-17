@@ -16,7 +16,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.weatherapp.model.CurrentWeather
 import com.example.weatherapp.R
-
+/*
 @Composable
 fun WeatherStatsGrid(current: CurrentWeather) {
     Column {
@@ -68,6 +68,4 @@ fun WeatherStatsGrid(current: CurrentWeather) {
             )
         }
     }
-}
-
-
+}*/

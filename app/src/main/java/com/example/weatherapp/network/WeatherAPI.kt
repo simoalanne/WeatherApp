@@ -1,42 +1,30 @@
 package com.example.weatherapp.network
 
-import com.example.weatherapp.BuildConfig
-import com.example.weatherapp.model.ForecastResponse
-import com.example.weatherapp.model.WeatherResponse
+import com.example.weatherapp.model.OpenMeteoResponse
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
 
 interface WeatherAPI {
-    /**
-     * Get current weather by coordinates.
-     */
-    @GET("weather")
+    @GET("v1/forecast")
     suspend fun getWeatherByCoordinates(
-        @Query("lat") lat: Double,
-        @Query("lon") lon: Double,
-        @Query("units") units: String = "metric",
-        @Query("appid") apiKey: String = BuildConfig.OPEN_WEATHER_MAP_API_KEY
-    ): WeatherResponse
+        @Query("latitude") lat: Double,
+        @Query("longitude") lon: Double,
+        @Query("current_weather") currentWeather: Boolean = true,
+        @Query("hourly") hourly: String = "temperature_2m,weathercode,is_day",
+        @Query("daily") daily: String = "weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset",
+        @Query("timeformat") timeformat: String = "unixtime",
+        @Query("timezone") timezone: String = "auto"
+    ): OpenMeteoResponse
 
-    /**
-     * Get 5 day / 3 hour forecast by coordinates.
-     */
-    @GET("forecast")
-    suspend fun getForecastByCoordinates(
-        @Query("lat") lat: Double,
-        @Query("lon") lon: Double,
-        @Query("units") units: String = "metric",
-        @Query("appid") apiKey: String = BuildConfig.OPEN_WEATHER_MAP_API_KEY
-    ): ForecastResponse
 
     companion object {
         private val retrofit: Retrofit = Retrofit.Builder()
-            .baseUrl(BuildConfig.WEATHER_API_BASE_URL)
+            .baseUrl("https://api.open-meteo.com/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-
         val service: WeatherAPI = retrofit.create(WeatherAPI::class.java)
     }
 }
+

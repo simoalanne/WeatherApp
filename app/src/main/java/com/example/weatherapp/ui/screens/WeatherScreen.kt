@@ -30,18 +30,15 @@ import com.example.weatherapp.ui.composables.AppBar
 import com.example.weatherapp.ui.composables.BackgroundImage
 import com.example.weatherapp.ui.composables.DailyForecasts
 import com.example.weatherapp.ui.composables.Margin
-import com.example.weatherapp.ui.composables.WeatherStatsGrid
 import com.example.weatherapp.ui.composables.WeatherInfo
 import com.example.weatherapp.ui.composables.WeatherList
 import com.example.weatherapp.utils.formatLocationName
-import com.example.weatherapp.utils.isDay
-import com.example.weatherapp.utils.truncateToHours
 import com.example.weatherapp.R
+import com.example.weatherapp.model.OpenMeteoCodes
 import com.example.weatherapp.model.WeatherUIStatus
 import com.example.weatherapp.utils.getCurrentLocale
 import com.example.weatherapp.viewmodel.MainViewModel
 import com.example.weatherapp.viewmodel.SettingsViewModel
-import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,14 +62,11 @@ fun WeatherScreen(
             val currentWeather = currentLocation?.weather ?: return
             val scrollState = rememberScrollState()
 
-            val now = currentWeather.hourlyForecasts.first().time
-            val weather24Hours = currentWeather.hourlyForecasts.takeWhile {
-                truncateToHours(it.time).isBefore(now.plusHours(24)) || truncateToHours(it.time) == now.plusHours(
-                    24
-                )
-            }
-            val timeZone = currentWeather.meta.timezoneOffsetInSeconds / 3600
-            BackgroundImage(isDay = isDay(now, currentWeather.meta.sunriseSunsetTimes))
+            val weather24Hours =
+                currentWeather.dailyForecasts.flatMap { it.hourlyWeathers }.takeWhile {
+                    it.time.isBefore(currentWeather.current.time.plusHours(24))
+                }
+            BackgroundImage(isDay = currentWeather.current.isDay)
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -83,11 +77,10 @@ fun WeatherScreen(
                             currentLocation.location,
                             locale = getCurrentLocale()
                         )
-                    } (UTC${if (timeZone >= 0) "+" else ""}$timeZone)",
+                    } (UTC${if (currentWeather.meta.utcOffsetSeconds > 0) "+" else ""}${currentWeather.meta.utcOffsetSeconds / 3600})",
                     lastUpdated = currentWeather.current.time.toLocalTime().toString()
                         .substring(0, 5),
-                    timezoneOffset = currentWeather.meta.timezoneOffsetInSeconds,
-                    // TODO: The effect should be animated like fonts getting smaller than just sudden change
+                    timezoneOffset = currentWeather.meta.utcOffsetSeconds,
                     collapseHeader = scrollState.value > 150,
                     onSearchIconPress = { navController.navigate("search") }
                 )
@@ -109,7 +102,7 @@ fun WeatherScreen(
                             current = currentWeather.current.temperature,
                             min = weather24Hours.minOf { it.temperature },
                             max = weather24Hours.maxOf { it.temperature },
-                            condition = stringResource(id = currentWeather.current.conditionId),
+                            condition = stringResource(currentWeather.current.conditionId),
                             round = true
                         )
                         Margin(margin = 20)
@@ -117,7 +110,14 @@ fun WeatherScreen(
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                             modifier = Modifier
                                 .clip(RoundedCornerShape(12.dp))
-                                .background(Color(red = 0f, green = 0f, blue = 0f, alpha = 0.3f))
+                                .background(
+                                    Color(
+                                        red = 0f,
+                                        green = 0f,
+                                        blue = 0f,
+                                        alpha = 0.3f
+                                    )
+                                )
                                 .padding(horizontal = 8.dp, vertical = 16.dp)
                         ) {
                             Column(
@@ -137,11 +137,11 @@ fun WeatherScreen(
                         }
                         Margin(margin = 8)
                         DailyForecasts(
-                            allHourlyForecasts = currentWeather.hourlyForecasts,
-                            currentWeather.meta.timezoneOffsetInSeconds
+                            currentWeather.dailyForecasts,
+                            currentWeather.meta.utcOffsetSeconds
                         )
                         Margin(margin = 8)
-                        WeatherStatsGrid(current = currentWeather.current)
+                        // WeatherStatsGrid(current = currentWeather.current)
                         Margin(margin = 100) // Should be possible to scroll further down so the last elements are better viewable
                     }
                 }
