@@ -9,3 +9,13 @@ data class LocationData(
     val state: String?,
 )
 
+fun LocationData.toLocationEntity(): LocationEntity {
+    return LocationEntity(
+        englishName = englishName,
+        finnishName = finnishName,
+        lat = lat,
+        lon = lon,
+        countryCode = countryCode,
+        state = state,
+    )
+}

@@ -97,19 +97,13 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun addNewLocation(locationWeather: LocationWeather) {
-        if (locationWeather.role != LocationRole.FAVORITE) {
+    fun addNewFavoriteLocation(locationData: LocationData) {
+        if (uiState.locations.any { it.location == locationData }) {
             Log.e(
                 "MainViewModel",
-                "Invalid location role. Expected FAVORITE, got ${locationWeather.role}"
+                "Location already exists in list as: ${uiState.locations.find { it.location == locationData }}"
             )
-        }
-
-        if (uiState.locations.any { it.location == locationWeather.location }) {
-            Log.e(
-                "MainViewModel",
-                "Location already exists in list as: ${locationWeather.location}"
-            )
+            return
         }
 
         if (uiState.locations.count { it.role == LocationRole.FAVORITE }
@@ -118,14 +112,23 @@ class MainViewModel : ViewModel() {
                 "MainViewModel",
                 "Maximum number of favorite locations reached (${BuildConfig.MAX_FAVORITE_LOCATIONS})"
             )
+            return
         }
 
         viewModelScope.launch {
             try {
                 uiState = uiState.copy(uiStatus = WeatherUIStatus.LOADING)
-                locationDao.add(locationWeather.toLocationEntity())
-                val newLocations = listOf(locationWeather) + uiState.locations
-                uiState = uiState.copy(locations = newLocations, uiStatus = WeatherUIStatus.SUCCESS)
+                locationDao.add(locationData.toLocationEntity())
+                val weatherData = fetchWeatherDataForCoordinates(
+                    Coordinates(locationData.lat, locationData.lon)
+                )
+                val newLocations = uiState.locations + LocationWeather(
+                    locationData,
+                    weatherData,
+                    LocationRole.FAVORITE
+                )
+                uiState =
+                    uiState.copy(locations = newLocations, uiStatus = WeatherUIStatus.SUCCESS)
             } catch (e: Exception) {
                 uiState = uiState.copy(uiStatus = WeatherUIStatus.ERROR)
             }
@@ -153,12 +156,12 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun deleteLocation(locationWeather: LocationWeather) {
+    fun removeFavoriteLocation(locationWeather: LocationWeather) {
         viewModelScope.launch {
             try {
                 uiState = uiState.copy(uiStatus = WeatherUIStatus.LOADING)
                 locationDao.delete(locationWeather.toLocationEntity())
-                val newLocations = uiState.locations - locationWeather
+                val newLocations = uiState.locations.filter { it != locationWeather }
                 uiState = uiState.copy(locations = newLocations)
             } catch (e: Exception) {
                 uiState = uiState.copy(uiStatus = WeatherUIStatus.ERROR)
