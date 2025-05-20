@@ -59,7 +59,7 @@
     <!-- Virheviestit -->
     <string name="something_went_wrong">Jotain meni pieleen. Yritä uudelleen.</string>
     <string name="city_name_cannot_be_empty">Kaupungin nimi ei voi olla tyhjä.</string>
-    <string name="no_results">Ei tuloksia haulle. Tarkista kirjoitusasu ja yritä uudelleen.</string>
+    <string name="no_results">Ei tulosta haulle!</string>
 
     <!-- Asetukset -->
     <string name="best_match">Paras osuma</string>

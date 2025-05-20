@@ -7,10 +7,9 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.weatherapp.BuildConfig
-import com.example.weatherapp.R
 import com.example.weatherapp.database.LocationDao
 import com.example.weatherapp.model.toLocationAndRole
-import com.example.weatherapp.location.UserLocationProvider
+import com.example.weatherapp.location.LocationService
 import com.example.weatherapp.model.Coordinates
 import com.example.weatherapp.model.LocationAndRole
 import com.example.weatherapp.model.LocationData
@@ -18,10 +17,9 @@ import com.example.weatherapp.model.LocationRole
 import com.example.weatherapp.model.LocationWeather
 import com.example.weatherapp.model.MainUiState
 import com.example.weatherapp.model.WeatherUIStatus
-import com.example.weatherapp.model.toLocationData
 import com.example.weatherapp.model.toLocationEntity
-import com.example.weatherapp.network.GeocodeAPI
 import com.example.weatherapp.utils.fetchWeatherDataForCoordinates
+import com.example.weatherapp.utils.reverseGeocodeLocation
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
@@ -38,11 +36,11 @@ import kotlinx.coroutines.launch
  * - Keeping database and the UI state in sync
  */
 class MainViewModel : ViewModel() {
-    private lateinit var userLocationProvider: UserLocationProvider
+    private lateinit var locationService: LocationService
     private lateinit var locationDao: LocationDao
 
-    fun setUserLocationProvider(provider: UserLocationProvider) {
-        userLocationProvider = provider
+    fun setLocationService(service: LocationService) {
+        locationService = service
     }
 
     fun setLocationDao(dao: LocationDao) {
@@ -57,23 +55,16 @@ class MainViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 uiState = uiState.copy(uiStatus = WeatherUIStatus.LOADING)
-                val userCoordsDeferred = async { userLocationProvider.getCurrentLocation() }
+                val userLocation = locationService.getUserLocation()
+                val userLocationRole = LocationAndRole(
+                    userLocation,
+                    LocationRole.USER
+                )
                 val savedLocationsDeferred = async { locationDao.getAll() }
-
-                val userCoords = userCoordsDeferred.await()
-                val userLocation = if (userCoords != null) {
-                    LocationAndRole(
-                        GeocodeAPI.service.reverseGeocode(userCoords.lat, userCoords.lon)
-                            .first()
-                            .toLocationData(),
-                        LocationRole.USER
-                    )
-                } else null
 
                 val savedLocations =
                     savedLocationsDeferred.await().map { it.toLocationAndRole() }
-
-                val locations = (listOfNotNull(userLocation) + savedLocations).map {
+                val locations = (listOfNotNull(userLocationRole) + savedLocations).map {
                     async {
                         val weatherData = fetchWeatherDataForCoordinates(
                             Coordinates(it.location.lat, it.location.lon)
@@ -91,6 +82,11 @@ class MainViewModel : ViewModel() {
                     )
                 }
             } catch (e: Exception) {
+                Log.e("MainViewModel", "Error loading initial data", e)
+                uiState =
+                    uiState.copy(uiStatus = WeatherUIStatus.ERROR)
+            } catch (e: SecurityException) {
+                Log.e("MainViewModel", "Error loading initial data", e)
                 uiState =
                     uiState.copy(uiStatus = WeatherUIStatus.ERROR)
             }
@@ -156,13 +152,12 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun removeFavoriteLocation(locationWeather: LocationWeather) {
+    fun removeFavoriteLocation(location: LocationData) {
         viewModelScope.launch {
             try {
                 uiState = uiState.copy(uiStatus = WeatherUIStatus.LOADING)
-                locationDao.delete(locationWeather.toLocationEntity())
-                val newLocations = uiState.locations.filter { it != locationWeather }
-                uiState = uiState.copy(locations = newLocations)
+                locationDao.delete(location.toLocationEntity())
+                // uiState = uiState.copy(locations = newLocations)
             } catch (e: Exception) {
                 uiState = uiState.copy(uiStatus = WeatherUIStatus.ERROR)
             } finally {
@@ -210,30 +205,27 @@ class MainViewModel : ViewModel() {
         Log.d("MainViewModel", "Locating user")
         viewModelScope.launch {
             try {
-                val userCoords = userLocationProvider.getCurrentLocation()
-                if (userCoords != null) {
-                    val userLocation = LocationAndRole(
-                        GeocodeAPI.service.reverseGeocode(userCoords.lat, userCoords.lon)
-                            .first()
-                            .toLocationData(),
-                        LocationRole.USER
+                val userLocation = LocationAndRole(
+                    locationService.getUserLocation(),
+                    LocationRole.USER
+                )
+                uiState = uiState.copy(uiStatus = WeatherUIStatus.LOADING)
+                val userWeather = fetchWeatherDataForCoordinates(
+                    Coordinates(userLocation.location.lat, userLocation.location.lon)
+                )
+                val userLocationWithWeather =
+                    LocationWeather(
+                        userLocation.location,
+                        userWeather,
+                        userLocation.role
                     )
-                    val userWeather = fetchWeatherDataForCoordinates(
-                        Coordinates(userLocation.location.lat, userLocation.location.lon)
-                    )
-                    val userLocationWithWeather =
-                        LocationWeather(
-                            userLocation.location,
-                            userWeather,
-                            userLocation.role
-                        )
-                    val newLocations = listOf(userLocationWithWeather) + uiState.locations
-                    uiState = uiState.copy(
-                        locations = newLocations,
-                        uiStatus = WeatherUIStatus.SUCCESS
-                    )
-                }
+                val newLocations = listOf(userLocationWithWeather) + uiState.locations
+                uiState = uiState.copy(
+                    locations = newLocations,
+                    uiStatus = WeatherUIStatus.SUCCESS
+                )
             } catch (e: Exception) {
+                Log.e("MainViewModel", "Error locating user", e)
                 uiState = uiState.copy(uiStatus = WeatherUIStatus.ERROR)
             }
         }

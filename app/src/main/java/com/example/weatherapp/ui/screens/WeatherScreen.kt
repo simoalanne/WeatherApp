@@ -34,9 +34,8 @@ import com.example.weatherapp.ui.composables.WeatherInfo
 import com.example.weatherapp.ui.composables.WeatherList
 import com.example.weatherapp.utils.formatLocationName
 import com.example.weatherapp.R
-import com.example.weatherapp.model.OpenMeteoCodes
 import com.example.weatherapp.model.WeatherUIStatus
-import com.example.weatherapp.utils.getCurrentLocale
+import com.example.weatherapp.utils.rememberCurrentLanguageCode
 import com.example.weatherapp.viewmodel.MainViewModel
 import com.example.weatherapp.viewmodel.SettingsViewModel
 
@@ -47,6 +46,7 @@ fun WeatherScreen(
     mainViewModel: MainViewModel,
     settingsViewModel: SettingsViewModel
 ) {
+    val languageCode = rememberCurrentLanguageCode()
     val uiStatus = mainViewModel.uiState.uiStatus
     Log.d("WeatherScreen", "WeatherScreen: $uiStatus")
     when (uiStatus) {
@@ -75,7 +75,7 @@ fun WeatherScreen(
                     title = "${
                         formatLocationName(
                             currentLocation.location,
-                            locale = getCurrentLocale()
+                            languageCode = languageCode
                         )
                     } (UTC${if (currentWeather.meta.utcOffsetSeconds > 0) "+" else ""}${currentWeather.meta.utcOffsetSeconds / 3600})",
                     lastUpdated = currentWeather.current.time.toLocalTime().toString()

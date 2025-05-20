@@ -6,9 +6,10 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.weatherapp.R
+import com.example.weatherapp.location.GeocodingErrorCode
+import com.example.weatherapp.location.GeocodingException
+import com.example.weatherapp.location.LocationService
 import com.example.weatherapp.model.SearchUiState
-import com.example.weatherapp.model.toLocationData
-import com.example.weatherapp.network.GeocodeAPI
 import kotlinx.coroutines.launch
 
 /**
@@ -16,19 +17,32 @@ import kotlinx.coroutines.launch
  */
 class SearchScreenViewModel : ViewModel() {
     var uiState by mutableStateOf(SearchUiState())
+    private lateinit var locationService: LocationService
+
+    fun setLocationService(locationService: LocationService) {
+        this.locationService = locationService
+    }
 
     fun geocode(query: String) {
         viewModelScope.launch {
             try {
                 uiState = uiState.copy(isLoading = true, errorRecourseId = null)
-                val locations =
-                    GeocodeAPI.service.geocode(query).distinct().map { it.toLocationData() }
-                uiState = uiState.copy(
-                    locations = locations,
-                    errorRecourseId = if (locations.isEmpty()) R.string.no_results else null
-                )
-            } catch (e: Exception) {
-                uiState = uiState.copy(errorRecourseId = R.string.no_results)
+                val location = locationService.geocode(query)
+                uiState = uiState.copy(searchResult = location)
+            } catch (e: GeocodingException) {
+                uiState = when (e.errorCode) {
+                    GeocodingErrorCode.NO_RESULTS -> {
+                        uiState.copy(errorRecourseId = R.string.no_results)
+                    }
+
+                    GeocodingErrorCode.INVALID_ADDRESS -> {
+                        uiState.copy(errorRecourseId = R.string.no_results)
+                    }
+
+                    GeocodingErrorCode.GEOCODING_FAILURE -> {
+                        uiState.copy(errorRecourseId = R.string.something_went_wrong)
+                    }
+                }
             } finally {
                 uiState = uiState.copy(isLoading = false)
             }
@@ -39,11 +53,9 @@ class SearchScreenViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 uiState = uiState.copy(isLoading = true, errorRecourseId = null)
-                val locations = GeocodeAPI.service.reverseGeocode(lat, lon).distinct()
-                    .map { it.toLocationData() }
-                uiState = uiState.copy(locations = locations)
-            } catch (e: Exception) {
-                uiState = uiState.copy(errorRecourseId = R.string.something_went_wrong)
+                val location = locationService.reverseGeocode(lat, lon)
+                uiState = uiState.copy(searchResult = location)
+            } catch (e: GeocodingException) {
             } finally {
                 uiState = uiState.copy(isLoading = false)
             }
@@ -51,7 +63,6 @@ class SearchScreenViewModel : ViewModel() {
     }
 
     fun clearLocations() {
-        uiState = uiState.copy(locations = emptyList())
+        uiState = uiState.copy(searchResult = null)
     }
-
 }
