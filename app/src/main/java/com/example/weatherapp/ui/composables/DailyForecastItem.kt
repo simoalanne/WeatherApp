@@ -22,7 +22,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.ui.res.stringResource
 import com.example.weatherapp.R
 import com.example.weatherapp.model.DailyWeather
-import com.example.weatherapp.utils.getCurrentLocale
+import com.example.weatherapp.utils.rememberCurrentLocale
 
 @Composable
 fun DailyForecastItem(
@@ -30,10 +30,11 @@ fun DailyForecastItem(
     isExpanded: Boolean, onExpand: () -> Unit,
     timezoneOffset: Int,
 ) {
+    val locale = rememberCurrentLocale()
     val formattedDate = formatDate(
         dailyWeather.date,
         timezoneOffset,
-        locale = getCurrentLocale(),
+        locale = locale,
         stringResource(R.string.today),
         stringResource(R.string.tomorrow)
     )

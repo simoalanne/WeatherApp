@@ -39,6 +39,7 @@ import com.example.weatherapp.R
 import com.example.weatherapp.model.LocationRole
 import com.example.weatherapp.model.LocationWeather
 import com.example.weatherapp.ui.composables.UserLocation
+import com.example.weatherapp.utils.rememberCurrentLanguageCode
 import com.example.weatherapp.viewmodel.MainViewModel
 import com.example.weatherapp.viewmodel.SearchScreenViewModel
 import com.example.weatherapp.viewmodel.SettingsViewModel
@@ -53,8 +54,9 @@ fun SearchScreen(
 ) {
     var query by remember { mutableStateOf("") }
     var isInitialLoad by remember { mutableStateOf(true) }
-    val locations = searchScreenVm.uiState.locations
+    val searchResult = searchScreenVm.uiState.searchResult
     val error = searchScreenVm.uiState.errorRecourseId
+    val languageCode = rememberCurrentLanguageCode()
 
     LaunchedEffect(mainViewModel.uiState.currentLocation) {
         if (isInitialLoad) {
@@ -102,7 +104,9 @@ fun SearchScreen(
             ) {
                 SearchTextField(
                     query = query, onQueryChange = { query = it }, onSearch = {
-                        if (query.isNotBlank()) searchScreenVm.geocode(query.trim().lowercase())
+                        if (query.isNotBlank()) searchScreenVm.geocode(
+                            query.trim().lowercase(),
+                        )
                     }, modifier = Modifier.weight(0.5f)
                 )
                 TextButton(
@@ -115,21 +119,21 @@ fun SearchScreen(
                     colors = ButtonDefaults.textButtonColors(
                         contentColor = Color.White, disabledContentColor = Color.Transparent
                     ),
-                    enabled = locations.isNotEmpty()
+                    enabled = searchResult != null,
                 )
             }
             if (error != null) {
                 Text(text = stringResource(error), color = Color.Red)
             }
             GeocodeResults(
-                geocodeEntries = locations, onSelect = {
+                searchResult = searchResult, onSelect = {
                     mainViewModel.previewLocation(it)
                 }, onFavoriteToggle = {
                     val existing =
                         mainViewModel.uiState.locations.find { locationWeather -> locationWeather.location == it }
                     if (existing != null) {
                         Log.d("SearchScreen", "Removing favorite location: $it")
-                        mainViewModel.removeFavoriteLocation(existing)
+                        mainViewModel.removeFavoriteLocation(it)
                     } else {
                         Log.d("SearchScreen", "Adding favorite location: $it")
                         mainViewModel.addNewFavoriteLocation(it)

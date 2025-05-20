@@ -3,15 +3,17 @@ package com.example.weatherapp.model
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
+/**
+ * Database representation of @see[LocationData]. use LocationData.toLocationEntity() to convert
+ */
 @Entity(tableName = "locations")
 data class LocationEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val englishName: String,
-    val finnishName: String?,
+    val finnishName: String,
     val lat: Double,
     val lon: Double,
     val countryCode: String,
-    val state: String?
 )
 
 fun LocationEntity.toLocationAndRole(): LocationAndRole {
@@ -22,7 +24,6 @@ fun LocationEntity.toLocationAndRole(): LocationAndRole {
         lat = lat,
         lon = lon,
         countryCode = countryCode,
-        state = state
         ),
         LocationRole.FAVORITE
     )

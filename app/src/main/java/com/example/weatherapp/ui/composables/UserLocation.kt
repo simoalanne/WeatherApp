@@ -6,7 +6,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import coil3.compose.AsyncImage
 import com.example.weatherapp.utils.formatLocationName
-import com.example.weatherapp.utils.getCurrentLocale
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -28,6 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.weatherapp.R
 import com.example.weatherapp.model.LocationWeather
+import com.example.weatherapp.utils.rememberCurrentLanguageCode
 
 // TODO: Terrible modularization should be refactored.
 @OptIn(ExperimentalPermissionsApi::class)
@@ -38,6 +38,7 @@ fun UserLocation(
     onLocationPress: () -> Unit
 ) {
     val locationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
+    val languageCode = rememberCurrentLanguageCode()
 
     Column(
         modifier = Modifier
@@ -53,7 +54,7 @@ fun UserLocation(
             userLocation != null -> {
                 val locationText = formatLocationName(
                     userLocation.location,
-                    locale = getCurrentLocale()
+                    languageCode = languageCode
                 )
                 AssistChip(
                     onClick = onLocationPress,

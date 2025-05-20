@@ -23,17 +23,6 @@ data class LocationAndRole(
     val role: LocationRole
 )
 
-fun LocationWeather.toLocationEntity(): LocationEntity {
-    return LocationEntity(
-        englishName = location.englishName,
-        finnishName = location.finnishName,
-        lat = location.lat,
-        lon = location.lon,
-        countryCode = location.countryCode,
-        state = location.state,
-    )
-}
-
 /**
  * Data class representing a location role.
  * - USER: The location is the user's current physical location. Weather should be fetched on app start.

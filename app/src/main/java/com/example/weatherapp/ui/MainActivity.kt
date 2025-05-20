@@ -1,6 +1,5 @@
 package com.example.weatherapp.ui
 
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -24,7 +23,7 @@ import com.example.weatherapp.ui.theme.WeatherAppTheme
 import com.google.android.gms.location.LocationServices
 import androidx.compose.runtime.LaunchedEffect
 import com.example.weatherapp.MyApplication
-import com.example.weatherapp.location.UserLocationProvider
+import com.example.weatherapp.location.LocationService
 import com.example.weatherapp.settingsDataStore
 import com.example.weatherapp.viewmodel.MainViewModel
 import com.example.weatherapp.viewmodel.SearchScreenViewModel
@@ -38,8 +37,7 @@ class MainActivity : ComponentActivity() {
             WeatherAppTheme {
                 // Create the dependencies
                 val locationDao = (application as MyApplication).locationDao
-                val userLocationProvider =
-                    UserLocationProvider(LocationServices.getFusedLocationProviderClient(this))
+                val locationService = LocationService(applicationContext)
                 val dataStore = applicationContext.settingsDataStore
 
                 // Create the view models
@@ -52,8 +50,9 @@ class MainActivity : ComponentActivity() {
                 LaunchedEffect(Unit) {
                     // Inject the dependencies manually, no Hilt or other fancy tools required for now
                     mainVm.setLocationDao(locationDao)
-                    mainVm.setUserLocationProvider(userLocationProvider)
+                    mainVm.setLocationService(locationService)
                     settingsVm.setDataStore(dataStore)
+                    searchScreenVm.setLocationService(locationService)
 
                     mainVm.loadInitialData()
                     settingsVm.loadSettings()
