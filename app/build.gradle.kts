@@ -22,33 +22,11 @@ android {
 
         val properties = Properties()
         properties.load(project.rootProject.file("local.properties").inputStream())
-        buildConfigField(
-            "String",
-            "WEATHER_API_BASE_URL",
-            "\"${properties.getProperty("WEATHER_API_BASE_URL")}\""
-        )
-        buildConfigField(
-            "String",
-            "GEOCODING_API_BASE_URL",
-            "\"${properties.getProperty("GEOCODING_API_BASE_URL")}\""
-        )
-        // How many fuzzy matches to return from the geocoding API.
-        // 5 is the maximum value supported by the API.
-        buildConfigField(
-            "String",
-            "GEOCODING_API_LIMIT",
-            "\"${properties.getProperty("GEOCODING_API_LIMIT")?.toInt() ?: 5}\""
-        )
-        buildConfigField(
-            "String",
-            "OPEN_WEATHER_MAP_API_KEY",
-            "\"${properties.getProperty("OPEN_WEATHER_MAP_API_KEY") ?: ""}\""
-        )
 
         buildConfigField(
             "String",
             "MAX_FAVORITE_LOCATIONS",
-            "\"${properties.getProperty("MAX_FAVORITE_LOCATIONS")?.toInt() ?: 5}\""
+            "\"${properties.getProperty("MAX_FAVORITE_LOCATIONS")?.toInt() ?: 10}\""
         )
     }
 
