@@ -19,7 +19,6 @@ import com.example.weatherapp.model.MainUiState
 import com.example.weatherapp.model.WeatherUIStatus
 import com.example.weatherapp.model.toLocationEntity
 import com.example.weatherapp.utils.fetchWeatherDataForCoordinates
-import com.example.weatherapp.utils.reverseGeocodeLocation
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
@@ -51,16 +50,15 @@ class MainViewModel : ViewModel() {
         private set
 
     fun loadInitialData() {
-        Log.d("MainViewModel", "Loading initial data")
         viewModelScope.launch {
             try {
                 uiState = uiState.copy(uiStatus = WeatherUIStatus.LOADING)
-                val userLocation = locationService.getUserLocation()
-                val userLocationRole = LocationAndRole(
-                    userLocation,
-                    LocationRole.USER
-                )
+                val userLocationDeferred =
+                    async { runCatching { locationService.getUserLocation() }.getOrNull() }
                 val savedLocationsDeferred = async { locationDao.getAll() }
+
+                val userLocation = userLocationDeferred.await()
+                val userLocationRole = userLocation?.let { LocationAndRole(it, LocationRole.USER) }
 
                 val savedLocations =
                     savedLocationsDeferred.await().map { it.toLocationAndRole() }
@@ -81,6 +79,7 @@ class MainViewModel : ViewModel() {
                         currentLocation = locations.first()
                     )
                 }
+                Log.d("MainViewModel", "Initial data loaded: $uiState")
             } catch (e: Exception) {
                 Log.e("MainViewModel", "Error loading initial data", e)
                 uiState =
@@ -93,20 +92,11 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun addNewFavoriteLocation(locationData: LocationData) {
+    fun addFavoriteLocation(locationData: LocationData) {
         if (uiState.locations.any { it.location == locationData }) {
             Log.e(
                 "MainViewModel",
                 "Location already exists in list as: ${uiState.locations.find { it.location == locationData }}"
-            )
-            return
-        }
-
-        if (uiState.locations.count { it.role == LocationRole.FAVORITE }
-            >= (BuildConfig.MAX_FAVORITE_LOCATIONS.toIntOrNull() ?: 5)) {
-            Log.e(
-                "MainViewModel",
-                "Maximum number of favorite locations reached (${BuildConfig.MAX_FAVORITE_LOCATIONS})"
             )
             return
         }
@@ -123,9 +113,11 @@ class MainViewModel : ViewModel() {
                     weatherData,
                     LocationRole.FAVORITE
                 )
+                Log.d("MainViewModel", "New locations: ${newLocations.map { it.location }}")
                 uiState =
                     uiState.copy(locations = newLocations, uiStatus = WeatherUIStatus.SUCCESS)
             } catch (e: Exception) {
+                Log.e("MainViewModel", "Error adding new favorite location", e)
                 uiState = uiState.copy(uiStatus = WeatherUIStatus.ERROR)
             }
         }
@@ -156,9 +148,15 @@ class MainViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 uiState = uiState.copy(uiStatus = WeatherUIStatus.LOADING)
-                locationDao.delete(location.toLocationEntity())
-                // uiState = uiState.copy(locations = newLocations)
+                locationDao.delete(location.englishName, location.countryCode)
+                val newLocations =
+                    uiState.locations.filter { locationWeather ->
+                        locationWeather.location != location
+                    }
+                uiState = uiState.copy(locations = newLocations)
+                Log.d("MainViewModel", "Removed favorite location: $location")
             } catch (e: Exception) {
+                Log.e("MainViewModel", "Error removing favorite location", e)
                 uiState = uiState.copy(uiStatus = WeatherUIStatus.ERROR)
             } finally {
                 uiState = uiState.copy(uiStatus = WeatherUIStatus.SUCCESS)

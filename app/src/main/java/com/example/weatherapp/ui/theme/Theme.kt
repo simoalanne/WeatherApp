@@ -41,7 +41,8 @@ fun WeatherAppTheme(
     val colorScheme = when {
         dynamicColor -> {
             val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            dynamicDarkColorScheme(context) // For now only dark theme is supported
+            // if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
 
         darkTheme -> DarkColorScheme

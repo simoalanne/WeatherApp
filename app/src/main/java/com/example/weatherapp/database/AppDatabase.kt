@@ -8,7 +8,7 @@ import com.example.weatherapp.model.LocationEntity
 
 // Magic code to create the database
 // Don't care how it works as long as it works
-@Database(entities = [LocationEntity::class], version = 1)
+@Database(entities = [LocationEntity::class], version = 2)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun locationDao(): LocationDao
 

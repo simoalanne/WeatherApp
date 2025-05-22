@@ -15,6 +15,6 @@ interface LocationDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun add(location: LocationEntity)
 
-    @Delete
-    suspend fun delete(location: LocationEntity)
+    @Query("DELETE FROM locations WHERE englishName = :englishName AND countryCode = :countryCode")
+    suspend fun delete(englishName: String, countryCode: String)
 }
