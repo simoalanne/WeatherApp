@@ -71,4 +71,5 @@
     <string name="locate_me">Locate me</string>
     <string name="navigate_to_search">Browse cities</string>
     <string name="favorite_locations">Favorites</string>
+    <string name="no_locations">No locations to display</string>
 </resources>

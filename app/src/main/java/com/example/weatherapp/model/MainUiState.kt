@@ -1,9 +1,12 @@
 package com.example.weatherapp.model
 
 data class MainUiState(
-    val locations: List<LocationWeather> = emptyList(),
-    val currentLocation: LocationWeather? = null,
-    val uiStatus: WeatherUIStatus = WeatherUIStatus.LOADING,
+    val favoriteLocations: List<LocationWeather> = emptyList(),
+    val previewLocation: LocationWeather? = null,
+    val isLoading: Boolean = true,
+    val isRefreshing: Boolean = false,
+    val errorResId: Int? = null,
+    val pageIndex: Int = 0,
 )
 
 /**
@@ -33,12 +36,4 @@ enum class LocationRole {
     USER,
     FAVORITE,
     PREVIEW
-}
-
-enum class WeatherUIStatus {
-    LOADING,
-    REFRESHING,
-    SUCCESS,
-    EMPTY,
-    ERROR
 }

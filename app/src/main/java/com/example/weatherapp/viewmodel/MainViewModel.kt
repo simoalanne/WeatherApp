@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.weatherapp.BuildConfig
+import com.example.weatherapp.R
 import com.example.weatherapp.database.LocationDao
 import com.example.weatherapp.model.toLocationAndRole
 import com.example.weatherapp.location.LocationService
@@ -16,7 +17,6 @@ import com.example.weatherapp.model.LocationData
 import com.example.weatherapp.model.LocationRole
 import com.example.weatherapp.model.LocationWeather
 import com.example.weatherapp.model.MainUiState
-import com.example.weatherapp.model.WeatherUIStatus
 import com.example.weatherapp.model.toLocationEntity
 import com.example.weatherapp.utils.fetchWeatherDataForCoordinates
 import kotlinx.coroutines.async
@@ -52,7 +52,7 @@ class MainViewModel : ViewModel() {
     fun loadInitialData() {
         viewModelScope.launch {
             try {
-                uiState = uiState.copy(uiStatus = WeatherUIStatus.LOADING)
+                uiState = uiState.copy(isLoading = true, errorResId = null)
                 val userLocationDeferred =
                     async { runCatching { locationService.getUserLocation() }.getOrNull() }
                 val savedLocationsDeferred = async { locationDao.getAll() }
@@ -71,75 +71,79 @@ class MainViewModel : ViewModel() {
                     }
                 }.awaitAll()
                 uiState = if (locations.isEmpty()) {
-                    uiState.copy(uiStatus = WeatherUIStatus.EMPTY)
+                    uiState.copy(errorResId = R.string.no_locations)
                 } else {
                     uiState.copy(
-                        uiStatus = WeatherUIStatus.SUCCESS,
-                        locations = locations,
-                        currentLocation = locations.first()
+                        favoriteLocations = locations
                     )
                 }
-                Log.d("MainViewModel", "Initial data loaded: $uiState")
             } catch (e: Exception) {
                 Log.e("MainViewModel", "Error loading initial data", e)
                 uiState =
-                    uiState.copy(uiStatus = WeatherUIStatus.ERROR)
-            } catch (e: SecurityException) {
-                Log.e("MainViewModel", "Error loading initial data", e)
-                uiState =
-                    uiState.copy(uiStatus = WeatherUIStatus.ERROR)
+                    uiState.copy(errorResId = R.string.something_went_wrong)
+            } finally {
+                uiState = uiState.copy(isLoading = false)
             }
         }
     }
 
     fun addFavoriteLocation(locationData: LocationData) {
-        if (uiState.locations.any { it.location == locationData }) {
-            Log.e(
-                "MainViewModel",
-                "Location already exists in list as: ${uiState.locations.find { it.location == locationData }}"
-            )
+        if (uiState.favoriteLocations.any { it.location == locationData }) {
+            Log.e("MainViewModel", "Location already in favorites: $locationData")
             return
         }
 
         viewModelScope.launch {
             try {
-                uiState = uiState.copy(uiStatus = WeatherUIStatus.LOADING)
+                uiState = uiState.copy(isLoading = true, errorResId = null)
                 locationDao.add(locationData.toLocationEntity())
                 val weatherData = fetchWeatherDataForCoordinates(
                     Coordinates(locationData.lat, locationData.lon)
                 )
-                val newLocations = uiState.locations + LocationWeather(
+                val newLocations = uiState.favoriteLocations + LocationWeather(
                     locationData,
                     weatherData,
                     LocationRole.FAVORITE
                 )
-                Log.d("MainViewModel", "New locations: ${newLocations.map { it.location }}")
                 uiState =
-                    uiState.copy(locations = newLocations, uiStatus = WeatherUIStatus.SUCCESS)
+                    uiState.copy(favoriteLocations = newLocations)
             } catch (e: Exception) {
                 Log.e("MainViewModel", "Error adding new favorite location", e)
-                uiState = uiState.copy(uiStatus = WeatherUIStatus.ERROR)
+                uiState = uiState.copy(errorResId = R.string.something_went_wrong)
+            } finally {
+                uiState = uiState.copy(isLoading = false)
             }
         }
     }
 
-    fun refreshCurrentLocation() {
-        Log.d("MainViewModel", "Refreshing current location")
+    fun refreshWeather(index: Int = 0) {
         viewModelScope.launch {
             try {
-                uiState = uiState.copy(uiStatus = WeatherUIStatus.REFRESHING)
-                val currentLocation = uiState.currentLocation
-                if (currentLocation != null) {
+                uiState = uiState.copy(isRefreshing = true, errorResId = null)
+                val target =
+                    if (uiState.previewLocation != null) uiState.previewLocation else uiState.favoriteLocations[index]
+                if (target != null) {
                     val weatherData = fetchWeatherDataForCoordinates(
-                        Coordinates(currentLocation.location.lat, currentLocation.location.lon)
+                        Coordinates(target.location.lat, target.location.lon)
                     )
-                    uiState =
-                        uiState.copy(currentLocation = currentLocation.copy(weather = weatherData))
+                    uiState = if (uiState.previewLocation != null) {
+                        uiState.copy()
+                    } else {
+                        uiState.copy(
+                            favoriteLocations = uiState.favoriteLocations.map {
+                                if (it == target) {
+                                    it.copy(weather = weatherData)
+                                } else {
+                                    it
+                                }
+                            }
+                        )
+                    }
                 }
             } catch (e: Exception) {
-                uiState = uiState.copy(uiStatus = WeatherUIStatus.ERROR)
+                uiState = uiState.copy(errorResId = R.string.something_went_wrong)
             } finally {
-                uiState = uiState.copy(uiStatus = WeatherUIStatus.SUCCESS)
+                uiState = uiState.copy(isRefreshing = false)
             }
         }
     }
@@ -147,58 +151,50 @@ class MainViewModel : ViewModel() {
     fun removeFavoriteLocation(location: LocationData) {
         viewModelScope.launch {
             try {
-                uiState = uiState.copy(uiStatus = WeatherUIStatus.LOADING)
+                uiState = uiState.copy(isLoading = true, errorResId = null)
                 locationDao.delete(location.englishName, location.countryCode)
                 val newLocations =
-                    uiState.locations.filter { locationWeather ->
+                    uiState.favoriteLocations.filter { locationWeather ->
                         locationWeather.location != location
                     }
-                uiState = uiState.copy(locations = newLocations)
+                uiState = uiState.copy(favoriteLocations = newLocations)
                 Log.d("MainViewModel", "Removed favorite location: $location")
             } catch (e: Exception) {
                 Log.e("MainViewModel", "Error removing favorite location", e)
-                uiState = uiState.copy(uiStatus = WeatherUIStatus.ERROR)
+                uiState = uiState.copy(errorResId = R.string.something_went_wrong)
             } finally {
-                uiState = uiState.copy(uiStatus = WeatherUIStatus.SUCCESS)
+                uiState = uiState.copy(isLoading = false)
             }
         }
     }
 
     fun previewLocation(locationData: LocationData) {
-        Log.d("MainViewModel", "Previewing location: $locationData")
         try {
             viewModelScope.launch {
-                uiState = uiState.copy(uiStatus = WeatherUIStatus.LOADING)
+                uiState = uiState.copy(isLoading = true, errorResId = null)
                 val weatherData = fetchWeatherDataForCoordinates(
                     Coordinates(locationData.lat, locationData.lon)
                 )
                 uiState = uiState.copy(
-                    currentLocation = LocationWeather(
+                    previewLocation = LocationWeather(
                         locationData,
                         weatherData,
                         LocationRole.PREVIEW
-                    ),
-                    uiStatus = WeatherUIStatus.SUCCESS
+                    )
                 )
             }
         } catch (_: Exception) {
-            uiState = uiState.copy(uiStatus = WeatherUIStatus.ERROR)
+            uiState = uiState.copy(errorResId = R.string.something_went_wrong)
+        } finally {
+            uiState = uiState.copy(isLoading = false)
         }
     }
 
-    fun changeCurrentLocation(index: Int) {
-        Log.d("MainViewModel", "Changing current location to: $index")
-        try {
-            uiState = uiState.copy(currentLocation = uiState.locations[index])
-        } catch (_: IndexOutOfBoundsException) {
-            Log.e(
-                "MainViewModel",
-                "Invalid index. Expected 0 - ${uiState.locations.size - 1}, got $index"
-            )
-            uiState = uiState.copy(uiStatus = WeatherUIStatus.ERROR)
-        }
+    fun changePageIndex(index: Int) {
+        uiState = uiState.copy(pageIndex = index, previewLocation = null)
     }
 
+    /*
     fun locateUser() {
         Log.d("MainViewModel", "Locating user")
         viewModelScope.launch {
@@ -227,5 +223,5 @@ class MainViewModel : ViewModel() {
                 uiState = uiState.copy(uiStatus = WeatherUIStatus.ERROR)
             }
         }
-    }
+    } */
 }

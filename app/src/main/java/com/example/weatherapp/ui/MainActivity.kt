@@ -56,8 +56,6 @@ class MainActivity : ComponentActivity() {
 
                     mainVm.loadInitialData()
                     settingsVm.loadSettings()
-                    Log.d("MainActivity", "onCreate: ${mainVm.uiState.locations}")
-
                 }
                 Surface(
                     modifier = Modifier.fillMaxSize(),
