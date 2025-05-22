@@ -1,12 +1,9 @@
 package com.example.weatherapp.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Arrangement.Absolute.spacedBy
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Language
@@ -22,7 +19,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -33,13 +29,20 @@ import com.example.weatherapp.model.TempUnit
 import com.example.weatherapp.model.TimeFormat
 import com.example.weatherapp.ui.composables.CountryFlag
 import com.example.weatherapp.ui.composables.DropdownMenu
+import com.example.weatherapp.ui.composables.DropdownOption
+import com.example.weatherapp.ui.composables.IconWithBackground
 import com.example.weatherapp.utils.changeAppLanguage
 import com.example.weatherapp.utils.getAppLanguage
+import com.example.weatherapp.viewmodel.MainViewModel
 import com.example.weatherapp.viewmodel.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(navController: NavController, settingsViewModel: SettingsViewModel) {
+fun SettingsScreen(
+    navController: NavController,
+    settingsViewModel: SettingsViewModel,
+    mainViewModel: MainViewModel
+) {
     val settingsState = settingsViewModel.settingsState
     val context = LocalContext.current
     val currentLanguage = getAppLanguage(context)
@@ -73,109 +76,66 @@ fun SettingsScreen(navController: NavController, settingsViewModel: SettingsView
             verticalArrangement = spacedBy(24.dp)
         ) {
             DropdownMenu(
-                label = Pair(
-                    stringResource(R.string.app_language),
-                    {
-                        Box(
-                            modifier = Modifier
-                                .clip(MaterialTheme.shapes.medium)
-                                .background(Color.Blue)
-                                .padding(4.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Language,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onBackground
-                            )
-                        }
-                    }
-                ), options = listOf(
-                    Triple(
-                        stringResource(R.string.english),
-                        "en",
-                        {
-                            CountryFlag("gb")
-                        }),
-                    Triple(
-                        stringResource(R.string.finnish),
-                        "fi",
-                        {
-                            CountryFlag("fi")
-                        })
+                label = stringResource(R.string.app_language),
+                leadingIcon = {
+                    IconWithBackground(
+                        icon = Icons.Default.Language,
+                        backgroundColor = Color.Blue
+                    )
+                },
+                options = listOf(
+                    DropdownOption(
+                        label = stringResource(R.string.english),
+                        value = "en",
+                        trailingIcon = { CountryFlag("gb") }
+                    ),
+                    DropdownOption(
+                        label = stringResource(R.string.finnish),
+                        value = "fi",
+                        trailingIcon = { CountryFlag("fi") }
+                    )
                 ),
                 selectedOption = currentLanguage,
                 onOptionSelected = {
                     changeAppLanguage(context, it)
                 }
             )
+
             DropdownMenu(
-                label = Pair(
-                    stringResource(R.string.temperature_unit),
-                    {
-                        Box(
-                            modifier = Modifier
-                                .clip(MaterialTheme.shapes.medium)
-                                .background(Color(255, 140, 0))
-                                .padding(4.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Thermostat,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onBackground
-                            )
-                        }
-                    }
-                ),
-                options = listOf(
-                    Triple(
-                        "Celsius (°C)",
-                        TempUnit.CELSIUS,
-                        {}
-                    ),
-                    Triple(
-                        "Fahrenheit (°F)",
-                        TempUnit.FAHRENHEIT
-                    ) {},
-                    Triple(
-                        "Kelvin (K)",
-                        TempUnit.KELVIN,
-                        {}
+                label = stringResource(R.string.temperature_unit),
+                leadingIcon = {
+                    IconWithBackground(
+                        icon = Icons.Default.Thermostat,
+                        backgroundColor = Color(255, 140, 0)
                     )
+                },
+                options = listOf(
+                    DropdownOption("Celsius (°C)", TempUnit.CELSIUS),
+                    DropdownOption("Fahrenheit (°F)", TempUnit.FAHRENHEIT),
+                    DropdownOption("Kelvin (K)", TempUnit.KELVIN)
                 ),
                 selectedOption = settingsState.tempUnit,
                 onOptionSelected = {
                     settingsViewModel.setTempUnit(it)
                 }
             )
-            DropdownMenu(
-                label = Pair(
-                    stringResource(R.string.time_format),
-                    {
-                        Box(
-                            modifier = Modifier
-                                .clip(MaterialTheme.shapes.medium)
-                                .background(Color.DarkGray)
-                                .padding(4.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Timer,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onBackground
 
-                            )
-                        }
-                    }
-                ),
+            DropdownMenu(
+                label = stringResource(R.string.time_format),
+                leadingIcon = {
+                    IconWithBackground(
+                        icon = Icons.Default.Timer,
+                        backgroundColor = Color.DarkGray
+                    )
+                },
                 options = listOf(
-                    Triple(
+                    DropdownOption(
                         stringResource(R.string.twelve_hour_format),
-                        TimeFormat.TWELVE_HOUR,
-                        {}
+                        TimeFormat.TWELVE_HOUR
                     ),
-                    Triple(
+                    DropdownOption(
                         stringResource(R.string.twenty_four_hour_format),
-                        TimeFormat.TWENTY_FOUR_HOUR,
-                        {}
+                        TimeFormat.TWENTY_FOUR_HOUR
                     )
                 ),
                 selectedOption = settingsState.timeFormat,
