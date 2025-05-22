@@ -98,7 +98,7 @@ class MainActivity : ComponentActivity() {
                             SearchScreen(navController, mainVm, searchScreenVm)
                         }
                         composable("settings") {
-                            SettingsScreen(navController, settingsVm)
+                            SettingsScreen(navController, settingsVm, mainVm)
                         }
                     }
                 }
