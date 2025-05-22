@@ -70,4 +70,5 @@
     <string name="locate_me">Paikanna minut</string>
     <string name="navigate_to_search">Selaa kaupunkeja</string>
     <string name="favorite_locations">Suosikit</string>
+    <string name="no_locations">No locations to display</string>
 </resources>

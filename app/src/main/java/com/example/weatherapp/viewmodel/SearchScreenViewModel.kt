@@ -63,6 +63,6 @@ class SearchScreenViewModel : ViewModel() {
     }
 
     fun clearLocations() {
-        uiState = uiState.copy(searchResult = null)
+        uiState = uiState.copy(searchResult = null, errorRecourseId = null)
     }
 }

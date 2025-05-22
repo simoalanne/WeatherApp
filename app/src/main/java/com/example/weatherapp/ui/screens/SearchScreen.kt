@@ -60,11 +60,11 @@ fun SearchScreen(
     val error = searchScreenVm.uiState.errorRecourseId
     val languageCode = rememberCurrentLanguageCode()
 
-    LaunchedEffect(mainViewModel.uiState.currentLocation) {
+    LaunchedEffect(mainViewModel.uiState.previewLocation) {
         if (isInitialLoad) {
             searchScreenVm.clearLocations()
             isInitialLoad = false
-        } else if (mainViewModel.uiState.currentLocation != null) {
+        } else if (mainViewModel.uiState.previewLocation != null) {
             navController.popBackStack()
         }
     }
@@ -83,7 +83,7 @@ fun SearchScreen(
                 containerColor = Color.Transparent
             ), navigationIcon = {
                 IconButton(onClick = {
-                    if (mainViewModel.uiState.currentLocation != null) {
+                    if (mainViewModel.uiState.errorResId != null) {
                         navController.popBackStack()
                     }
                 }) {
@@ -154,8 +154,16 @@ fun SearchScreen(
                 }
             }
             FavoriteLocationsList(
-                favoriteLocations = mainViewModel.uiState.locations.map { LocationAndRole(it.location, it.role) },
-                onLocationPress = { index -> mainViewModel.changeCurrentLocation(index) },
+                favoriteLocations = mainViewModel.uiState.favoriteLocations.map {
+                    LocationAndRole(
+                        it.location,
+                        it.role
+                    )
+                },
+                onLocationPress = { index ->
+                    mainViewModel.changePageIndex(index)
+                    navController.navigate("weather")
+                },
                 onLocationDelete = { location -> mainViewModel.removeFavoriteLocation(location.location) }
             )
         }
