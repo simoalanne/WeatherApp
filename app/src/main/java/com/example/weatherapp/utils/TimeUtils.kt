@@ -1,6 +1,8 @@
 package com.example.weatherapp.utils
 
 import android.util.Log
+import com.example.weatherapp.model.TimeFormat
+import com.example.weatherapp.viewmodel.AppPreferences
 import java.time.*
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
@@ -50,9 +52,9 @@ fun getHoursBetweenTwoLocalDates(a: LocalDateTime, b: LocalDateTime): Int {
 
 fun formatLocalDateTime(
     dateTime: LocalDateTime,
-    use24HourFormat: Boolean = true,
     accuracy: String = "minutes"
 ): String {
+    val use24HourFormat = AppPreferences.preferences.timeFormat == TimeFormat.TWENTY_FOUR_HOUR
     val minute = dateTime.minute.toString().padStart(2, '0')
     val second = dateTime.second.toString().padStart(2, '0')
 
@@ -62,7 +64,7 @@ fun formatLocalDateTime(
     } else {
         val hour = dateTime.hour % 12
         val hourFormatted = if (hour == 0) 12 else hour
-        val amPm = if (dateTime.hour < 12) "am" else "pm"
+        val amPm = if (dateTime.hour < 12) "AM" else "PM"
         val base = "$hourFormatted:$minute $amPm"
         if (accuracy == "seconds") "$hourFormatted:$minute:$second $amPm" else base
     }
@@ -98,14 +100,12 @@ fun formatDate(
  * Returns the current time at one second accuracy with the given timezone offset.
  *
  * @param timezoneOffset the timezone offset in seconds
- * @param use24HourFormat whether to use 24 hour format or 12 hour format
  * @return formatted time string with the given timezone offset
  */
-fun getTimeAtOffset(timezoneOffset: Int = 0, use24HourFormat: Boolean = true): String {
+fun getTimeAtOffset(timezoneOffset: Int = 0): String {
     val now = LocalDateTime.now(ZoneOffset.UTC).plusSeconds(timezoneOffset.toLong())
     return formatLocalDateTime(
         dateTime = now,
-        use24HourFormat = use24HourFormat,
         accuracy = "seconds"
     )
 }

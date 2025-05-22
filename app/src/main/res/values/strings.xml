@@ -9,7 +9,7 @@
     <string name="search_for_city">Search for city or location</string>
     <string name="manage_cities">Manage cities</string>
     <string name="search">Search</string>
-    <string name="settings">settings</string>
+    <string name="settings">Settings</string>
     <string name="now">Now</string>
     <string name="feels_like">Feels like</string>
     <string name="humidity">Humidity</string>
@@ -72,4 +72,12 @@
     <string name="navigate_to_search">Browse cities</string>
     <string name="favorite_locations">Favorites</string>
     <string name="no_locations">No locations to display</string>
+    <string name="app_language">App language</string>
+    <string name="english">English</string>
+    <string name="finnish">Finnish</string>
+    <string name="selected">Selected</string>
+    <string name="temperature_unit">Temperature unit</string>
+    <string name="twelve_hour_format">12-hour clock</string>
+    <string name="twenty_four_hour_format">24-hour clock</string>
+    <string name="time_format">Time format</string>
 </resources>

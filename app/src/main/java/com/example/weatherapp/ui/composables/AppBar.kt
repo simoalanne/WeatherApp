@@ -29,7 +29,8 @@ fun AppBar(
     lastUpdated: String,
     timezoneOffset: Int,
     collapseHeader: Boolean,
-    onSearchIconPress: () -> Unit
+    onSearchIconPress: () -> Unit,
+    onSettingsIconPress: () -> Unit
 ) {
     var currentTime = rememberCurrentTime(timezoneOffset)
     Row(
@@ -61,7 +62,7 @@ fun AppBar(
             IconButton(onClick = onSearchIconPress) {
                 Icon(Icons.Default.Search, tint = Color.White, contentDescription = stringResource(R.string.search))
             }
-            IconButton(onClick = { /* TODO */ }) {
+            IconButton(onClick = onSettingsIconPress) {
                 Icon(
                     Icons.Default.Settings,
                     tint = Color.White,

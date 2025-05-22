@@ -58,6 +58,7 @@ class MainViewModel : ViewModel() {
                 val savedLocationsDeferred = async { locationDao.getAll() }
 
                 val userLocation = userLocationDeferred.await()
+                Log.d("MainViewModel", "User location: $userLocation")
                 val userLocationRole = userLocation?.let { LocationAndRole(it, LocationRole.USER) }
 
                 val savedLocations =
@@ -67,9 +68,10 @@ class MainViewModel : ViewModel() {
                         val weatherData = fetchWeatherDataForCoordinates(
                             Coordinates(it.location.lat, it.location.lon)
                         )
+                        if (weatherData == null) return@async null
                         LocationWeather(it.location, weatherData, it.role)
                     }
-                }.awaitAll()
+                }.awaitAll().filterNotNull()
                 uiState = if (locations.isEmpty()) {
                     uiState.copy(errorResId = R.string.no_locations)
                 } else {
@@ -78,7 +80,7 @@ class MainViewModel : ViewModel() {
                     )
                 }
             } catch (e: Exception) {
-                Log.e("MainViewModel", "Error loading initial data", e)
+                Log.e("MainViewModel", "Error loading initial data ${e.message}")
                 uiState =
                     uiState.copy(errorResId = R.string.something_went_wrong)
             } finally {
@@ -102,7 +104,7 @@ class MainViewModel : ViewModel() {
                 )
                 val newLocations = uiState.favoriteLocations + LocationWeather(
                     locationData,
-                    weatherData,
+                    weatherData!!,
                     LocationRole.FAVORITE
                 )
                 uiState =
@@ -132,7 +134,7 @@ class MainViewModel : ViewModel() {
                         uiState.copy(
                             favoriteLocations = uiState.favoriteLocations.map {
                                 if (it == target) {
-                                    it.copy(weather = weatherData)
+                                    it.copy(weather = weatherData!!)
                                 } else {
                                     it
                                 }
@@ -178,7 +180,7 @@ class MainViewModel : ViewModel() {
                 uiState = uiState.copy(
                     previewLocation = LocationWeather(
                         locationData,
-                        weatherData,
+                        weatherData!!,
                         LocationRole.PREVIEW
                     )
                 )
