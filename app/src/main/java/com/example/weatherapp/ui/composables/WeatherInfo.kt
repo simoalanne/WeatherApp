@@ -13,6 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.weatherapp.utils.formatTemp
+import com.example.weatherapp.viewmodel.AppPreferences
 
 @Composable
 fun WeatherInfo(
@@ -20,7 +21,6 @@ fun WeatherInfo(
     min: Double,
     max: Double,
     condition: String,
-    round: Boolean = true
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -35,13 +35,15 @@ fun WeatherInfo(
             modifier = Modifier.offset(x = 15.dp)
         ) {
             Text(
-                formatTemp(current, round, false),
+                formatTemp(current, addUnit = false),
                 fontSize = 90.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White
             )
             Text(
-                "°",
+                if (AppPreferences.preferences.tempUnit == com.example.weatherapp.model.TempUnit.KELVIN) {
+                    "K"
+                } else "°",
                 fontSize = 60.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
@@ -49,7 +51,7 @@ fun WeatherInfo(
             )
         }
         Text(
-            "$condition ${formatTemp(min, round)} / ${formatTemp(max, round)}",
+            "$condition ${formatTemp(min)} / ${formatTemp(max)}",
             fontSize = 18.sp,
             color = Color.White
         )

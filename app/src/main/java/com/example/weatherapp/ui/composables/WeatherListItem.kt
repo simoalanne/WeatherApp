@@ -19,6 +19,11 @@ fun WeatherListItem(formattedTime: String, iconResId: Int, temperature: Double) 
     ) {
         Text(formattedTime, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
         ResImage(iconResId, width = 20, height = 20)
-        Text(formatTemp(temperature), fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
+        Text(
+            formatTemp(temperature),
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White
+        )
     }
 }

@@ -9,6 +9,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,6 +26,7 @@ import androidx.compose.runtime.LaunchedEffect
 import com.example.weatherapp.MyApplication
 import com.example.weatherapp.location.LocationService
 import com.example.weatherapp.settingsDataStore
+import com.example.weatherapp.ui.screens.SettingsScreen
 import com.example.weatherapp.viewmodel.MainViewModel
 import com.example.weatherapp.viewmodel.SearchScreenViewModel
 import com.example.weatherapp.viewmodel.SettingsViewModel
@@ -59,7 +61,7 @@ class MainActivity : ComponentActivity() {
                 }
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = Color.Black
+                    color = Color.Transparent
                 ) {
                     NavHost(
                         navController = navController,
@@ -90,10 +92,13 @@ class MainActivity : ComponentActivity() {
                         }
                     ) {
                         composable("weather") {
-                            WeatherScreen(navController, mainVm, settingsVm)
+                            WeatherScreen(navController, mainVm)
                         }
                         composable("search") {
-                            SearchScreen(navController, mainVm, searchScreenVm, settingsVm)
+                            SearchScreen(navController, mainVm, searchScreenVm)
+                        }
+                        composable("settings") {
+                            SettingsScreen(navController, settingsVm)
                         }
                     }
                 }

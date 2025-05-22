@@ -1,5 +1,6 @@
 package com.example.weatherapp.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement.Absolute.spacedBy
 import androidx.compose.foundation.layout.Box
@@ -51,7 +52,6 @@ fun SearchScreen(
     navController: NavController,
     mainViewModel: MainViewModel,
     searchScreenVm: SearchScreenViewModel,
-    settingsVm: SettingsViewModel
 ) {
     var query by remember { mutableStateOf("") }
     var isInitialLoad by remember { mutableStateOf(true) }
@@ -59,7 +59,6 @@ fun SearchScreen(
     var currentSearchResult by remember { mutableStateOf<LocationData?>(null) }
     val error = searchScreenVm.uiState.errorRecourseId
     val languageCode = rememberCurrentLanguageCode()
-
     LaunchedEffect(mainViewModel.uiState.previewLocation) {
         if (isInitialLoad) {
             searchScreenVm.clearLocations()
@@ -83,7 +82,7 @@ fun SearchScreen(
                 containerColor = Color.Transparent
             ), navigationIcon = {
                 IconButton(onClick = {
-                    if (mainViewModel.uiState.errorResId != null) {
+                    if (mainViewModel.uiState.favoriteLocations.isNotEmpty()) {
                         navController.popBackStack()
                     }
                 }) {

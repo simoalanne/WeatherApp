@@ -22,6 +22,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.ui.res.stringResource
 import com.example.weatherapp.R
 import com.example.weatherapp.model.DailyWeather
+import com.example.weatherapp.utils.formatTemp
 import com.example.weatherapp.utils.rememberCurrentLocale
 
 @Composable
@@ -64,8 +65,8 @@ fun DailyForecastItem(
                 modifier = Modifier.weight(0.45f)
             ) {
                 ResImage(dominantIcon)
-                val minTempStr = "${minTemp.roundToInt()}°"
-                val maxTempStr = "${maxTemp.roundToInt()}°"
+                val minTempStr = formatTemp(minTemp)
+                val maxTempStr = formatTemp(maxTemp)
                 Text(
                     text = "$minTempStr / $maxTempStr",
                     fontSize = 14.sp,

@@ -13,7 +13,10 @@ android {
 
     defaultConfig {
         applicationId = "com.example.weatherapp"
-        minSdk = 31
+        // minSdk should be 33 because that makes app language switching much easier and possible
+        // via system settings. That way don't have to override locale on app launch. Additionally
+        // the Geocoder API this app uses no longer needs fallback code for older versions.
+        minSdk = 33
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"

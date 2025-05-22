@@ -15,8 +15,10 @@
         android:label="@string/app_name"
         android:roundIcon="@drawable/few_clouds_day"
         android:supportsRtl="true"
-        android:theme="@style/Theme.WeatherApp">
+        android:theme="@style/Theme.WeatherApp"
+        android:localeConfig="@xml/locales_config">
         <activity
+            android:configChanges="layoutDirection|locale"
             android:name="com.example.weatherapp.ui.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.WeatherApp">

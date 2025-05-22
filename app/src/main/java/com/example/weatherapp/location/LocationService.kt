@@ -134,41 +134,26 @@ class LocationService(context: Context) {
      */
     private suspend fun Geocoder.performGeocodeAction(action: GeocodeAction): Address? =
         withContext(Dispatchers.IO) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                suspendCancellableCoroutine { continuation ->
-                    val listener = object : Geocoder.GeocodeListener {
-                        override fun onGeocode(results: MutableList<Address>) {
-                            continuation.resumeWith(Result.success(results.firstOrNull()))
-                        }
-
-                        override fun onError(errorMessage: String?) {
-                            continuation.resumeWithException(
-                                GeocodingException(GeocodingErrorCode.GEOCODING_FAILURE)
-                            )
-                        }
+            suspendCancellableCoroutine { continuation ->
+                val listener = object : Geocoder.GeocodeListener {
+                    override fun onGeocode(results: MutableList<Address>) {
+                        continuation.resumeWith(Result.success(results.firstOrNull()))
                     }
-                    when (action) {
-                        is GeocodeAction.Forward -> {
-                            getFromLocationName(action.locationName, 1, listener)
-                        }
 
-                        is GeocodeAction.Reverse -> {
-                            getFromLocation(action.lat, action.lon, 1, listener)
-                        }
+                    override fun onError(errorMessage: String?) {
+                        continuation.resumeWithException(
+                            GeocodingException(GeocodingErrorCode.GEOCODING_FAILURE)
+                        )
                     }
                 }
-            } else {
-                @Suppress("DEPRECATION")
-                try {
-                    when (action) {
-                        is GeocodeAction.Forward ->
-                            getFromLocationName(action.locationName, 1)?.firstOrNull()
-
-                        is GeocodeAction.Reverse ->
-                            getFromLocation(action.lat, action.lon, 1)?.firstOrNull()
+                when (action) {
+                    is GeocodeAction.Forward -> {
+                        getFromLocationName(action.locationName, 1, listener)
                     }
-                } catch (_: IOException) {
-                    throw GeocodingException(GeocodingErrorCode.GEOCODING_FAILURE)
+
+                    is GeocodeAction.Reverse -> {
+                        getFromLocation(action.lat, action.lon, 1, listener)
+                    }
                 }
             }
         }

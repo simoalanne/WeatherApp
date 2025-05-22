@@ -65,7 +65,8 @@ fun WeatherPage(
                     .substring(0, 5),
                 timezoneOffset = currentWeather.meta.utcOffsetSeconds,
                 collapseHeader = scrollState.value > 150,
-                onSearchIconPress = { navController.navigate("search") }
+                onSearchIconPress = { navController.navigate("search") },
+                onSettingsIconPress = { navController.navigate("settings") }
             )
             PullToRefreshBox(
                 isRefreshing = isRefreshing,
@@ -85,8 +86,7 @@ fun WeatherPage(
                         current = currentWeather.current.temperature,
                         min = weather24Hours.minOf { it.temperature },
                         max = weather24Hours.maxOf { it.temperature },
-                        condition = stringResource(currentWeather.current.conditionId),
-                        round = true
+                        condition = stringResource(currentWeather.current.conditionId)
                     )
                     Margin(margin = 20)
                     Column(

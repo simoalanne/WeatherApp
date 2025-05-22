@@ -9,7 +9,7 @@
     <string name="search_for_city">Hae kaupunkia tai paikkaa</string>
     <string name="manage_cities">Hallitse kaupunkeja</string>
     <string name="search">Hae</string>
-    <string name="settings">asetukset</string>
+    <string name="settings">Asetukset</string>
     <string name="now">Nyt</string>
     <string name="feels_like">Tuntuu kuin</string>
     <string name="humidity">Kosteus</string>
@@ -71,4 +71,12 @@
     <string name="navigate_to_search">Selaa kaupunkeja</string>
     <string name="favorite_locations">Suosikit</string>
     <string name="no_locations">No locations to display</string>
+    <string name="app_language">Sovelluksen kieli</string>
+    <string name="english">Englanti</string>
+    <string name="finnish">Suomi</string>
+    <string name="selected">Selected</string>
+    <string name="temperature_unit">Lämpötilan yksikkö</string>
+    <string name="twelve_hour_format">12 tunnin kello</string>
+    <string name="twenty_four_hour_format">24 tunnin kello</string>
+    <string name="time_format">Aikaformaatti</string>
 </resources>
