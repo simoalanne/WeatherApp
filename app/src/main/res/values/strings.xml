@@ -6,7 +6,7 @@
     <string name="expand">expand</string>
     <string name="last_update">last updated</string>
     <string name="local_time">local time</string>
-    <string name="search_for_city">Search for city</string>
+    <string name="search_for_city">Search for city or location</string>
     <string name="manage_cities">Manage cities</string>
     <string name="search">Search</string>
     <string name="settings">settings</string>
@@ -60,7 +60,7 @@
     <!-- Error messages -->
     <string name="something_went_wrong">Something went wrong. Please try again.</string>
     <string name="city_name_cannot_be_empty">City name cannot be empty.</string>
-    <string name="no_results">No result found for the query!</string>
+    <string name="no_results">No city found. Check the spelling and try again.</string>
 
     <!-- Settings -->
     <string name="best_match">Best match</string>
@@ -70,4 +70,5 @@
     <string name="current_location_label">Current location</string>
     <string name="locate_me">Locate me</string>
     <string name="navigate_to_search">Browse cities</string>
+    <string name="favorite_locations">Favorites</string>
 </resources>

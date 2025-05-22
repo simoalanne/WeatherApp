@@ -29,7 +29,6 @@ import com.example.weatherapp.R
 import com.example.weatherapp.model.LocationWeather
 import com.example.weatherapp.utils.rememberCurrentLanguageCode
 
-// TODO: Terrible modularization should be refactored.
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun UserLocation(

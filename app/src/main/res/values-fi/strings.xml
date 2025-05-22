@@ -6,7 +6,7 @@
     <string name="expand">avaa</string>
     <string name="last_update">viimeksi päivitetty</string>
     <string name="local_time">paikallinen kellonaika</string>
-    <string name="search_for_city">Hae kaupunkia</string>
+    <string name="search_for_city">Hae kaupunkia tai paikkaa</string>
     <string name="manage_cities">Hallitse kaupunkeja</string>
     <string name="search">Hae</string>
     <string name="settings">asetukset</string>
@@ -59,7 +59,7 @@
     <!-- Virheviestit -->
     <string name="something_went_wrong">Jotain meni pieleen. Yritä uudelleen.</string>
     <string name="city_name_cannot_be_empty">Kaupungin nimi ei voi olla tyhjä.</string>
-    <string name="no_results">Ei tulosta haulle!</string>
+    <string name="no_results">Kaupunkia ei löytynyt. Tarkista oikeinkirjoitus ja yritä uudelleen.</string>
 
     <!-- Asetukset -->
     <string name="best_match">Paras osuma</string>
@@ -69,4 +69,5 @@
     <string name="current_location_label">Tämänhetkinen sijainti</string>
     <string name="locate_me">Paikanna minut</string>
     <string name="navigate_to_search">Selaa kaupunkeja</string>
+    <string name="favorite_locations">Suosikit</string>
 </resources>

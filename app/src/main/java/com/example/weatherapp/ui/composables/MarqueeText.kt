@@ -10,6 +10,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -67,8 +68,8 @@ fun MarqueeText(text: String, modifier: Modifier = Modifier) {
     ) {
         Text(
             text,
-            maxLines = 1, // don't allow text to wrap
-            color = Color.White,
+            maxLines = 1,
+            color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier
                 // allow text to overflow past the end of the row.
                 .wrapContentWidth(unbounded = true, align = Alignment.Start)
