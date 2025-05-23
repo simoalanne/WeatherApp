@@ -24,6 +24,7 @@ import androidx.navigation.NavController
 import com.example.weatherapp.ui.composables.SearchTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -58,13 +59,12 @@ fun SearchScreen(
     val searchResult = searchScreenVm.uiState.searchResult
     var currentSearchResult by remember { mutableStateOf<LocationData?>(null) }
     val error = searchScreenVm.uiState.errorRecourseId
-    val languageCode = rememberCurrentLanguageCode()
     LaunchedEffect(mainViewModel.uiState.previewLocation) {
         if (isInitialLoad) {
-            searchScreenVm.clearLocations()
             isInitialLoad = false
+            searchScreenVm.clearLocations()
         } else if (mainViewModel.uiState.previewLocation != null) {
-            navController.popBackStack()
+            navController.navigate("preview")
         }
     }
     Column(
@@ -92,7 +92,16 @@ fun SearchScreen(
                         contentDescription = stringResource(R.string.back)
                     )
                 }
-            })
+            }, actions = {
+                IconButton(onClick = { navController.navigate("settings") }) {
+                    Icon(
+                        Icons.Default.Settings,
+                        tint = MaterialTheme.colorScheme.onBackground,
+                        contentDescription = stringResource(R.string.settings)
+                    )
+                }
+            }
+        )
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -139,14 +148,20 @@ fun SearchScreen(
                             LocationItem(
                                 location = currentSearchResult,
                                 onLocationTap = {
-                                    mainViewModel.previewLocation(
-                                        searchResult
-                                    )
-                                },
-                                onLocationDoubleTap = {
-                                    mainViewModel.addFavoriteLocation(
-                                        searchResult
-                                    )
+                                    if (mainViewModel.uiState.previewLocation?.location == currentSearchResult) {
+                                        navController.navigate("preview")
+                                        return@LocationItem
+                                    }
+                                    val alreadyFavoriteIndex =
+                                        mainViewModel.uiState.favoriteLocations.indexOfFirst {
+                                            it.location.englishName == searchResult.englishName
+                                        }
+                                    if (alreadyFavoriteIndex != -1) {
+                                        mainViewModel.changePageIndex(alreadyFavoriteIndex)
+                                        navController.popBackStack()
+                                    } else {
+                                        mainViewModel.previewLocation(searchResult)
+                                    }
                                 }
                             )
                         })
@@ -161,7 +176,7 @@ fun SearchScreen(
                 },
                 onLocationPress = { index ->
                     mainViewModel.changePageIndex(index)
-                    navController.navigate("weather")
+                    navController.popBackStack()
                 },
                 onLocationDelete = { location -> mainViewModel.removeFavoriteLocation(location.location) }
             )
