@@ -31,49 +31,40 @@ fun FavoriteLocationsList(
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.verticalScroll(rememberScrollState())
     ) {
-        Text(
-            stringResource(R.string.favorite_locations),
-            color = MaterialTheme.colorScheme.onBackground,
-            style = MaterialTheme.typography.titleLarge
-        )
-        Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier.verticalScroll(rememberScrollState())
-        ) {
-            favoriteLocations.forEachIndexed { index, location ->
-                SwipeableItem(
-                    start = if (index % 2 == 0) Offset.LEFT else Offset.RIGHT,
-                    initialDelayMs = 450,
-                    contentKey = location,
-                    content = {
-                        LocationItem(
-                            location = location.location,
-                            onLocationTap = {
-                                onLocationPress(index)
-                            },
-                            leadingIcon = {
-                                if (location.role == LocationRole.FAVORITE) {
-                                    Icon(
-                                        imageVector = Icons.Default.Star,
-                                        contentDescription = null,
-                                        tint = Color.Yellow,
-                                        modifier = Modifier.clickable {
-                                            onLocationDelete(location)
-                                        }
-                                    )
-                                } else {
-                                    Icon(
-                                        imageVector = Icons.Default.LocationOn,
-                                        contentDescription = null,
-                                        tint = Color.Green
-                                    )
-                                }
+        favoriteLocations.forEachIndexed { index, location ->
+            SwipeableItem(
+                start = if (index % 2 == 0) Offset.LEFT else Offset.RIGHT,
+                initialDelayMs = 450,
+                contentKey = location,
+                content = {
+                    LocationItem(
+                        location = location.location,
+                        onLocationTap = {
+                            onLocationPress(index)
+                        },
+                        leadingIcon = {
+                            if (location.role == LocationRole.FAVORITE) {
+                                Icon(
+                                    imageVector = Icons.Default.Star,
+                                    contentDescription = null,
+                                    tint = Color.Yellow,
+                                    modifier = Modifier.clickable {
+                                        onLocationDelete(location)
+                                    }
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.LocationOn,
+                                    contentDescription = null,
+                                    tint = Color.Green
+                                )
                             }
-                        )
-                    }
-                )
-            }
+                        }
+                    )
+                }
+            )
         }
     }
 }

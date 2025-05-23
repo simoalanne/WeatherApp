@@ -84,7 +84,10 @@
     <string name="location_permissions_required_message">To show weather for your current location, please allow location access.</string>
     <string name="location_permissions_permanently_denied_message">Location access has been permanently denied. Please open the system settings and enable location accesss in order to see weather for your current location.</string>
     <string name="open_system_settings">Open system settings</string>
-    <string name="location_not_available">Location not available</string>
+    <string name="location_not_available">Location not available. Ensure that GPS is enabled and location permissions are granted.</string>
     <string name="update_location_manually">Update location manually</string>
     <string name="location_available_message">Location access granted. You\'re all set!</string>
+    <string name="no_locations_message">No favorites yet. Enable location access in settings or search for cities to add.</string>
+    <string name="open_settings">Open settings</string>
+    <string name="search_for_cities">Search for cities</string>
 </resources>
