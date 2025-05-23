@@ -26,6 +26,7 @@ import androidx.compose.runtime.LaunchedEffect
 import com.example.weatherapp.MyApplication
 import com.example.weatherapp.location.LocationService
 import com.example.weatherapp.settingsDataStore
+import com.example.weatherapp.ui.screens.PreviewWeatherScreen
 import com.example.weatherapp.ui.screens.SettingsScreen
 import com.example.weatherapp.viewmodel.MainViewModel
 import com.example.weatherapp.viewmodel.SearchScreenViewModel
@@ -67,12 +68,18 @@ class MainActivity : ComponentActivity() {
                         navController = navController,
                         startDestination = "weather",
                         enterTransition = {
+                            if (initialState.destination.route == "preview" && targetState.destination.route == "weather") {
+                                null
+                            }
                             slideInHorizontally(
                                 initialOffsetX = { it },
                                 animationSpec = tween(500)
                             )
                         },
                         exitTransition = {
+                            if (initialState.destination.route == "preview" && targetState.destination.route == "weather") {
+                                null
+                            }
                             slideOutHorizontally(
                                 targetOffsetX = { -it / 2 },
                                 animationSpec = tween(500)
@@ -93,6 +100,9 @@ class MainActivity : ComponentActivity() {
                     ) {
                         composable("weather") {
                             WeatherScreen(navController, mainVm)
+                        }
+                        composable("preview") {
+                            PreviewWeatherScreen(navController, mainVm)
                         }
                         composable("search") {
                             SearchScreen(navController, mainVm, searchScreenVm)

@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -26,13 +27,11 @@ import com.example.weatherapp.R
 @Composable
 fun AppBar(
     title: String,
-    lastUpdated: String,
-    timezoneOffset: Int,
-    collapseHeader: Boolean,
     onSearchIconPress: () -> Unit,
-    onSettingsIconPress: () -> Unit
+    onSettingsIconPress: () -> Unit,
+    totalPages: Int = 0,
+    currentPage: Int = 0,
 ) {
-    var currentTime = rememberCurrentTime(timezoneOffset)
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -40,7 +39,7 @@ fun AppBar(
             .padding(horizontal = 16.dp)
             .animateContentSize(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = if (collapseHeader) Alignment.CenterVertically else Alignment.Top
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Column(
             modifier = Modifier.weight(0.75f)
@@ -48,11 +47,10 @@ fun AppBar(
             Text(
                 text = title,
                 color = Color.White,
-                fontSize = if (collapseHeader) 14.sp else 20.sp
+                style = MaterialTheme.typography.titleMedium
             )
-            if (!collapseHeader) {
-                Text(text = "${stringResource(R.string.last_update)}: $lastUpdated", color = Color.White, fontSize = 12.sp)
-                Text(text = "${stringResource(R.string.local_time)}: $currentTime", color = Color.White, fontSize = 12.sp)
+            if (totalPages > 1) {
+                PageIndicator(currentPage, totalPages)
             }
         }
 
@@ -60,7 +58,11 @@ fun AppBar(
             modifier = Modifier.weight(0.25f),
         ) {
             IconButton(onClick = onSearchIconPress) {
-                Icon(Icons.Default.Search, tint = Color.White, contentDescription = stringResource(R.string.search))
+                Icon(
+                    Icons.Default.Search,
+                    tint = Color.White,
+                    contentDescription = stringResource(R.string.search)
+                )
             }
             IconButton(onClick = onSettingsIconPress) {
                 Icon(
@@ -71,7 +73,7 @@ fun AppBar(
             }
         }
     }
-    if (collapseHeader) HorizontalDivider(
+    HorizontalDivider(
         color = Color.White.copy(alpha = 0.5f),
         thickness = 0.5f.dp
     )

@@ -80,4 +80,11 @@
     <string name="twelve_hour_format">12-hour clock</string>
     <string name="twenty_four_hour_format">24-hour clock</string>
     <string name="time_format">Time format</string>
+    <string name="current_location">Current location</string>
+    <string name="location_permissions_required_message">To show weather for your current location, please allow location access.</string>
+    <string name="location_permissions_permanently_denied_message">Location access has been permanently denied. Please open the system settings and enable location accesss in order to see weather for your current location.</string>
+    <string name="open_system_settings">Open system settings</string>
+    <string name="location_not_available">Location not available</string>
+    <string name="update_location_manually">Update location manually</string>
+    <string name="location_available_message">Location access granted. You\'re all set!</string>
 </resources>

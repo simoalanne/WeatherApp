@@ -21,6 +21,7 @@ import com.example.weatherapp.model.toLocationEntity
 import com.example.weatherapp.utils.fetchWeatherDataForCoordinates
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
@@ -72,11 +73,15 @@ class MainViewModel : ViewModel() {
                         LocationWeather(it.location, weatherData, it.role)
                     }
                 }.awaitAll().filterNotNull()
-                uiState = if (locations.isEmpty()) {
+
+                val filteredLocations = listOfNotNull(locations.firstOrNull()) + locations.filter {
+                    it.location.englishName != locations.firstOrNull()?.location?.englishName
+                }
+                uiState = if (filteredLocations.isEmpty()) {
                     uiState.copy(errorResId = R.string.no_locations)
                 } else {
                     uiState.copy(
-                        favoriteLocations = locations
+                        favoriteLocations = filteredLocations,
                     )
                 }
             } catch (e: Exception) {
@@ -89,33 +94,33 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun addFavoriteLocation(locationData: LocationData) {
-        if (uiState.favoriteLocations.any { it.location == locationData }) {
-            Log.e("MainViewModel", "Location already in favorites: $locationData")
+    fun changePreviewToFavorite() {
+        val previewLocation = uiState.previewLocation ?: return
+        if (uiState.favoriteLocations.any { it.location.englishName == previewLocation.location.englishName }) {
+            Log.d("MainViewModel", "Location already in favorites: ${previewLocation.location}")
+            uiState = uiState.copy(previewLocation = null)
             return
         }
 
         viewModelScope.launch {
             try {
-                uiState = uiState.copy(isLoading = true, errorResId = null)
-                locationDao.add(locationData.toLocationEntity())
-                val weatherData = fetchWeatherDataForCoordinates(
-                    Coordinates(locationData.lat, locationData.lon)
+                locationDao.add(previewLocation.location.toLocationEntity())
+                val updatedFavorites = uiState.favoriteLocations + previewLocation
+                val newPageIndex = updatedFavorites.lastIndex
+
+                uiState = uiState.copy(
+                    favoriteLocations = updatedFavorites,
+                    pageIndex = newPageIndex
                 )
-                val newLocations = uiState.favoriteLocations + LocationWeather(
-                    locationData,
-                    weatherData!!,
-                    LocationRole.FAVORITE
-                )
-                uiState =
-                    uiState.copy(favoriteLocations = newLocations)
             } catch (e: Exception) {
-                Log.e("MainViewModel", "Error adding new favorite location", e)
+                Log.e("MainViewModel", "Failed to save preview as favorite", e)
                 uiState = uiState.copy(errorResId = R.string.something_went_wrong)
-            } finally {
-                uiState = uiState.copy(isLoading = false)
             }
         }
+    }
+
+    fun clearPreview() {
+        uiState = uiState.copy(previewLocation = null)
     }
 
     fun refreshWeather(index: Int = 0) {
@@ -181,7 +186,7 @@ class MainViewModel : ViewModel() {
                     previewLocation = LocationWeather(
                         locationData,
                         weatherData!!,
-                        LocationRole.PREVIEW
+                        LocationRole.FAVORITE
                     )
                 )
             }
@@ -193,37 +198,37 @@ class MainViewModel : ViewModel() {
     }
 
     fun changePageIndex(index: Int) {
-        uiState = uiState.copy(pageIndex = index, previewLocation = null)
+        uiState = uiState.copy(pageIndex = index)
     }
 
-    /*
     fun locateUser() {
-        Log.d("MainViewModel", "Locating user")
         viewModelScope.launch {
             try {
                 val userLocation = LocationAndRole(
                     locationService.getUserLocation(),
                     LocationRole.USER
                 )
-                uiState = uiState.copy(uiStatus = WeatherUIStatus.LOADING)
+                if (uiState.favoriteLocations.any { it.location == userLocation.location && it.role == LocationRole.USER }) {
+                    Log.d("MainViewModel", "User location already in favorites, nothing to update")
+                    return@launch
+                }
                 val userWeather = fetchWeatherDataForCoordinates(
                     Coordinates(userLocation.location.lat, userLocation.location.lon)
                 )
                 val userLocationWithWeather =
                     LocationWeather(
                         userLocation.location,
-                        userWeather,
+                        userWeather!!,
                         userLocation.role
                     )
-                val newLocations = listOf(userLocationWithWeather) + uiState.locations
+                val newLocations = listOf(userLocationWithWeather) + uiState.favoriteLocations
                 uiState = uiState.copy(
-                    locations = newLocations,
-                    uiStatus = WeatherUIStatus.SUCCESS
+                    favoriteLocations = newLocations,
                 )
             } catch (e: Exception) {
                 Log.e("MainViewModel", "Error locating user", e)
-                uiState = uiState.copy(uiStatus = WeatherUIStatus.ERROR)
+                uiState = uiState.copy(errorResId = R.string.something_went_wrong)
             }
         }
-    } */
+    }
 }
