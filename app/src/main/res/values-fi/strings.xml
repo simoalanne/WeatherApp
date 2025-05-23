@@ -83,7 +83,10 @@
     <string name="location_permissions_required_message">Nähdäksesi säätiedot nykyisestä sijainnistasi, anna lupa sijainnin käyttöön.</string>
     <string name="location_permissions_permanently_denied_message">Sijainnin käyttö on estetty pysyvästi. Avaa järjestelmäasetukset ja salli sijainnin käyttö nähdäksesi säätiedot nykyisestä sijainnistasi.</string>
     <string name="open_system_settings">Avaa sovellusasetukset</string>
-    <string name="location_not_available">Sijainti ei saatavilla</string>
+    <string name="location_not_available">Sijainti ei saatavilla. Varmista, että GPS on päällä ja sijainnin käytttö on sallittu.</string>
     <string name="update_location_manually">Päivitä sijainti manuaalisesti</string>
     <string name="location_available_message">Sijainnin käyttö on sallittu. Kaikki kunnossa!</string>
+    <string name="no_locations_message">Ei vielä suosikkeja. Salli sijainnin käyttö asetuksissa tai Lisää kaupunkeja hakemalla</string>
+    <string name="open_settings">Avaa asetukset</string>
+    <string name="search_for_cities">Hae kapunkeja</string>
 </resources>

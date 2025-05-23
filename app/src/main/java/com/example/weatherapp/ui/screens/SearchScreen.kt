@@ -2,6 +2,7 @@ package com.example.weatherapp.ui.screens
 
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Arrangement.Absolute.spacedBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,6 +35,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.weatherapp.R
@@ -41,6 +44,7 @@ import com.example.weatherapp.model.LocationAndRole
 import com.example.weatherapp.model.LocationData
 import com.example.weatherapp.ui.composables.FavoriteLocationsList
 import com.example.weatherapp.ui.composables.LocationItem
+import com.example.weatherapp.ui.composables.NoLocationsCta
 import com.example.weatherapp.ui.composables.SwipeableItem
 import com.example.weatherapp.utils.rememberCurrentLanguageCode
 import com.example.weatherapp.viewmodel.MainViewModel
@@ -58,6 +62,7 @@ fun SearchScreen(
     var isInitialLoad by remember { mutableStateOf(true) }
     val searchResult = searchScreenVm.uiState.searchResult
     var currentSearchResult by remember { mutableStateOf<LocationData?>(null) }
+    val focusRequester = remember { FocusRequester() }
     val error = searchScreenVm.uiState.errorRecourseId
     LaunchedEffect(mainViewModel.uiState.previewLocation) {
         if (isInitialLoad) {
@@ -118,7 +123,9 @@ fun SearchScreen(
                         if (query.isNotBlank()) searchScreenVm.geocode(
                             query.trim().lowercase(),
                         )
-                    }, modifier = Modifier.weight(0.5f)
+                    }, modifier = Modifier
+                        .weight(0.5f)
+                        .focusRequester(focusRequester)
                 )
             }
             if (error != null) {
@@ -167,19 +174,39 @@ fun SearchScreen(
                         })
                 }
             }
-            FavoriteLocationsList(
-                favoriteLocations = mainViewModel.uiState.favoriteLocations.map {
-                    LocationAndRole(
-                        it.location,
-                        it.role
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                Text(
+                    stringResource(R.string.favorite_locations),
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.titleLarge
+                )
+                if (mainViewModel.uiState.favoriteLocations.isEmpty()) {
+                    NoLocationsCta(
+                        onSearchClick = { focusRequester.requestFocus() },
+                        onSettingsClick = { navController.navigate("settings") }
                     )
-                },
-                onLocationPress = { index ->
-                    mainViewModel.changePageIndex(index)
-                    navController.popBackStack()
-                },
-                onLocationDelete = { location -> mainViewModel.removeFavoriteLocation(location.location) }
-            )
+                } else {
+                    FavoriteLocationsList(
+                        favoriteLocations = mainViewModel.uiState.favoriteLocations.map {
+                            LocationAndRole(
+                                it.location,
+                                it.role
+                            )
+                        },
+                        onLocationPress = { index ->
+                            mainViewModel.changePageIndex(index)
+                            navController.popBackStack()
+                        },
+                        onLocationDelete = { location ->
+                            mainViewModel.removeFavoriteLocation(
+                                location.location
+                            )
+                        }
+                    )
+                }
+            }
         }
     }
 }
