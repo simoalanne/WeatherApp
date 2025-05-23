@@ -6,7 +6,6 @@ import androidx.compose.runtime.setValue
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -39,7 +38,7 @@ class SettingsViewModel : ViewModel() {
         val timeFormat = when (this[PreferencesKeys.TIME_FORMAT]) {
             "twelve_hour" -> TimeFormat.TWELVE_HOUR
             "twenty_four_hour" -> TimeFormat.TWENTY_FOUR_HOUR
-            else -> TimeFormat.TWELVE_HOUR
+            else -> TimeFormat.TWENTY_FOUR_HOUR
         }
 
         return SettingsState(unit, timeFormat)
