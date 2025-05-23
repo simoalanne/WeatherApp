@@ -65,5 +65,5 @@ fun changeAppLanguage(context: Context, languageTag: String) {
 fun getAppLanguage(context: Context): String {
     val localeManager = context.getSystemService(LocaleManager::class.java)
     val locales = localeManager.applicationLocales
-    return locales.get(0)?.language ?: "en"
+    return locales.get(0)?.language ?: Locale.getDefault().language
 }
