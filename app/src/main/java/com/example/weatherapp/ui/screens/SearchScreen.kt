@@ -1,7 +1,10 @@
 package com.example.weatherapp.ui.screens
 
 import android.util.Log
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Arrangement.Absolute.spacedBy
 import androidx.compose.foundation.layout.Box
@@ -26,6 +29,7 @@ import com.example.weatherapp.ui.composables.SearchTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -37,13 +41,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.example.weatherapp.R
 import com.example.weatherapp.model.LocationAndRole
 import com.example.weatherapp.model.LocationData
 import com.example.weatherapp.ui.composables.FavoriteLocationsList
 import com.example.weatherapp.ui.composables.LocationItem
+import com.example.weatherapp.ui.composables.Margin
 import com.example.weatherapp.ui.composables.NoLocationsCta
 import com.example.weatherapp.ui.composables.SwipeableItem
 import com.example.weatherapp.utils.rememberCurrentLanguageCode
@@ -63,6 +70,9 @@ fun SearchScreen(
     val searchResult = searchScreenVm.uiState.searchResult
     var currentSearchResult by remember { mutableStateOf<LocationData?>(null) }
     val focusRequester = remember { FocusRequester() }
+    val interactionSource = remember { MutableInteractionSource() }
+    val focusManager = LocalFocusManager.current
+    val isFocused by interactionSource.collectIsFocusedAsState()
     val error = searchScreenVm.uiState.errorRecourseId
     LaunchedEffect(mainViewModel.uiState.previewLocation) {
         if (isInitialLoad) {
@@ -108,15 +118,16 @@ fun SearchScreen(
             }
         )
         Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .padding(16.dp),
-            horizontalAlignment = Alignment.Start,
             verticalArrangement = spacedBy(16.dp)
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = spacedBy(8.dp),
+                horizontalArrangement = if (isFocused) spacedBy(8.dp) else Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
             ) {
                 SearchTextField(
                     query = query, onQueryChange = { query = it }, onSearch = {
@@ -124,9 +135,34 @@ fun SearchScreen(
                             query.trim().lowercase(),
                         )
                     }, modifier = Modifier
-                        .weight(0.5f)
                         .focusRequester(focusRequester)
+                        .weight(0.5f),
+                    interactionSource = interactionSource
                 )
+                if (isFocused) {
+                    TextButton(
+                        onClick = {
+                            searchScreenVm.clearLocations()
+                            query = ""
+                            focusManager.clearFocus()
+                        }
+                    ) {
+                        Text(stringResource(R.string.cancel_search))
+                    }
+                }
+            }
+            if (!isFocused) {
+                Text(
+                    stringResource(R.string.or),
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.titleMedium,
+                    textDecoration = TextDecoration.Underline
+                )
+                Button(
+                    onClick = { navController.navigate("map") },
+                ) {
+                    Text(stringResource(R.string.search_from_map))
+                }
             }
             if (error != null) {
                 Row(
@@ -145,7 +181,6 @@ fun SearchScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(100.dp)
             ) {
                 if (searchResult != null) {
                     SwipeableItem(
@@ -174,6 +209,7 @@ fun SearchScreen(
                         })
                 }
             }
+            Margin(50)
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
@@ -205,6 +241,7 @@ fun SearchScreen(
                             )
                         }
                     )
+                    Margin(100)
                 }
             }
         }

@@ -28,8 +28,8 @@ android {
 
         buildConfigField(
             "String",
-            "MAX_FAVORITE_LOCATIONS",
-            "\"${properties.getProperty("MAX_FAVORITE_LOCATIONS")?.toInt() ?: 10}\""
+            "NOMINATIM_USER_AGENT",
+            "\"${properties.getProperty("NOMINATIM_USER_AGENT") ?: "weather app android"}\""
         )
     }
 
@@ -110,4 +110,7 @@ dependencies {
 
     // Datastore for storing preferences
     implementation(libs.androidx.datastore.preferences)
+
+    // Maps SDK for rendering maps.
+    implementation(libs.maplibre.compose)
 }

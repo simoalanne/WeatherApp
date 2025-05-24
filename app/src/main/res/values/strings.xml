@@ -90,4 +90,9 @@
     <string name="no_locations_message">No favorites yet. Enable location access in settings or search for cities to add.</string>
     <string name="open_settings">Open settings</string>
     <string name="search_for_cities">Search for cities</string>
+    <string name="show_weather">Show weather</string>
+    <string name="map_search">Map search</string>
+    <string name="cancel_search">Cancel</string>
+    <string name="or">OR</string>
+    <string name="search_from_map">Search from map</string>
 </resources>

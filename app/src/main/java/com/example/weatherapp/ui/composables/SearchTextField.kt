@@ -1,5 +1,6 @@
 package com.example.weatherapp.ui.composables
 
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -24,7 +25,8 @@ fun SearchTextField(
     query: String,
     onQueryChange: (String) -> Unit,
     onSearch: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    interactionSource: MutableInteractionSource
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -42,6 +44,7 @@ fun SearchTextField(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent
         ),
+        interactionSource = interactionSource,
         onValueChange = onQueryChange,
         placeholder = { Text(stringResource(R.string.search_for_city)) },
         leadingIcon = {
