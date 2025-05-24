@@ -3,9 +3,9 @@ package com.example.weatherapp.location
 import android.content.Context
 import android.location.Address
 import android.location.Geocoder
-import android.os.Build
+import android.util.Log
 import com.example.weatherapp.model.LocationData
-import com.google.android.gms.location.LocationServices
+import com.example.weatherapp.network.NominatimAPI
 import kotlinx.coroutines.tasks.await
 import java.util.Locale
 import kotlinx.coroutines.Dispatchers
@@ -14,7 +14,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.resumeWithException
-import java.io.IOException
+import com.google.android.gms.location.LocationServices
 
 /**
  * This class turns the build in awkward callback and java based Geocoder API into a more
@@ -33,6 +33,7 @@ class LocationService(context: Context) {
     }
 
     private val fusedClient = LocationServices.getFusedLocationProviderClient(context)
+
     // Since the App will NOT support more than these two languages it's fine to just hardcode
     // the logic around these two. If more languages were supported this would need major changes
     // and likely couldn't just run more than few more geocoders in parallel without hitting
@@ -74,8 +75,11 @@ class LocationService(context: Context) {
      * @return The resulting location as a [LocationData] object.
      * @throws [GeocodingException] if geocoding fails.
      */
-    suspend fun reverseGeocode(lat: Double, lon: Double): LocationData =
-        geocodeAction(GeocodeAction.Reverse(lat, lon))
+    suspend fun reverseGeocode(lat: Double, lon: Double): LocationData {
+        val result = geocodeAction(GeocodeAction.Reverse(lat, lon))
+        Log.d("LocationService", "Reverse geocoded $lat, $lon to $result")
+        return result
+    }
 
     /**
      * Geocodes a location name to a [LocationData] object.
@@ -93,18 +97,38 @@ class LocationService(context: Context) {
 
     /**
      * Performs a geocode action and returns the resulting location as a [LocationData] object.
+     * The action can be either a forward or reverse geocode. for reverse geocode it will first
+     * use the nominatim reverse geocode api from which it will take the geocoded address and
+     * then it will forward geocode that address to the en and fi geocoders. This ensures that both
+     * forward and reverse geocode addresses should resolve to the same location with correct
+     * localization.
      *
      * @param action The action to perform. either Forward or Reverse geocoding
      * @return The resulting location as a [LocationData] object.
      * @throws [GeocodingException] if geocoding fails.
      */
     private suspend fun geocodeAction(action: GeocodeAction): LocationData = coroutineScope {
-        val enAddressDeferred = async { enGeocoder.performGeocodeAction(action) }
-        val fiAddressDeferred = async { fiGeocoder.performGeocodeAction(action) }
+        val newAction = if (action is GeocodeAction.Reverse) {
+            try {
+                val geoAddress =
+                    NominatimAPI.service.reverseGeocode(action.lat, action.lon).address.geoAddress
+                Log.d("LocationService", "Reverse geocoded $action to $geoAddress")
+                GeocodeAction.Forward(geoAddress)
+            } catch (e: Exception) {
+                Log.e("LocationService", "Reverse geocoding failed", e)
+                action
+            }
+        } else {
+            action
+        }
+
+
+        val enAddressDeferred = async { enGeocoder.performGeocodeAction(newAction) }
+        val fiAddressDeferred = async { fiGeocoder.performGeocodeAction(newAction) }
 
         val enAddress = enAddressDeferred.await()
         val fiAddress = fiAddressDeferred.await()
-
+        Log.d("LocationService", "Geocoded $enAddress to $fiAddress")
         when {
             // Finnish places should always use fi address for both because they are more accurate
             // eg. the english locale may have wrong admin area name for the place
@@ -168,7 +192,13 @@ class LocationService(context: Context) {
             finnishName = fiAddress.formatAddress(Locale("fi")),
             lat = enAddress.latitude,
             lon = enAddress.longitude,
-            countryCode = enAddress.countryCode
+            countryCode = when (enAddress.adminArea) {
+                "England" -> "gb-eng"
+                "Scotland" -> "gb-sct"
+                "Wales" -> "gb-wls"
+                "Northern Ireland" -> "gb-nir"
+                else -> enAddress.countryCode
+            }
         )
     }
 
@@ -180,13 +210,28 @@ class LocationService(context: Context) {
         }
     }
 
-    private fun Address.formatAddress(locale: Locale = Locale.ENGLISH) =
-        listOfNotNull(
+    private fun Address.formatAddress(locale: Locale = Locale.ENGLISH): String {
+        val countryName = if (countryCode == "GB") {
+            if (locale.language == "fi") {
+                when (adminArea) {
+                    "England", "Englanti" -> "Englanti"
+                    "Scotland", "Skotlanti" -> "Skotlanti"
+                    "Wales" -> "Wales"
+                    "Northern Ireland", "Pohjois-Irlanti" -> "Pohjois-Irlanti"
+                    else -> countryName
+                }
+            } else {
+                adminArea
+            }
+        } else {
+            countryCode?.let { Locale("", it).getDisplayName(locale) }
+        }
+        return listOfNotNull(
             locality,
             adminArea,
-            // can't use country name here due to fallbacks being used previously
-            countryCode?.let { Locale("", it).getDisplayName(locale) }
+            if (countryCode != "GB") countryName else null
         ).joinToString(", ")
+    }
 }
 
 class UserLocatingException(val errorCode: UserLocatingErrorCode) : Exception()

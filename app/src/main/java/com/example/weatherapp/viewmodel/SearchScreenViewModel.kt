@@ -50,6 +50,9 @@ class SearchScreenViewModel : ViewModel() {
     }
 
     fun reverseGeocode(lat: Double, lon: Double) {
+        if (uiState.searchResult != null) {
+            return
+        }
         viewModelScope.launch {
             try {
                 uiState = uiState.copy(isLoading = true, errorRecourseId = null)

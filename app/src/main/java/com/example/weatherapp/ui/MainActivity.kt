@@ -26,6 +26,7 @@ import androidx.compose.runtime.LaunchedEffect
 import com.example.weatherapp.MyApplication
 import com.example.weatherapp.location.LocationService
 import com.example.weatherapp.settingsDataStore
+import com.example.weatherapp.ui.screens.MapScreen
 import com.example.weatherapp.ui.screens.PreviewWeatherScreen
 import com.example.weatherapp.ui.screens.SettingsScreen
 import com.example.weatherapp.viewmodel.MainViewModel
@@ -109,6 +110,9 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("settings") {
                             SettingsScreen(navController, settingsVm, mainVm)
+                        }
+                        composable("map") {
+                            MapScreen(navController, mainVm, searchScreenVm)
                         }
                     }
                 }

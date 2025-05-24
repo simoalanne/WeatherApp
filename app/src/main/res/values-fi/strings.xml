@@ -89,4 +89,9 @@
     <string name="no_locations_message">Ei vielä suosikkeja. Salli sijainnin käyttö asetuksissa tai Lisää kaupunkeja hakemalla</string>
     <string name="open_settings">Avaa asetukset</string>
     <string name="search_for_cities">Hae kapunkeja</string>
+    <string name="show_weather">Näytä sää</string>
+    <string name="map_search">Kartalta haku</string>
+    <string name="cancel_search">Peruuta</string>
+    <string name="or">TAI</string>
+    <string name="search_from_map">Hae kartalta</string>
 </resources>
