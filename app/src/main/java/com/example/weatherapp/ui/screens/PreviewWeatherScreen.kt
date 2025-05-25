@@ -46,7 +46,10 @@ fun PreviewWeatherScreen(
                 onBackPress = { navController.popBackStack() },
                 onStarClick = { mainViewModel.changePreviewToFavorite() }
             )
-            WeatherPage(locationWeather = preview)
+            WeatherPage(
+                locationWeather = preview,
+                onRefresh = { mainViewModel.refreshWeather() }
+            )
         }
     }
 }
