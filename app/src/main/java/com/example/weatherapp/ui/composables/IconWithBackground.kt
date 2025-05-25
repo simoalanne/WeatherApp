@@ -3,6 +3,7 @@ package com.example.weatherapp.ui.composables
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -17,7 +18,8 @@ fun IconWithBackground(
     icon: ImageVector,
     iconColor: Color = MaterialTheme.colorScheme.onBackground,
     backgroundColor: Color = Color.DarkGray,
-    contentDescription: String? = null
+    contentDescription: String? = null,
+    size : Int = 24
 ) {
     Box(
         modifier = Modifier
@@ -28,7 +30,8 @@ fun IconWithBackground(
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
-            tint = iconColor
+            tint = iconColor,
+            modifier = Modifier.size(size.dp)
         )
     }
 }

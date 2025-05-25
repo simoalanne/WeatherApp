@@ -94,4 +94,6 @@
     <string name="cancel_search">Peruuta</string>
     <string name="or">TAI</string>
     <string name="search_from_map">Hae kartalta</string>
+    <string name="sunrise">Auringonnousu</string>
+    <string name="sunset">Auringonlasku</string>
 </resources>

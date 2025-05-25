@@ -31,6 +31,7 @@ fun WeatherPage(
         currentWeather.dailyForecasts.flatMap { it.hourlyWeathers }.takeWhile {
             it.time.isBefore(currentWeather.current.time.plusHours(24))
         }
+    val currentTime = rememberCurrentTime(currentWeather.meta.utcOffsetSeconds)
 
     Column(
         modifier = Modifier
@@ -81,6 +82,12 @@ fun WeatherPage(
             currentWeather.meta.utcOffsetSeconds
         )
         Margin(margin = 8)
+        SunriseSunsetInfo(
+            sunrise = currentWeather.dailyForecasts[0].sunrise,
+            sunset = currentWeather.dailyForecasts[0].sunset,
+            currentTime = currentTime,
+            lastUpdated = currentWeather.current.time
+        )
         // WeatherStatsGrid(current = currentWeather.current)
         Margin(margin = 100) // For better scroll at bottom
     }
