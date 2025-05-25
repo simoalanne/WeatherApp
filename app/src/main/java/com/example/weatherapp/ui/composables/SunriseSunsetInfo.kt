@@ -1,5 +1,6 @@
 package com.example.weatherapp.ui.composables
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement.Absolute.SpaceBetween
 import androidx.compose.foundation.layout.Arrangement.Absolute.spacedBy
@@ -17,6 +18,7 @@ import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -29,7 +31,6 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.weatherapp.R
@@ -45,25 +46,26 @@ fun SunriseSunsetInfo(
     currentTime: LocalDateTime,
     lastUpdated: LocalDateTime,
 ) {
-    val isDay = currentTime.isAfter(sunrise) && currentTime.isBefore(sunset)
+    val isDay = lastUpdated.isAfter(sunrise) && lastUpdated.isBefore(sunset)
     val eventDuration = abs(Duration.between(sunrise, sunset).toMinutes())
 
     val progress =
         if (isDay) {
-            (Duration.between(sunrise, currentTime).toMinutes()) / eventDuration.toFloat()
+            (Duration.between(sunrise, lastUpdated).toMinutes()) / eventDuration.toFloat()
         } else {
-            (Duration.between(sunset, currentTime).toMinutes()) / eventDuration.toFloat()
+            (Duration.between(sunset, lastUpdated).toMinutes()) / eventDuration.toFloat()
         }
 
     val density = LocalDensity.current
     var containerWidthPx by remember { mutableIntStateOf(0) }
-    var iconSize = 32
+    val iconSize = 32.dp
+    val iconSizePx = with(density) { iconSize.toPx() }.toInt()
 
-    val progressBarLeftWidthDp =
-        with(density) { ((containerWidthPx * progress) - iconSize / 2).toDp() }
-    val progressBarRightWidthDp =
-        with(density) { ((containerWidthPx * (1 - progress)) - iconSize / 2).toDp() }
+    val progressBarLeftWidthPx = containerWidthPx * progress
+    val progressBarRightWidthPx = containerWidthPx * (1 - progress)
 
+    val progressBarLeftWidthDp = with(density) { progressBarLeftWidthPx.toDp() }
+    val progressBarRightWidthDp = with(density) { progressBarRightWidthPx.toDp() }
 
     Column(
         verticalArrangement = spacedBy(32.dp),
@@ -73,7 +75,7 @@ fun SunriseSunsetInfo(
             .background(Color.Black.copy(alpha = 0.3f))
             .padding(12.dp)
             .onGloballyPositioned {
-                containerWidthPx = it.size.width
+                containerWidthPx = it.size.width - iconSizePx
             }
     ) {
         Row(
@@ -152,7 +154,7 @@ fun SunriseSunsetInfo(
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
-                        .size(iconSize.dp)
+                        .size(iconSize)
                 ) {
                     ResImage(
                         resId = if (isDay) R.drawable.sun else R.drawable.moon,

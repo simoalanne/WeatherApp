@@ -21,7 +21,7 @@ fun rememberCurrentTime(timezoneOffset: Int): LocalDateTime {
 
     LaunchedEffect(Unit) {
         while (true) {
-            currentTime = currentTime.plusSeconds(1)
+            currentTime = LocalDateTime.now(ZoneOffset.UTC).plusSeconds(timezoneOffset.toLong())
             delay(1000)
         }
     }

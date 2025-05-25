@@ -1,5 +1,6 @@
 package com.example.weatherapp.mapper
 
+import android.util.Log
 import com.example.weatherapp.R
 import com.example.weatherapp.model.CurrentWeather
 import com.example.weatherapp.model.DailyWeather
@@ -10,12 +11,40 @@ import com.example.weatherapp.model.OpenMeteoResponse
 import com.example.weatherapp.model.WeatherData
 import com.example.weatherapp.utils.getLocalDateTimeFromUnixTimestamp
 import java.time.Duration
+import java.time.LocalDateTime
 import kotlin.math.abs
 
 fun OpenMeteoResponse.toWeatherData(): WeatherData {
 
     val meta = Meta(utcOffsetSeconds)
-    val isDay = this.currentWeather.isDay == 1
+    val isDay = currentWeather.isDay == 1
+    val currentTime = currentWeather.time
+
+    val sunrise = (if (isDay) {
+        dailyWeather.sunrise.filter { it < currentTime }.minByOrNull { currentTime - it }
+    } else {
+        dailyWeather.sunrise.filter { it > currentTime }.minByOrNull { it - currentTime }
+    })?.let { getLocalDateTimeFromUnixTimestamp(it, utcOffsetSeconds) }
+        ?: getLocalDateTimeFromUnixTimestamp(0, 0)
+
+
+    val sunset = (if (isDay) {
+        dailyWeather.sunset.filter { it > currentTime }.minByOrNull { it - currentTime }
+    } else {
+        dailyWeather.sunset.filter { it < currentTime }.minByOrNull { currentTime - it }
+    })?.let { getLocalDateTimeFromUnixTimestamp(it, utcOffsetSeconds) }
+        ?: getLocalDateTimeFromUnixTimestamp(0, 0)
+
+    Log.d(
+        "WeatherData",
+        "sunset: $sunset, currentTime: ${
+            getLocalDateTimeFromUnixTimestamp(
+                currentTime,
+                utcOffsetSeconds
+            )
+        }, sunrise: $sunrise, isDay: $isDay"
+    )
+
     val currentWeather = CurrentWeather(
         time = getLocalDateTimeFromUnixTimestamp(this.currentWeather.time, utcOffsetSeconds),
         temperature = this.currentWeather.temperature,
@@ -23,7 +52,9 @@ fun OpenMeteoResponse.toWeatherData(): WeatherData {
             this.currentWeather.weatherCode, isDay
         ),
         conditionId = OpenMeteoCodes.getConditionFromCode(this.currentWeather.weatherCode),
-        isDay = isDay
+        isDay = isDay,
+        sunrise = sunrise,
+        sunset = sunset
     )
 
     val hourlyWeatherGrouped = this.hourlyWeather.time.mapIndexed { index, time ->

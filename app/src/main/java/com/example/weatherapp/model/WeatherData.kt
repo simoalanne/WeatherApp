@@ -19,7 +19,9 @@ data class CurrentWeather(
     val temperature: Double,
     val weatherIconId: Int,
     val conditionId: Int,
-    val isDay: Boolean
+    val isDay: Boolean,
+    val sunrise: LocalDateTime,
+    val sunset: LocalDateTime
 )
 
 data class DailyWeather(

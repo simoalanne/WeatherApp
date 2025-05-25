@@ -1,5 +1,6 @@
 package com.example.weatherapp.ui.composables
 
+import android.util.Log
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -9,9 +10,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,10 +25,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.weatherapp.R
 import com.example.weatherapp.model.LocationWeather
+import kotlinx.coroutines.delay
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WeatherPage(
     locationWeather: LocationWeather,
+    onRefresh: () -> Unit
 ) {
     val currentWeather = locationWeather.weather
     val weather24Hours =
@@ -33,9 +40,18 @@ fun WeatherPage(
         }
     val currentTime = rememberCurrentTime(currentWeather.meta.utcOffsetSeconds)
 
+    LaunchedEffect(Unit) {
+        while (true) {
+            // Tries to refresh weather data every 10 seconds. the receiver will handle checking
+            // if refresh is needed so this doesn't cause unnecessary API calls
+            onRefresh()
+            delay(10000)
+        }
+    }
     Column(
         modifier = Modifier
-            .fillMaxWidth().verticalScroll(rememberScrollState())
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -83,8 +99,8 @@ fun WeatherPage(
         )
         Margin(margin = 8)
         SunriseSunsetInfo(
-            sunrise = currentWeather.dailyForecasts[0].sunrise,
-            sunset = currentWeather.dailyForecasts[0].sunset,
+            sunrise = currentWeather.current.sunrise,
+            sunset = currentWeather.current.sunset,
             currentTime = currentTime,
             lastUpdated = currentWeather.current.time
         )
@@ -92,4 +108,3 @@ fun WeatherPage(
         Margin(margin = 100) // For better scroll at bottom
     }
 }
-

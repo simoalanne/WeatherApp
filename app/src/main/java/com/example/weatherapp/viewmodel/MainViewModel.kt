@@ -23,6 +23,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 /**
  * The main view model for the app required by most of the screens. It holds the state of locations
@@ -123,13 +125,22 @@ class MainViewModel : ViewModel() {
         uiState = uiState.copy(previewLocation = null)
     }
 
-    fun refreshWeather(index: Int = 0) {
+    fun refreshWeather(index: Int = 0, changeIsRefreshing: Boolean = true) {
         viewModelScope.launch {
             try {
-                uiState = uiState.copy(isRefreshing = true, errorResId = null)
+                uiState = uiState.copy(isRefreshing = changeIsRefreshing, errorResId = null)
                 val target =
                     if (uiState.previewLocation != null) uiState.previewLocation else uiState.favoriteLocations[index]
                 if (target != null) {
+                    val lastRefreshTime = target.weather.current.time
+                    val utcOffsetSeconds = target.weather.meta.utcOffsetSeconds
+                    val nextExpectedRefreshTime = lastRefreshTime.plusMinutes(15)
+                    val currentTime =
+                        LocalDateTime.now(ZoneOffset.UTC).plusSeconds(utcOffsetSeconds.toLong())
+                    if (currentTime.isBefore(nextExpectedRefreshTime)) {
+                        Log.d("MainViewModel", "Not refreshing, not enough time has passed")
+                        return@launch
+                    }
                     val weatherData = fetchWeatherDataForCoordinates(
                         Coordinates(target.location.lat, target.location.lon)
                     )

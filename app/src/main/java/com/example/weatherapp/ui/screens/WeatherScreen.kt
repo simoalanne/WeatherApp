@@ -87,7 +87,10 @@ fun WeatherScreen(
                     currentPage = pagerState.currentPage
                 )
                 HorizontalPager(state = pagerState) { pageIndex ->
-                    WeatherPage(locationWeather = uiState.favoriteLocations[pageIndex])
+                    WeatherPage(
+                        locationWeather = uiState.favoriteLocations[pageIndex],
+                        onRefresh = { mainViewModel.refreshWeather(pageIndex) }
+                    )
                 }
             }
         }
