@@ -36,11 +36,9 @@ fun OpenMeteoResponse.toWeatherData(): WeatherData {
         ?: getLocalDateTimeFromUnixTimestamp(0, 0)
 
     Log.d(
-        "WeatherData",
-        "sunset: $sunset, currentTime: ${
+        "WeatherData", "sunset: $sunset, currentTime: ${
             getLocalDateTimeFromUnixTimestamp(
-                currentTime,
-                utcOffsetSeconds
+                currentTime, utcOffsetSeconds
             )
         }, sunrise: $sunrise, isDay: $isDay"
     )
@@ -100,7 +98,7 @@ fun OpenMeteoResponse.toWeatherData(): WeatherData {
                 )
             }
 
-        val currentWeatherAsHourly = if (index == 0) {
+        val currentWeatherAsHourly = if (index == 1) { // index 0 is previous day :)
             HourlyWeather(
                 time = currentWeather.time,
                 temperature = currentWeather.temperature,
@@ -110,10 +108,13 @@ fun OpenMeteoResponse.toWeatherData(): WeatherData {
 
         val newDailyWeather = (listOfNotNull(currentWeatherAsHourly).plus(sunriseAndSunsetAsHourly)
             .plus(dailyWeather.hourlyWeathers)).sortedBy { it.time }
-            .filterNot { entry -> entry.time.isBefore(currentWeather.time) }
+            // exclude any weather or sunrise/sunset from the past
+            .filterNot { it.time.isBefore(currentWeather.time) }
+
 
         dailyWeather.copy(hourlyWeathers = newDailyWeather)
-    }
+        // exclude empty days so essentially the yesterdays that above filter makes empty
+    }.filterNot { it.hourlyWeathers.isEmpty() }
 
     return WeatherData(meta, currentWeather, dailyWeathers)
 }
