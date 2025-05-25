@@ -8,16 +8,23 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.example.weatherapp.utils.getTimeAtOffset
 import kotlinx.coroutines.delay
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 @Composable
-fun rememberCurrentTime(timezoneOffset: Int): String {
-    var currentTime by remember { mutableStateOf("") }
+fun rememberCurrentTime(timezoneOffset: Int): LocalDateTime {
+    var currentTime by remember {
+        mutableStateOf(
+            LocalDateTime.now(ZoneOffset.UTC).plusSeconds(timezoneOffset.toLong())
+        )
+    }
 
     LaunchedEffect(Unit) {
         while (true) {
-            currentTime = getTimeAtOffset(timezoneOffset)
+            currentTime = currentTime.plusSeconds(1)
             delay(1000)
         }
     }
     return currentTime
 }
+

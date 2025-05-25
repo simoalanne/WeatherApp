@@ -95,4 +95,6 @@
     <string name="cancel_search">Cancel</string>
     <string name="or">OR</string>
     <string name="search_from_map">Search from map</string>
+    <string name="sunrise">Sunrise</string>
+    <string name="sunset">Sunset</string>
 </resources>

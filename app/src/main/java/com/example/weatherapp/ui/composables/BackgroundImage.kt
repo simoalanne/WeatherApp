@@ -13,7 +13,7 @@ import androidx.compose.ui.res.painterResource
 
 @Composable
 fun BackgroundImage(isDay: Boolean) {
-    val id = if (isDay) R.drawable.background else R.drawable.background_night
+    val id = if (isDay) R.drawable.day_clear_bg else R.drawable.night_clear_bg
     Image(
         // TODO: image should be dynamic and based on the weather condition
         painter = painterResource(id),
