@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.weatherapp.model.HourlyWeatherWhatToShow
 import com.example.weatherapp.model.SettingsState
 import com.example.weatherapp.model.TempUnit
 import com.example.weatherapp.model.TimeFormat
@@ -41,7 +42,13 @@ class SettingsViewModel : ViewModel() {
             else -> TimeFormat.TWENTY_FOUR_HOUR
         }
 
-        return SettingsState(unit, timeFormat)
+        val hourlyWeatherWhatToShow = when (this[PreferencesKeys.HOURLY_WEATHER_WHAT_TO_SHOW]) {
+            "condition_and_temp" -> HourlyWeatherWhatToShow.CONDITION_AND_TEMP
+            "pop" -> HourlyWeatherWhatToShow.POP
+            else -> HourlyWeatherWhatToShow.BOTH
+        }
+
+        return SettingsState(unit, timeFormat, hourlyWeatherWhatToShow)
     }
 
     fun loadSettings() {
@@ -69,11 +76,21 @@ class SettingsViewModel : ViewModel() {
             }
         }
     }
+
+    fun setHourlyWeatherWhatToShow(whatToShow: HourlyWeatherWhatToShow) {
+        viewModelScope.launch {
+            dataStore.edit { preferences ->
+                preferences[PreferencesKeys.HOURLY_WEATHER_WHAT_TO_SHOW] =
+                    whatToShow.name.lowercase()
+            }
+        }
+    }
 }
 
 object PreferencesKeys {
     val TEMP_UNIT = stringPreferencesKey("temp_unit")
     val TIME_FORMAT = stringPreferencesKey("time_format")
+    val HOURLY_WEATHER_WHAT_TO_SHOW = stringPreferencesKey("hourly_weather_what_to_show")
 }
 
 /**

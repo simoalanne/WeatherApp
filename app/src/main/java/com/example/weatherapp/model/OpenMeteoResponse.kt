@@ -31,7 +31,9 @@ data class HourlyWeatherResponse(
     @SerializedName("weathercode")
     val weatherCode: List<Int>,
     @SerializedName("is_day")
-    val isDay: List<Int>
+    val isDay: List<Int>,
+    @SerializedName("precipitation_probability")
+    val pop: List<Int>
 )
 
 data class DailyWeatherResponse(

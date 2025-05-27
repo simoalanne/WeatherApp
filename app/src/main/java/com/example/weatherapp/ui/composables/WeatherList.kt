@@ -30,7 +30,7 @@ fun WeatherList(
     ) {
         itemsIndexed(hourlyWeathers) { index, hourlyWeather ->
             val time = if (index == 0 && isNext24Hours) stringResource(R.string.now) else formatLocalDateTime(hourlyWeather.time)
-            WeatherListItem(time, hourlyWeather.weatherIconId, hourlyWeather.temperature)
+            WeatherListItem(time, hourlyWeather.weatherIconId, hourlyWeather.temperature, hourlyWeather.pop)
         }
     }
 }

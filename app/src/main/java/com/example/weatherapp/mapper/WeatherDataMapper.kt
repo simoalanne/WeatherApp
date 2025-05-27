@@ -10,8 +10,8 @@ import com.example.weatherapp.model.OpenMeteoCodes
 import com.example.weatherapp.model.OpenMeteoResponse
 import com.example.weatherapp.model.WeatherData
 import com.example.weatherapp.utils.getLocalDateTimeFromUnixTimestamp
+import com.example.weatherapp.utils.truncateToHours
 import java.time.Duration
-import java.time.LocalDateTime
 import kotlin.math.abs
 
 fun OpenMeteoResponse.toWeatherData(): WeatherData {
@@ -35,14 +35,6 @@ fun OpenMeteoResponse.toWeatherData(): WeatherData {
     })?.let { getLocalDateTimeFromUnixTimestamp(it, utcOffsetSeconds) }
         ?: getLocalDateTimeFromUnixTimestamp(0, 0)
 
-    Log.d(
-        "WeatherData", "sunset: $sunset, currentTime: ${
-            getLocalDateTimeFromUnixTimestamp(
-                currentTime, utcOffsetSeconds
-            )
-        }, sunrise: $sunrise, isDay: $isDay"
-    )
-
     val currentWeather = CurrentWeather(
         time = getLocalDateTimeFromUnixTimestamp(this.currentWeather.time, utcOffsetSeconds),
         temperature = this.currentWeather.temperature,
@@ -61,7 +53,8 @@ fun OpenMeteoResponse.toWeatherData(): WeatherData {
             temperature = this.hourlyWeather.temperature[index],
             weatherIconId = OpenMeteoCodes.getIconFromCode(
                 this.hourlyWeather.weatherCode[index], this.hourlyWeather.isDay[index] == 1
-            )
+            ),
+            pop = this.hourlyWeather.pop[index]
         )
     }.groupBy { it.time.toLocalDate() }
 
@@ -85,16 +78,17 @@ fun OpenMeteoResponse.toWeatherData(): WeatherData {
 
         val sunriseAndSunsetAsHourly =
             listOf(dailyWeather.sunrise, dailyWeather.sunset).mapIndexed { sunIndex, time ->
-                val tempToUse = dailyWeather.hourlyWeathers.minBy {
+                val entryToUse = dailyWeather.hourlyWeathers.minBy {
                     abs(
                         Duration.between(time, it.time).toMinutes()
                     )
-                }.temperature
+                }
 
                 HourlyWeather(
                     time = time,
-                    temperature = tempToUse,
-                    weatherIconId = if (sunIndex == 0) R.drawable.sunrise else R.drawable.sunset
+                    temperature = entryToUse.temperature,
+                    weatherIconId = if (sunIndex == 0) R.drawable.sunrise else R.drawable.sunset,
+                    pop = entryToUse.pop
                 )
             }
 
@@ -102,7 +96,13 @@ fun OpenMeteoResponse.toWeatherData(): WeatherData {
             HourlyWeather(
                 time = currentWeather.time,
                 temperature = currentWeather.temperature,
-                weatherIconId = currentWeather.weatherIconId
+                weatherIconId = currentWeather.weatherIconId,
+                // pop is the previous hour of the current weather
+                pop = hourlyWeatherGrouped[date]?.find {
+                    truncateToHours(it.time).plusHours(1) == truncateToHours(
+                        currentWeather.time
+                    )
+                }?.pop ?: 0
             )
         } else null
 

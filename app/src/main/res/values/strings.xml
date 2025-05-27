@@ -97,4 +97,8 @@
     <string name="search_from_map">Search from map</string>
     <string name="sunrise">Sunrise</string>
     <string name="sunset">Sunset</string>
+    <string name="hourly_forecast_details">Forecast details</string>
+    <string name="condition_and_temp">Show weather icon and temperature</string>
+    <string name="probability_of_precipitation">Show probability of precipitation</string>
+    <string name="show_both">Show both</string>
 </resources>
