@@ -60,6 +60,28 @@ fun OpenMeteoResponse.toWeatherData(): WeatherData {
 
     val dailyWeathers = this.dailyWeather.time.mapIndexed { index, time ->
         val date = getLocalDateTimeFromUnixTimestamp(time, utcOffsetSeconds).toLocalDate()
+        val closestEntry = hourlyWeatherGrouped[date]?.minBy {
+            abs(
+                Duration.between(it.time, currentWeather.time).toMinutes()
+            )
+        }
+        // if is the current day copy the current weather data as hourly data to the hourly list
+        // as pop doesn't exist for current use the closest entry's pop for that instead
+        val newHourlyWeathers = if (index == 1) {
+            val currentWeatherAsHourly = HourlyWeather(
+                time = currentWeather.time,
+                temperature = currentWeather.temperature,
+                weatherIconId = currentWeather.weatherIconId,
+                pop = closestEntry?.pop ?: 0
+            )
+            // If current time is even hour, then remove the duplicated hourly weather entry
+            // as the current weather should be more accurate than the closest entry
+            (listOf(currentWeatherAsHourly) + (hourlyWeatherGrouped[date]
+                ?: emptyList())).distinctBy { it.time }
+        } else {
+            hourlyWeatherGrouped[date] ?: emptyList()
+        }
+
         val dailyWeather = DailyWeather(
             date = date,
             weatherIconId = OpenMeteoCodes.getIconFromCode(
@@ -92,22 +114,8 @@ fun OpenMeteoResponse.toWeatherData(): WeatherData {
                 )
             }
 
-        val currentWeatherAsHourly = if (index == 1) { // index 0 is previous day :)
-            HourlyWeather(
-                time = currentWeather.time,
-                temperature = currentWeather.temperature,
-                weatherIconId = currentWeather.weatherIconId,
-                // pop is the previous hour of the current weather
-                pop = hourlyWeatherGrouped[date]?.find {
-                    truncateToHours(it.time).plusHours(1) == truncateToHours(
-                        currentWeather.time
-                    )
-                }?.pop ?: 0
-            )
-        } else null
-
-        val newDailyWeather = (listOfNotNull(currentWeatherAsHourly).plus(sunriseAndSunsetAsHourly)
-            .plus(dailyWeather.hourlyWeathers)).sortedBy { it.time }
+        val newDailyWeather = (sunriseAndSunsetAsHourly
+            .plus(newHourlyWeathers)).sortedBy { it.time }
             // exclude any weather or sunrise/sunset from the past
             .filterNot { it.time.isBefore(currentWeather.time) }
 
