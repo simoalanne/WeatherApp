@@ -56,13 +56,12 @@ fun <T> DropdownMenu(
                         )
                         icon()
                     }
-                    if (optionValue == selectedOption) {
-                        Icon(
-                            imageVector = Icons.Filled.Check,
-                            contentDescription = stringResource(R.string.selected),
-                            tint = Color.Green
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.Filled.Check,
+                        contentDescription = stringResource(R.string.selected),
+                        // use transparent icon to stop height slightly shifting for the selected option
+                        tint = if (selectedOption == optionValue) Color.Green else Color.Transparent
+                    )
                 }
             }
         }

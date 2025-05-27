@@ -12,7 +12,7 @@ interface WeatherAPI {
         @Query("latitude") lat: Double,
         @Query("longitude") lon: Double,
         @Query("current_weather") currentWeather: Boolean = true,
-        @Query("hourly") hourly: String = "temperature_2m,weathercode,is_day",
+        @Query("hourly") hourly: String = "temperature_2m,weathercode,precipitation_probability,is_day",
         @Query("daily") daily: String = "weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset",
         @Query("timeformat") timeformat: String = "unixtime",
         @Query("past_days") pastDays: Int = 1,

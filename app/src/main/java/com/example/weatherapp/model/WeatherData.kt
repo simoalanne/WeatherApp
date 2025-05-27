@@ -38,4 +38,5 @@ data class HourlyWeather(
     val time: LocalDateTime,
     val temperature: Double,
     val weatherIconId: Int,
+    val pop: Int
 )

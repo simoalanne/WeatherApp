@@ -9,7 +9,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Thermostat
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,6 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.weatherapp.R
+import com.example.weatherapp.model.HourlyWeatherWhatToShow
 import com.example.weatherapp.model.LocationRole
 import com.example.weatherapp.model.TempUnit
 import com.example.weatherapp.model.TimeFormat
@@ -113,7 +116,33 @@ fun SettingsScreen(
                 ), selectedOption = settingsState.tempUnit, onOptionSelected = {
                     settingsViewModel.setTempUnit(it)
                 })
-
+            DropdownMenu(
+                label = stringResource(R.string.hourly_forecast_details),
+                leadingIcon = {
+                    IconWithBackground(
+                        icon = Icons.AutoMirrored.Filled.List,
+                        backgroundColor = Color.DarkGray
+                    )
+                },
+                options = listOf(
+                    DropdownOption(
+                        stringResource(R.string.condition_and_temp),
+                        HourlyWeatherWhatToShow.CONDITION_AND_TEMP
+                    ),
+                    DropdownOption(
+                        stringResource(R.string.probability_of_precipitation),
+                        HourlyWeatherWhatToShow.POP
+                    ),
+                    DropdownOption(
+                        stringResource(R.string.show_both),
+                        HourlyWeatherWhatToShow.BOTH
+                    )
+                ),
+                selectedOption = settingsState.hourlyWeatherWhatToShow,
+                onOptionSelected = {
+                    settingsViewModel.setHourlyWeatherWhatToShow(it)
+                }
+            )
             DropdownMenu(
                 label = stringResource(R.string.time_format), leadingIcon = {
                     IconWithBackground(
