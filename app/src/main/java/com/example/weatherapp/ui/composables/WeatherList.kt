@@ -3,6 +3,7 @@ package com.example.weatherapp.ui.composables
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -25,7 +26,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 @Composable
 fun WeatherList(
     hourlyWeathers: List<HourlyWeather>,
-    isNext24Hours: Boolean = true,
+    isNext24Hours: Boolean = true
 ) {
 
     val horizontalScrollBlocker = remember {
@@ -49,6 +50,8 @@ fun WeatherList(
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier
+                // the whole row should block scrolling even if there arent enough items to fill it
+                .fillMaxWidth()
                 .clip(RoundedCornerShape(12.dp))
                 .background(Color(red = 0f, green = 0f, blue = 0f, alpha = 0.3f))
                 .padding(12.dp)
