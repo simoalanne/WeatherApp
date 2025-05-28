@@ -19,10 +19,6 @@ fun BackgroundImage(isDay: Boolean) {
         painter = painterResource(id),
         contentDescription = null,
         contentScale = ContentScale.Crop,
-        colorFilter = ColorFilter.tint(
-            color = Color(red = 0f, green = 0f, blue = 0f, alpha = 0.3f),
-            blendMode = BlendMode.Darken
-        ),
         modifier = Modifier.fillMaxSize()
     )
 }
