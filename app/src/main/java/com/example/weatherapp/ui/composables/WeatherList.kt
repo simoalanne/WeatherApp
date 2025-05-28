@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -22,6 +21,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.material3.MaterialTheme
 
 @Composable
 fun WeatherList(
@@ -48,13 +48,13 @@ fun WeatherList(
             .nestedScroll(horizontalScrollBlocker)
     ) {
         LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier
                 // the whole row should block scrolling even if there arent enough items to fill it
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
-                .background(Color(red = 0f, green = 0f, blue = 0f, alpha = 0.3f))
-                .padding(12.dp)
+                .clip(MaterialTheme.shapes.small)
+                .background(Color(red = 0f, green = 0f, blue = 0f, alpha = 0.1f))
+                .padding(8.dp)
         ) {
             itemsIndexed(hourlyWeathers) { index, hourlyWeather ->
                 val time =
