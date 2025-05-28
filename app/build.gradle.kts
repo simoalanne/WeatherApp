@@ -113,4 +113,7 @@ dependencies {
 
     // Maps SDK for rendering maps.
     implementation(libs.maplibre.compose)
+
+    // Charting library for weather data
+    implementation(libs.compose.charts)
 }

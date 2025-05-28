@@ -44,6 +44,8 @@ data class DailyWeatherResponse(
     val maxTemperature: List<Double>,
     @SerializedName("temperature_2m_min")
     val minTemperature: List<Double>,
+    @SerializedName("temperature_2m_mean")
+    val meanTemperature: List<Double>,
     @SerializedName("sunrise")
     val sunrise: List<Long>,
     @SerializedName("sunset")

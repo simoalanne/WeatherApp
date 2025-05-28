@@ -25,7 +25,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.weatherapp.R
 import com.example.weatherapp.model.LocationWeather
+import com.example.weatherapp.model.TempUnit
+import com.example.weatherapp.utils.convertTemperature
+import com.example.weatherapp.utils.rememberCurrentLocale
+import com.example.weatherapp.viewmodel.AppPreferences
 import kotlinx.coroutines.delay
+import java.time.format.TextStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,6 +44,7 @@ fun WeatherPage(
             it.time.isBefore(currentWeather.current.time.plusHours(24))
         }
     val currentTime = rememberCurrentTime(currentWeather.meta.utcOffsetSeconds)
+    val tempUnit = AppPreferences.preferences.tempUnit
 
     LaunchedEffect(Unit) {
         while (true) {
@@ -103,6 +109,36 @@ fun WeatherPage(
             sunset = currentWeather.current.sunset,
             currentTime = currentTime,
             lastUpdated = currentWeather.current.time
+        )
+        Margin(margin = 8)
+        TemperatureChart(
+            dailyMinTemps = currentWeather.dailyForecasts.map {
+                convertTemperature(
+                    it.minTemperature,
+                    tempUnit
+                )
+            },
+            dailyMaxTemps = currentWeather.dailyForecasts.map {
+                convertTemperature(
+                    it.maxTemperature,
+                    tempUnit
+                )
+            },
+            dailyMeanTemps = currentWeather.dailyForecasts.map {
+                convertTemperature(
+                    it.meanTemperature,
+                    tempUnit
+                )
+            },
+            weekDays = currentWeather.dailyForecasts.map {
+                it.date.dayOfWeek.getDisplayName(TextStyle.SHORT, rememberCurrentLocale())
+                    .lowercase().replaceFirstChar { char -> char.uppercase() }
+            },
+            tempUnit = when (tempUnit) {
+                TempUnit.CELSIUS -> "°C"
+                TempUnit.FAHRENHEIT -> "°F"
+                TempUnit.KELVIN -> "K"
+            }
         )
         // WeatherStatsGrid(current = currentWeather.current)
         Margin(margin = 100) // For better scroll at bottom

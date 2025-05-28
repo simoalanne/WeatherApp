@@ -100,4 +100,9 @@
     <string name="condition_and_temp">Näytä sääkuvake ja lämpötila</string>
     <string name="probability_of_precipitation">Näytä sateen todennäköisyys</string>
     <string name="show_both">Näytä molemmat</string>
+    <string name="temperature_chart">Temperature chart</string>
+    <string name="coldest">Kylmin</string>
+    <string name="hottest">Kuumin</string>
+    <string name="average">Keskiarvo</string>
+    <string name="daily_temperatures_chart_title">Päivittäiset lämpötilat</string>
 </resources>

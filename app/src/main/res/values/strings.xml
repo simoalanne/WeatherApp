@@ -101,4 +101,9 @@
     <string name="condition_and_temp">Show weather icon and temperature</string>
     <string name="probability_of_precipitation">Show probability of precipitation</string>
     <string name="show_both">Show both</string>
+    <string name="temperature_chart">Temperature chart</string>
+    <string name="coldest">Coldest</string>
+    <string name="hottest">Hottest</string>
+    <string name="average">Average</string>
+    <string name="daily_temperatures_chart_title">Daily temperatures</string>
 </resources>

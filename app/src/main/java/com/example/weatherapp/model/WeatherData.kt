@@ -29,6 +29,7 @@ data class DailyWeather(
     val weatherIconId: Int,
     val maxTemperature: Double,
     val minTemperature: Double,
+    val meanTemperature: Double,
     val sunrise: LocalDateTime,
     val sunset: LocalDateTime,
     val hourlyWeathers: List<HourlyWeather>

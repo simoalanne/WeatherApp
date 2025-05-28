@@ -1,6 +1,5 @@
 package com.example.weatherapp.mapper
 
-import android.util.Log
 import com.example.weatherapp.R
 import com.example.weatherapp.model.CurrentWeather
 import com.example.weatherapp.model.DailyWeather
@@ -10,7 +9,6 @@ import com.example.weatherapp.model.OpenMeteoCodes
 import com.example.weatherapp.model.OpenMeteoResponse
 import com.example.weatherapp.model.WeatherData
 import com.example.weatherapp.utils.getLocalDateTimeFromUnixTimestamp
-import com.example.weatherapp.utils.truncateToHours
 import java.time.Duration
 import kotlin.math.abs
 
@@ -89,6 +87,7 @@ fun OpenMeteoResponse.toWeatherData(): WeatherData {
             ),
             maxTemperature = this.dailyWeather.maxTemperature[index],
             minTemperature = this.dailyWeather.minTemperature[index],
+            meanTemperature = this.dailyWeather.meanTemperature[index],
             sunrise = getLocalDateTimeFromUnixTimestamp(
                 this.dailyWeather.sunrise[index], utcOffsetSeconds
             ),
