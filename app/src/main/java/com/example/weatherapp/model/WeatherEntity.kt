@@ -7,8 +7,7 @@ import com.example.weatherapp.GsonProvider
 @Entity(tableName = "weather")
 data class WeatherEntity(
     @PrimaryKey val locationKey: String, // englishName,countryCode
-    val json: String,
-    val timestamp: Long
+    val json: String
 )
 
 fun WeatherEntity.toWeather(): WeatherData {

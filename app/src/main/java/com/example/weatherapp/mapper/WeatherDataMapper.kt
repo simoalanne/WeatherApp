@@ -1,5 +1,6 @@
 package com.example.weatherapp.mapper
 
+import android.util.Log
 import com.example.weatherapp.R
 import com.example.weatherapp.model.CurrentWeather
 import com.example.weatherapp.model.DailyWeather
@@ -43,11 +44,7 @@ fun OpenMeteoResponse.toWeatherData(): WeatherData {
         isDay = isDay,
         sunrise = sunrise,
         sunset = sunset,
-        weatherVisuals = WeatherVisualsObject.visualsForPreset(
-            OpenMeteoCodes.presetForWeatherCode(
-                this.currentWeather.weatherCode, isDay
-            )
-        )
+        weatherCode = this.currentWeather.weatherCode,
     )
 
     val hourlyWeatherGrouped = this.hourlyWeather.time.mapIndexed { index, time ->

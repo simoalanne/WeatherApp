@@ -35,8 +35,7 @@ import java.time.format.TextStyle
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WeatherPage(
-    locationWeather: LocationWeather,
-    onRefresh: () -> Unit
+    locationWeather: LocationWeather
 ) {
     val currentWeather = locationWeather.weather
     if (currentWeather == null) return
@@ -47,14 +46,6 @@ fun WeatherPage(
     val currentTime = rememberCurrentTime(currentWeather.meta.utcOffsetSeconds)
     val tempUnit = AppPreferences.preferences.tempUnit
 
-    LaunchedEffect(Unit) {
-        while (true) {
-            // Tries to refresh weather data every 10 seconds. the receiver will handle checking
-            // if refresh is needed so this doesn't cause unnecessary API calls
-            onRefresh()
-            delay(10000)
-        }
-    }
     Column(
         modifier = Modifier
             .fillMaxWidth()
