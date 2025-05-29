@@ -82,7 +82,9 @@ fun WeatherScreen(
     LaunchedEffect(currentIndex) {
         while (true) {
             Log.d("WeatherScreen", "Refreshing weather for page $currentIndex")
-            mainViewModel.refreshWeather()
+            // index needed here since there could be a race condition where the page index in vm
+            // is not updated when this is called
+            mainViewModel.refreshWeather(currentIndex)
             delay(10_000)
         }
     }
@@ -109,8 +111,14 @@ fun WeatherScreen(
         Column(modifier = Modifier.fillMaxSize()) {
             AppBar(
                 title = title,
-                onSearchIconPress = { navController.navigate("search") },
-                onSettingsIconPress = { navController.navigate("settings") },
+                onSearchIconPress = {
+                    mainViewModel.setAllButCurrentWeatherToNull()
+                    navController.navigate("search")
+                },
+                onSettingsIconPress = {
+                    mainViewModel.setAllButCurrentWeatherToNull()
+                    navController.navigate("settings")
+                },
                 totalPages = uiState.favoriteLocations.size,
                 currentPage = pagerState.currentPage
             )
