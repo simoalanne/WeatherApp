@@ -8,8 +8,6 @@ import com.example.weatherapp.R
 object WeatherVisualsObject {
     private val cloudyColorFilterDay =
         ColorFilter.tint(Color.Black.copy(alpha = 0.3f), BlendMode.Darken)
-    private val cloudyColorFilterNight =
-        ColorFilter.tint(Color.Black.copy(alpha = 0.6f), BlendMode.Darken)
 
     private val visualsMap: Map<WeatherPreset, WeatherVisuals> = mapOf(
         WeatherPreset.CLEAR_DAY to WeatherVisuals(backgroundResId = R.drawable.day_clear_bg),
@@ -21,7 +19,6 @@ object WeatherVisualsObject {
         ),
         WeatherPreset.CLOUDY_NIGHT to WeatherVisuals(
             backgroundResId = R.drawable.night_cloudy_bg,
-            colorFilter = cloudyColorFilterNight
         ),
 
         WeatherPreset.RAINY_DAY to WeatherVisuals(
@@ -31,7 +28,6 @@ object WeatherVisualsObject {
         ),
         WeatherPreset.RAINY_NIGHT to WeatherVisuals(
             backgroundResId = R.drawable.night_cloudy_bg,
-            colorFilter = cloudyColorFilterNight,
             lottieAnimationResId = R.raw.rain
         ),
 
@@ -42,7 +38,6 @@ object WeatherVisualsObject {
         ),
         WeatherPreset.SNOWY_NIGHT to WeatherVisuals(
             backgroundResId = R.drawable.night_cloudy_bg,
-            colorFilter = cloudyColorFilterNight,
             lottieAnimationResId = R.raw.snow
         ),
 
