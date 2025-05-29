@@ -37,6 +37,7 @@ fun PreviewWeatherScreen(
     }
     val preview = mainViewModel.uiState.previewLocation ?: return
     val currentWeather = preview.weather
+    if (currentWeather == null) return
     val languageCode = rememberCurrentLanguageCode()
     val title = formatLocationName(preview.location, languageCode = languageCode)
 

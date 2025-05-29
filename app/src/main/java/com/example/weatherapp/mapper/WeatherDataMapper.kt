@@ -8,8 +8,6 @@ import com.example.weatherapp.model.Meta
 import com.example.weatherapp.model.OpenMeteoCodes
 import com.example.weatherapp.model.OpenMeteoResponse
 import com.example.weatherapp.model.WeatherData
-import com.example.weatherapp.model.WeatherInput
-import com.example.weatherapp.model.WeatherVisuals
 import com.example.weatherapp.model.WeatherVisualsObject
 import com.example.weatherapp.utils.getLocalDateTimeFromUnixTimestamp
 import com.example.weatherapp.utils.truncateToHours

@@ -1,5 +1,7 @@
 package com.example.weatherapp.model
 
+import com.example.weatherapp.GsonProvider
+
 data class MainUiState(
     val favoriteLocations: List<LocationWeather> = emptyList(),
     val previewLocation: LocationWeather? = null,
@@ -17,7 +19,7 @@ data class MainUiState(
  */
 data class LocationWeather(
     val location: LocationData,
-    val weather: WeatherData,
+    val weather: WeatherData?,
     val role: LocationRole,
 )
 
@@ -36,4 +38,12 @@ enum class LocationRole {
     USER,
     FAVORITE,
     PREVIEW
+}
+
+fun LocationWeather.toWeatherEntity(): WeatherEntity {
+    return WeatherEntity(
+        locationKey = "${location.englishName},${location.countryCode}",
+        json = GsonProvider.gson.toJson(weather),
+        timestamp = System.currentTimeMillis()
+    )
 }

@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.weatherapp.BuildConfig
 import com.example.weatherapp.R
 import com.example.weatherapp.database.LocationDao
+import com.example.weatherapp.database.WeatherDao
 import com.example.weatherapp.model.toLocationAndRole
 import com.example.weatherapp.location.LocationService
 import com.example.weatherapp.model.Coordinates
@@ -18,6 +19,8 @@ import com.example.weatherapp.model.LocationRole
 import com.example.weatherapp.model.LocationWeather
 import com.example.weatherapp.model.MainUiState
 import com.example.weatherapp.model.toLocationEntity
+import com.example.weatherapp.model.toWeather
+import com.example.weatherapp.model.toWeatherEntity
 import com.example.weatherapp.utils.fetchWeatherDataForCoordinates
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -40,6 +43,7 @@ import java.time.ZoneOffset
 class MainViewModel : ViewModel() {
     private lateinit var locationService: LocationService
     private lateinit var locationDao: LocationDao
+    private lateinit var weatherDao: WeatherDao
 
     fun setLocationService(service: LocationService) {
         locationService = service
@@ -47,6 +51,10 @@ class MainViewModel : ViewModel() {
 
     fun setLocationDao(dao: LocationDao) {
         locationDao = dao
+    }
+
+    fun setWeatherDao(dao: WeatherDao) {
+        weatherDao = dao
     }
 
     var uiState by mutableStateOf(MainUiState())
@@ -64,32 +72,52 @@ class MainViewModel : ViewModel() {
                 Log.d("MainViewModel", "User location: $userLocation")
                 val userLocationRole = userLocation?.let { LocationAndRole(it, LocationRole.USER) }
 
-                val savedLocations =
-                    savedLocationsDeferred.await().map { it.toLocationAndRole() }
-                val locations = (listOfNotNull(userLocationRole) + savedLocations).map {
-                    async {
-                        val weatherData = fetchWeatherDataForCoordinates(
-                            Coordinates(it.location.lat, it.location.lon)
-                        )
-                        if (weatherData == null) return@async null
-                        LocationWeather(it.location, weatherData, it.role)
-                    }
-                }.awaitAll().filterNotNull()
+                val savedLocations = savedLocationsDeferred.await().map { it.toLocationAndRole() }
 
-                val filteredLocations = listOfNotNull(locations.firstOrNull()) + locations.filter {
-                    it.location.englishName != locations.firstOrNull()?.location?.englishName
-                }
-                uiState = if (filteredLocations.isEmpty()) {
-                    uiState.copy(errorResId = R.string.no_locations)
-                } else {
-                    uiState.copy(
-                        favoriteLocations = filteredLocations,
-                    )
-                }
+                val favoritesAndUserLocation = listOfNotNull(userLocationRole) + savedLocations
+                val cachedWeathers = weatherDao.getAllWeather()
+                val weatherLocationList = favoritesAndUserLocation.map { location ->
+                    val existingWeather = cachedWeathers.find {
+                        it.locationKey == "${location.location.englishName},${location.location.countryCode}"
+                    }
+                    val isValid =
+                        existingWeather != null && System.currentTimeMillis() - existingWeather.timestamp < 1000 * 60 * 15
+                    if (isValid) {
+                        // this is not async operation but it has to treated as one for the type
+                        // of this entry to be possible to awaitAll()
+                        async {
+                            LocationWeather(
+                                location.location, existingWeather.toWeather(), location.role
+                            )
+                        }
+                    } else {
+                        Log.d("MainViewModel", "Refreshing weather for ${location.location}")
+                        async {
+                            val weather = fetchWeatherDataForCoordinates(
+                                Coordinates(
+                                    location.location.lat, location.location.lon
+                                )
+                            )
+                            if (weather != null) {
+                                weatherDao.upsertWeather(
+                                    LocationWeather(
+                                        location.location, weather, location.role
+                                    ).toWeatherEntity()
+                                )
+                            }
+                            LocationWeather(
+                                location.location, weather, location.role
+                            )
+                        }
+                    }
+                }.awaitAll().distinctBy { it.location.englishName }
+
+                uiState = uiState.copy(
+                    favoriteLocations = weatherLocationList,
+                )
+
             } catch (e: Exception) {
                 Log.e("MainViewModel", "Error loading initial data ${e.message}")
-                uiState =
-                    uiState.copy(errorResId = R.string.something_went_wrong)
             } finally {
                 uiState = uiState.copy(isLoading = false)
             }
@@ -111,9 +139,9 @@ class MainViewModel : ViewModel() {
                 val newPageIndex = updatedFavorites.lastIndex
 
                 uiState = uiState.copy(
-                    favoriteLocations = updatedFavorites,
-                    pageIndex = newPageIndex
+                    favoriteLocations = updatedFavorites, pageIndex = newPageIndex
                 )
+                weatherDao.upsertWeather(previewLocation.toWeatherEntity())
             } catch (e: Exception) {
                 Log.e("MainViewModel", "Failed to save preview as favorite", e)
                 uiState = uiState.copy(errorResId = R.string.something_went_wrong)
@@ -131,7 +159,7 @@ class MainViewModel : ViewModel() {
                 uiState = uiState.copy(isRefreshing = changeIsRefreshing, errorResId = null)
                 val target =
                     if (uiState.previewLocation != null) uiState.previewLocation else uiState.favoriteLocations[index]
-                if (target != null) {
+                if (target != null && target.weather != null) {
                     val lastRefreshTime = target.weather.current.time
                     val utcOffsetSeconds = target.weather.meta.utcOffsetSeconds
                     val nextExpectedRefreshTime = lastRefreshTime.plusMinutes(15)
@@ -154,9 +182,9 @@ class MainViewModel : ViewModel() {
                                 } else {
                                     it
                                 }
-                            }
-                        )
+                            })
                     }
+                    weatherDao.upsertWeather(target.toWeatherEntity())
                 }
             } catch (e: Exception) {
                 uiState = uiState.copy(errorResId = R.string.something_went_wrong)
@@ -171,10 +199,10 @@ class MainViewModel : ViewModel() {
             try {
                 uiState = uiState.copy(isLoading = true, errorResId = null)
                 locationDao.delete(location.englishName, location.countryCode)
-                val newLocations =
-                    uiState.favoriteLocations.filter { locationWeather ->
-                        locationWeather.location != location
-                    }
+                val newLocations = uiState.favoriteLocations.filter { locationWeather ->
+                    locationWeather.location != location
+                }
+                weatherDao.deleteWeather("${location.englishName},${location.countryCode}")
                 uiState = uiState.copy(favoriteLocations = newLocations)
                 Log.d("MainViewModel", "Removed favorite location: $location")
             } catch (e: Exception) {
@@ -195,9 +223,7 @@ class MainViewModel : ViewModel() {
                 )
                 uiState = uiState.copy(
                     previewLocation = LocationWeather(
-                        locationData,
-                        weatherData!!,
-                        LocationRole.FAVORITE
+                        locationData, weatherData!!, LocationRole.FAVORITE
                     )
                 )
             }
@@ -216,22 +242,20 @@ class MainViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val userLocation = LocationAndRole(
-                    locationService.getUserLocation(),
-                    LocationRole.USER
+                    locationService.getUserLocation(), LocationRole.USER
                 )
                 if (uiState.favoriteLocations.any { it.location == userLocation.location && it.role == LocationRole.USER }) {
-                    Log.d("MainViewModel", "User location already in favorites, nothing to update")
+                    Log.d(
+                        "MainViewModel", "User location already in favorites, nothing to update"
+                    )
                     return@launch
                 }
                 val userWeather = fetchWeatherDataForCoordinates(
                     Coordinates(userLocation.location.lat, userLocation.location.lon)
                 )
-                val userLocationWithWeather =
-                    LocationWeather(
-                        userLocation.location,
-                        userWeather!!,
-                        userLocation.role
-                    )
+                val userLocationWithWeather = LocationWeather(
+                    userLocation.location, userWeather!!, userLocation.role
+                )
                 val newLocations = listOf(userLocationWithWeather) + uiState.favoriteLocations
                 uiState = uiState.copy(
                     favoriteLocations = newLocations,

@@ -2,7 +2,6 @@ package com.example.weatherapp.model
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.LocalTime
 
 data class WeatherData(
     val meta: Meta,

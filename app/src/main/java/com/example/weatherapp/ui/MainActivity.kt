@@ -41,6 +41,7 @@ class MainActivity : ComponentActivity() {
             WeatherAppTheme {
                 // Create the dependencies
                 val locationDao = (application as MyApplication).locationDao
+                val weatherDao = (application as MyApplication).weatherDao
                 val locationService = LocationService(applicationContext)
                 val dataStore = applicationContext.settingsDataStore
 
@@ -54,6 +55,7 @@ class MainActivity : ComponentActivity() {
                 LaunchedEffect(Unit) {
                     // Inject the dependencies manually, no Hilt or other fancy tools required for now
                     mainVm.setLocationDao(locationDao)
+                    mainVm.setWeatherDao(weatherDao)
                     mainVm.setLocationService(locationService)
                     settingsVm.setDataStore(dataStore)
                     searchScreenVm.setLocationService(locationService)
