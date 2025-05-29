@@ -1,5 +1,8 @@
 package com.example.weatherapp.model
 
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import com.example.weatherapp.R
 
 /**
@@ -143,6 +146,22 @@ enum class OpenMeteoCodes(
             val entry = entries.find { code in it.codes }
             return if (isDay) entry?.iconResDayId ?: R.drawable.sun else entry?.iconResNightId
                 ?: R.drawable.moon
+        }
+
+        fun presetForWeatherCode(code: Int, isDay: Boolean): WeatherPreset {
+            return when (code) {
+                0, 1 -> if (isDay) WeatherPreset.CLEAR_DAY else WeatherPreset.CLEAR_NIGHT
+
+                2, 3, in 45..48 -> if (isDay) WeatherPreset.CLOUDY_DAY else WeatherPreset.CLOUDY_NIGHT
+
+                in 51..67, in 80..82 -> if (isDay) WeatherPreset.RAINY_DAY else WeatherPreset.RAINY_NIGHT
+
+                in 71..77, in 85..86 -> if (isDay) WeatherPreset.SNOWY_DAY else WeatherPreset.SNOWY_NIGHT
+
+                in 95..99 -> WeatherPreset.STORMY
+
+                else -> if (isDay) WeatherPreset.CLEAR_DAY else WeatherPreset.CLEAR_NIGHT
+            }
         }
     }
 }

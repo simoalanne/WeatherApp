@@ -8,9 +8,11 @@ import com.example.weatherapp.model.Meta
 import com.example.weatherapp.model.OpenMeteoCodes
 import com.example.weatherapp.model.OpenMeteoResponse
 import com.example.weatherapp.model.WeatherData
+import com.example.weatherapp.model.WeatherInput
+import com.example.weatherapp.model.WeatherVisuals
+import com.example.weatherapp.model.WeatherVisualsObject
 import com.example.weatherapp.utils.getLocalDateTimeFromUnixTimestamp
-import java.time.Duration
-import kotlin.math.abs
+import com.example.weatherapp.utils.truncateToHours
 
 fun OpenMeteoResponse.toWeatherData(): WeatherData {
 
@@ -42,7 +44,12 @@ fun OpenMeteoResponse.toWeatherData(): WeatherData {
         conditionId = OpenMeteoCodes.getConditionFromCode(this.currentWeather.weatherCode),
         isDay = isDay,
         sunrise = sunrise,
-        sunset = sunset
+        sunset = sunset,
+        weatherVisuals = WeatherVisualsObject.visualsForPreset(
+            OpenMeteoCodes.presetForWeatherCode(
+                this.currentWeather.weatherCode, isDay
+            )
+        )
     )
 
     val hourlyWeatherGrouped = this.hourlyWeather.time.mapIndexed { index, time ->
@@ -52,25 +59,31 @@ fun OpenMeteoResponse.toWeatherData(): WeatherData {
             weatherIconId = OpenMeteoCodes.getIconFromCode(
                 this.hourlyWeather.weatherCode[index], this.hourlyWeather.isDay[index] == 1
             ),
-            pop = this.hourlyWeather.pop[index]
+            pop = this.hourlyWeather.pop[index],
+            windGusts = this.hourlyWeather.windGusts[index],
+            windDirection = this.hourlyWeather.flippedWindDirection[index],
+            humidity = this.hourlyWeather.humidity[index],
+            feelsLike = this.hourlyWeather.feelsLike[index]
         )
     }.groupBy { it.time.toLocalDate() }
 
     val dailyWeathers = this.dailyWeather.time.mapIndexed { index, time ->
         val date = getLocalDateTimeFromUnixTimestamp(time, utcOffsetSeconds).toLocalDate()
-        val closestEntry = hourlyWeatherGrouped[date]?.minBy {
-            abs(
-                Duration.between(it.time, currentWeather.time).toMinutes()
-            )
-        }
         // if is the current day copy the current weather data as hourly data to the hourly list
         // as pop doesn't exist for current use the closest entry's pop for that instead
         val newHourlyWeathers = if (index == 1) {
+            val closestEntry = hourlyWeatherGrouped[date]?.find {
+                it.time == truncateToHours(currentWeather.time)
+            } ?: hourlyWeatherGrouped[date]?.first()
             val currentWeatherAsHourly = HourlyWeather(
                 time = currentWeather.time,
                 temperature = currentWeather.temperature,
                 weatherIconId = currentWeather.weatherIconId,
-                pop = closestEntry?.pop ?: 0
+                pop = closestEntry?.pop ?: 0,
+                windGusts = closestEntry?.windGusts ?: 0.0,
+                windDirection = closestEntry?.windDirection ?: 0,
+                humidity = closestEntry?.humidity ?: 0,
+                feelsLike = closestEntry?.feelsLike ?: 0.0,
             )
             // If current time is even hour, then remove the duplicated hourly weather entry
             // as the current weather should be more accurate than the closest entry
@@ -99,17 +112,19 @@ fun OpenMeteoResponse.toWeatherData(): WeatherData {
 
         val sunriseAndSunsetAsHourly =
             listOf(dailyWeather.sunrise, dailyWeather.sunset).mapIndexed { sunIndex, time ->
-                val entryToUse = dailyWeather.hourlyWeathers.minBy {
-                    abs(
-                        Duration.between(time, it.time).toMinutes()
-                    )
-                }
+                val entryToUse = dailyWeather.hourlyWeathers.find {
+                    it.time == truncateToHours(time)
+                } ?: dailyWeather.hourlyWeathers.first()
 
                 HourlyWeather(
                     time = time,
                     temperature = entryToUse.temperature,
                     weatherIconId = if (sunIndex == 0) R.drawable.sunrise else R.drawable.sunset,
-                    pop = entryToUse.pop
+                    pop = entryToUse.pop,
+                    windGusts = entryToUse.windGusts,
+                    windDirection = entryToUse.windDirection,
+                    humidity = entryToUse.humidity,
+                    feelsLike = entryToUse.feelsLike
                 )
             }
 

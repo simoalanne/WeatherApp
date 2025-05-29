@@ -64,8 +64,8 @@ fun WeatherPage(
         Margin(margin = 20)
         WeatherInfo(
             current = currentWeather.current.temperature,
-            min = weather24Hours.minOf { it.temperature },
-            max = weather24Hours.maxOf { it.temperature },
+            min = currentWeather.dailyForecasts.first().minTemperature,
+            max = currentWeather.dailyForecasts.first().maxTemperature,
             condition = stringResource(currentWeather.current.conditionId)
         )
         Margin(margin = 20)

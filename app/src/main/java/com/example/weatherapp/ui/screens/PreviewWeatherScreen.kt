@@ -12,11 +12,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
+import com.example.weatherapp.model.WeatherPreset
+import com.example.weatherapp.model.WeatherVisualsObject
 import com.example.weatherapp.ui.composables.BackgroundImage
 import com.example.weatherapp.ui.composables.PreviewWeatherAppBar
 import com.example.weatherapp.ui.composables.WeatherPage
 import com.example.weatherapp.utils.formatLocationName
 import com.example.weatherapp.utils.rememberCurrentLanguageCode
+import com.example.weatherapp.viewmodel.AppPreferences
 import com.example.weatherapp.viewmodel.MainViewModel
 
 @Composable
@@ -38,8 +41,13 @@ fun PreviewWeatherScreen(
     val title = formatLocationName(preview.location, languageCode = languageCode)
 
     Box(modifier = Modifier.fillMaxSize()) {
-        BackgroundImage(isDay = currentWeather.current.isDay)
-
+        BackgroundImage(
+            weatherVisuals = if (AppPreferences.preferences.selectedBackgroundPreset != WeatherPreset.DYNAMIC) {
+                WeatherVisualsObject.visualsForPreset(AppPreferences.preferences.selectedBackgroundPreset)
+            } else {
+                currentWeather.current.weatherVisuals
+            }
+        )
         Column(modifier = Modifier.fillMaxSize()) {
             PreviewWeatherAppBar(
                 title = title,

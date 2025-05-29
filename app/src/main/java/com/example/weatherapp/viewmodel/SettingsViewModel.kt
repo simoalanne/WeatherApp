@@ -9,10 +9,12 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.weatherapp.model.HourlyWeatherWhatToShow
 import com.example.weatherapp.model.SettingsState
 import com.example.weatherapp.model.TempUnit
 import com.example.weatherapp.model.TimeFormat
+import com.example.weatherapp.model.WeatherInfoOption
+import com.example.weatherapp.model.WeatherPreset
+import com.example.weatherapp.model.WindSpeedUnit
 import kotlinx.coroutines.launch
 
 /**
@@ -42,13 +44,33 @@ class SettingsViewModel : ViewModel() {
             else -> TimeFormat.TWENTY_FOUR_HOUR
         }
 
-        val hourlyWeatherWhatToShow = when (this[PreferencesKeys.HOURLY_WEATHER_WHAT_TO_SHOW]) {
-            "condition_and_temp" -> HourlyWeatherWhatToShow.CONDITION_AND_TEMP
-            "pop" -> HourlyWeatherWhatToShow.POP
-            else -> HourlyWeatherWhatToShow.BOTH
-        }
+        val windSpeedUnit =
+            WindSpeedUnit.valueOf(this[PreferencesKeys.WIND_SPEED_UNIT] ?: "METERS_PER_SECOND")
 
-        return SettingsState(unit, timeFormat, hourlyWeatherWhatToShow)
+        val selectedOptions = this[PreferencesKeys.SELECTED_OPTIONS]?.split(",")?.map {
+            WeatherInfoOption.valueOf(it)
+        }?.toSet()
+
+        val selectedBackgroundPreset = WeatherPreset.valueOf(
+            this[PreferencesKeys.BACKGROUND_PRESET] ?: "DYNAMIC"
+        )
+
+        return if (selectedOptions != null) {
+            SettingsState(
+                tempUnit = unit,
+                timeFormat = timeFormat,
+                selectedWeatherInfoOptions = selectedOptions,
+                windSpeedUnit = windSpeedUnit,
+                selectedBackgroundPreset = selectedBackgroundPreset
+            )
+        } else {
+            SettingsState(
+                tempUnit = unit,
+                timeFormat = timeFormat,
+                windSpeedUnit = windSpeedUnit,
+                selectedBackgroundPreset = selectedBackgroundPreset
+            )
+        }
     }
 
     fun loadSettings() {
@@ -77,11 +99,27 @@ class SettingsViewModel : ViewModel() {
         }
     }
 
-    fun setHourlyWeatherWhatToShow(whatToShow: HourlyWeatherWhatToShow) {
+    fun setSelectedOptions(selectedOptions: Set<WeatherInfoOption>) {
         viewModelScope.launch {
             dataStore.edit { preferences ->
-                preferences[PreferencesKeys.HOURLY_WEATHER_WHAT_TO_SHOW] =
-                    whatToShow.name.lowercase()
+                preferences[PreferencesKeys.SELECTED_OPTIONS] =
+                    selectedOptions.joinToString(",") { it.name }
+            }
+        }
+    }
+
+    fun setWindSpeedUnit(windSpeedUnit: String) {
+        viewModelScope.launch {
+            dataStore.edit { preferences ->
+                preferences[PreferencesKeys.WIND_SPEED_UNIT] = windSpeedUnit
+            }
+        }
+    }
+
+    fun setSelectedBackgroundPreset(selectedBackgroundPreset: WeatherPreset) {
+        viewModelScope.launch {
+            dataStore.edit { preferences ->
+                preferences[PreferencesKeys.BACKGROUND_PRESET] = selectedBackgroundPreset.name
             }
         }
     }
@@ -90,7 +128,9 @@ class SettingsViewModel : ViewModel() {
 object PreferencesKeys {
     val TEMP_UNIT = stringPreferencesKey("temp_unit")
     val TIME_FORMAT = stringPreferencesKey("time_format")
-    val HOURLY_WEATHER_WHAT_TO_SHOW = stringPreferencesKey("hourly_weather_what_to_show")
+    val SELECTED_OPTIONS = stringPreferencesKey("selected_weather_info_options")
+    val WIND_SPEED_UNIT = stringPreferencesKey("wind_speed_unit")
+    val BACKGROUND_PRESET = stringPreferencesKey("background_preset")
 }
 
 /**

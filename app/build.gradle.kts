@@ -116,4 +116,7 @@ dependencies {
 
     // Charting library for weather data
     implementation(libs.compose.charts)
+
+    // Lottie animations
+    implementation(libs.lottie.compose)
 }

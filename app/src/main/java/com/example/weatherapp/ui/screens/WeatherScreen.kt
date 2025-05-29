@@ -1,5 +1,6 @@
 package com.example.weatherapp.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,11 +16,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.example.weatherapp.R
+import com.example.weatherapp.model.WeatherPreset
+import com.example.weatherapp.model.WeatherVisualsObject
 import com.example.weatherapp.ui.composables.AppBar
 import com.example.weatherapp.ui.composables.BackgroundImage
 import com.example.weatherapp.ui.composables.WeatherPage
 import com.example.weatherapp.utils.formatLocationName
 import com.example.weatherapp.utils.rememberCurrentLanguageCode
+import com.example.weatherapp.viewmodel.AppPreferences
 import com.example.weatherapp.viewmodel.MainViewModel
 import kotlinx.coroutines.delay
 
@@ -74,10 +78,15 @@ fun WeatherScreen(
         val currentWeather = locationWeather.weather
         val languageCode = rememberCurrentLanguageCode()
         val title = formatLocationName(locationWeather.location, languageCode = languageCode)
-
+        Log.d("WeatherScreen", "WeatherScreen conditionid: ${currentWeather.current.conditionId}")
         Box(modifier = Modifier.fillMaxSize()) {
-            BackgroundImage(isDay = currentWeather.current.isDay)
-
+            BackgroundImage(
+                if (AppPreferences.preferences.selectedBackgroundPreset != WeatherPreset.DYNAMIC) {
+                    WeatherVisualsObject.visualsForPreset(AppPreferences.preferences.selectedBackgroundPreset)
+                } else {
+                    currentWeather.current.weatherVisuals
+                }
+            )
             Column(modifier = Modifier.fillMaxSize()) {
                 AppBar(
                     title = title,

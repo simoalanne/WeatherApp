@@ -1,6 +1,7 @@
 package com.example.weatherapp.model
 
 import com.google.gson.annotations.SerializedName
+import kotlin.math.round
 
 data class OpenMeteoResponse(
     val latitude: Double,
@@ -21,7 +22,7 @@ data class CurrentWeatherResponse(
     @SerializedName("weathercode")
     val weatherCode: Int,
     @SerializedName("is_day")
-    val isDay: Int
+    val isDay: Int,
 )
 
 data class HourlyWeatherResponse(
@@ -33,8 +34,23 @@ data class HourlyWeatherResponse(
     @SerializedName("is_day")
     val isDay: List<Int>,
     @SerializedName("precipitation_probability")
-    val pop: List<Int>
-)
+    val pop: List<Int>,
+    @SerializedName("wind_gusts_10m")
+    val windGusts: List<Double>,
+    @SerializedName("wind_direction_10m")
+    val windDirection: List<Int>,
+    @SerializedName("relative_humidity_2m")
+    val humidity: List<Int>,
+    @SerializedName("apparent_temperature")
+    val feelsLike: List<Double>
+) {
+    val flippedWindDirection: List<Int>
+        get() = windDirection.map {
+            val flipped = (it + 180) % 360 // the wind direction is changed from "from" to "to" because most weather apps seem to do this
+            val rounded = round(flipped / 45.0) * 45 // round so it matches a compass direction
+            rounded.toInt()
+        }
+}
 
 data class DailyWeatherResponse(
     val time: List<Long>,

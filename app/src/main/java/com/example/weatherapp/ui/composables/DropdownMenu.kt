@@ -24,7 +24,7 @@ fun <T> DropdownMenu(
     label: String,
     leadingIcon: @Composable () -> Unit = {},
     options: List<DropdownOption<T>>,
-    selectedOption: T?,
+    selectedOptions: Set<T>,
     onOptionSelected: (T) -> Unit,
 ) {
     ExpandableColumn(
@@ -60,7 +60,7 @@ fun <T> DropdownMenu(
                         imageVector = Icons.Filled.Check,
                         contentDescription = stringResource(R.string.selected),
                         // use transparent icon to stop height slightly shifting for the selected option
-                        tint = if (selectedOption == optionValue) Color.Green else Color.Transparent
+                        tint = if (optionValue in selectedOptions) Color.Green else Color.Transparent
                     )
                 }
             }
