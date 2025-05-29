@@ -150,10 +150,12 @@ fun TemperatureChart(
                 enabled = true,
                 xAxisProperties = AxisProperties(
                     enabled = true,
+                    color = SolidColor(Color.White.copy(alpha = 0.5f)),
                     lineCount = totalIntervals
                 ),
                 yAxisProperties = AxisProperties(
                     enabled = true,
+                    color = SolidColor(Color.White.copy(alpha = 0.5f)),
                     lineCount = weekDays.size
                 )
             ),
