@@ -1,7 +1,6 @@
 package com.example.weatherapp.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement.Absolute.spacedBy
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,6 +9,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Air
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Thermostat
@@ -30,10 +31,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.weatherapp.R
-import com.example.weatherapp.model.HourlyWeatherWhatToShow
 import com.example.weatherapp.model.LocationRole
 import com.example.weatherapp.model.TempUnit
 import com.example.weatherapp.model.TimeFormat
+import com.example.weatherapp.model.WeatherInfoOption
+import com.example.weatherapp.model.WeatherPreset
+import com.example.weatherapp.model.WindSpeedUnit
+import com.example.weatherapp.model.localizedLabel
 import com.example.weatherapp.ui.composables.CountryFlag
 import com.example.weatherapp.ui.composables.CurrentLocation
 import com.example.weatherapp.ui.composables.DropdownMenu
@@ -53,6 +57,22 @@ fun SettingsScreen(
     val settingsState = settingsViewModel.settingsState
     val context = LocalContext.current
     val currentLanguage = getAppLanguage(context)
+
+    fun handleOptionSelected(option: WeatherInfoOption) {
+        if (option in settingsState.selectedWeatherInfoOptions) {
+            val newSelection = settingsState.selectedWeatherInfoOptions - option
+            // There has to always be one option selected that is not the "LABELS" option. This prevents a scenario
+            // where no data would be rendered
+            if (newSelection.isNotEmpty() && !(newSelection.size == 1 && WeatherInfoOption.LABELS in newSelection)) {
+                settingsViewModel.setSelectedOptions(newSelection)
+            }
+        } else {
+            settingsViewModel.setSelectedOptions(
+                settingsState.selectedWeatherInfoOptions + option
+            )
+        }
+    }
+
     Column(
         verticalArrangement = spacedBy(16.dp),
         modifier = Modifier
@@ -84,13 +104,11 @@ fun SettingsScreen(
             verticalArrangement = spacedBy(24.dp),
         ) {
             DropdownMenu(
-                label = stringResource(R.string.app_language),
-                leadingIcon = {
+                label = stringResource(R.string.app_language), leadingIcon = {
                     IconWithBackground(
                         icon = Icons.Default.Language, backgroundColor = Color.Blue
                     )
-                },
-                options = listOf(
+                }, options = listOf(
                     DropdownOption(
                         label = stringResource(R.string.english),
                         value = "en",
@@ -98,12 +116,28 @@ fun SettingsScreen(
                         label = stringResource(R.string.finnish),
                         value = "fi",
                         trailingIcon = { CountryFlag("fi") })
-                ),
-                selectedOption = currentLanguage,
-                onOptionSelected = {
+                ), selectedOptions = setOf(currentLanguage), onOptionSelected = {
                     changeAppLanguage(context, it)
                 })
-
+            DropdownMenu(
+                label = stringResource(R.string.weather_screen_background_image),
+                leadingIcon = {
+                    IconWithBackground(
+                        icon = Icons.Default.Image,
+                        backgroundColor = Color.DarkGray
+                    )
+                },
+                List(WeatherPreset.entries.size) {
+                    DropdownOption(
+                        label = WeatherPreset.entries[it].localizedLabel(),
+                        value = WeatherPreset.entries[it]
+                    )
+                },
+                selectedOptions = setOf(settingsState.selectedBackgroundPreset),
+                onOptionSelected = {
+                    settingsViewModel.setSelectedBackgroundPreset(it)
+                }
+            )
             DropdownMenu(
                 label = stringResource(R.string.temperature_unit), leadingIcon = {
                     IconWithBackground(
@@ -113,9 +147,34 @@ fun SettingsScreen(
                     DropdownOption("Celsius (°C)", TempUnit.CELSIUS),
                     DropdownOption("Fahrenheit (°F)", TempUnit.FAHRENHEIT),
                     DropdownOption("Kelvin (K)", TempUnit.KELVIN)
-                ), selectedOption = settingsState.tempUnit, onOptionSelected = {
+                ), selectedOptions = setOf(settingsState.tempUnit), onOptionSelected = {
                     settingsViewModel.setTempUnit(it)
                 })
+            DropdownMenu(
+                label = stringResource(R.string.wind_speed_unit), leadingIcon = {
+                    IconWithBackground(
+                        icon = Icons.Default.Air, backgroundColor = Color.DarkGray
+                    )
+                },
+                options = listOf(
+                    DropdownOption(
+                        stringResource(R.string.meters_per_second),
+                        WindSpeedUnit.METERS_PER_SECOND
+                    ),
+                    DropdownOption(
+                        stringResource(R.string.kilometers_per_hour),
+                        WindSpeedUnit.KILOMETERS_PER_HOUR
+                    ),
+                    DropdownOption(
+                        stringResource(R.string.miles_per_hour),
+                        WindSpeedUnit.MILES_PER_HOUR
+                    )
+                ),
+                selectedOptions = setOf(settingsState.windSpeedUnit),
+                onOptionSelected = {
+                    settingsViewModel.setWindSpeedUnit(it.name)
+                }
+            )
             DropdownMenu(
                 label = stringResource(R.string.hourly_forecast_details),
                 leadingIcon = {
@@ -126,22 +185,40 @@ fun SettingsScreen(
                 },
                 options = listOf(
                     DropdownOption(
-                        stringResource(R.string.condition_and_temp),
-                        HourlyWeatherWhatToShow.CONDITION_AND_TEMP
+                        stringResource(R.string.weather_icon),
+                        WeatherInfoOption.WEATHER_ICON
+                    ),
+                    DropdownOption(
+                        stringResource(R.string.temperature),
+                        WeatherInfoOption.TEMPERATURE
+                    ),
+                    DropdownOption(
+                        stringResource(R.string.feels_like),
+                        WeatherInfoOption.FEELS_LIKE
+                    ),
+                    DropdownOption(
+                        stringResource(R.string.wind_direction),
+                        WeatherInfoOption.WIND_DIRECTION
+                    ),
+                    DropdownOption(
+                        stringResource(R.string.wind_gusts),
+                        WeatherInfoOption.WIND_GUSTS
                     ),
                     DropdownOption(
                         stringResource(R.string.probability_of_precipitation),
-                        HourlyWeatherWhatToShow.POP
+                        WeatherInfoOption.PROBABILITY_OF_PRECIPITATION
                     ),
                     DropdownOption(
-                        stringResource(R.string.show_both),
-                        HourlyWeatherWhatToShow.BOTH
+                        stringResource(R.string.humidity),
+                        WeatherInfoOption.HUMIDITY
+                    ),
+                    DropdownOption(
+                        stringResource(R.string.show_labels),
+                        WeatherInfoOption.LABELS
                     )
                 ),
-                selectedOption = settingsState.hourlyWeatherWhatToShow,
-                onOptionSelected = {
-                    settingsViewModel.setHourlyWeatherWhatToShow(it)
-                }
+                selectedOptions = settingsState.selectedWeatherInfoOptions,
+                onOptionSelected = { handleOptionSelected(it) }
             )
             DropdownMenu(
                 label = stringResource(R.string.time_format), leadingIcon = {
@@ -155,11 +232,12 @@ fun SettingsScreen(
                         stringResource(R.string.twenty_four_hour_format),
                         TimeFormat.TWENTY_FOUR_HOUR
                     )
-                ), selectedOption = settingsState.timeFormat, onOptionSelected = {
+                ), selectedOptions = setOf(settingsState.timeFormat), onOptionSelected = {
                     settingsViewModel.setTimeFormat(it)
                 })
             CurrentLocation(
-                userLocation = mainViewModel.uiState.favoriteLocations.find { it.role == LocationRole.USER }?.location,
+                userLocation =
+                    mainViewModel.uiState.favoriteLocations.find { it.role == LocationRole.USER }?.location,
                 handleUserLocate = {
                     mainViewModel.locateUser()
                 })

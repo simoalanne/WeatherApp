@@ -21,7 +21,8 @@ data class CurrentWeather(
     val conditionId: Int,
     val isDay: Boolean,
     val sunrise: LocalDateTime,
-    val sunset: LocalDateTime
+    val sunset: LocalDateTime,
+    val weatherVisuals: WeatherVisuals
 )
 
 data class DailyWeather(
@@ -39,5 +40,9 @@ data class HourlyWeather(
     val time: LocalDateTime,
     val temperature: Double,
     val weatherIconId: Int,
-    val pop: Int
+    val pop: Int,
+    val windGusts: Double,
+    val windDirection: Int,
+    val humidity: Int,
+    val feelsLike: Double
 )

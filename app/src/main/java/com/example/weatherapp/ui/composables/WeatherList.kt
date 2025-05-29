@@ -2,7 +2,9 @@ package com.example.weatherapp.ui.composables
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Arrangement.Absolute.spacedBy
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
@@ -22,13 +24,22 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.VerticalDivider
+import androidx.compose.ui.Alignment
+import com.example.weatherapp.model.WeatherInfoOption
+import com.example.weatherapp.viewmodel.AppPreferences
 
+/**
+ * Renders a list of hourly weather items. the UX here isn't the best because originally there was
+ * not meant to be as many items stacked up in the WeatherListItem composable. Swapping from lazy row
+ * to lazy column and switching WeatherListItems to rows would work better but run out of time to do that
+ */
 @Composable
 fun WeatherList(
     hourlyWeathers: List<HourlyWeather>,
     isNext24Hours: Boolean = true
 ) {
-
+    val showLabels = WeatherInfoOption.LABELS in AppPreferences.preferences.selectedWeatherInfoOptions
     val horizontalScrollBlocker = remember {
         object : NestedScrollConnection {
             override fun onPostScroll(
@@ -38,7 +49,9 @@ fun WeatherList(
         }
     }
 
-    Box(
+    Row(
+        horizontalArrangement = spacedBy(2.dp),
+        verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             // nested scroll here is used to capture the remaining horizontal scroll that would otherwise
             // go all the way to the pager composable which is not desired here because that makes it
@@ -47,6 +60,9 @@ fun WeatherList(
             // similar to what I've ended up using in the end.
             .nestedScroll(horizontalScrollBlocker)
     ) {
+        if (showLabels) {
+            WeatherItemLabels()
+        }
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier
@@ -61,9 +77,11 @@ fun WeatherList(
                     if (index == 0 && isNext24Hours) stringResource(R.string.now) else formatLocalDateTime(
                         hourlyWeather.time
                     )
-                WeatherListItem(
-                    time, hourlyWeather.weatherIconId, hourlyWeather.temperature, hourlyWeather.pop
-                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    WeatherListItem(
+                        time, hourlyWeather
+                    )
+                }
             }
         }
     }

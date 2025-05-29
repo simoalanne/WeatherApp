@@ -12,11 +12,12 @@ interface WeatherAPI {
         @Query("latitude") lat: Double,
         @Query("longitude") lon: Double,
         @Query("current_weather") currentWeather: Boolean = true,
-        @Query("hourly") hourly: String = "temperature_2m,weathercode,precipitation_probability,is_day",
+        @Query("hourly") hourly: String = "temperature_2m,weathercode,precipitation_probability,is_day,wind_gusts_10m,relative_humidity_2m,apparent_temperature,wind_direction_10m",
         @Query("daily") daily: String = "weathercode,temperature_2m_max,temperature_2m_min,temperature_2m_mean,sunrise,sunset",
         @Query("timeformat") timeformat: String = "unixtime",
         @Query("past_days") pastDays: Int = 1,
-        @Query("timezone") timezone: String = "auto"
+        @Query("timezone") timezone: String = "auto",
+        @Query("windspeed_unit") windspeedUnit: String = "ms"
     ): OpenMeteoResponse
 
 

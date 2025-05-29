@@ -5,6 +5,7 @@ import com.example.weatherapp.model.Coordinates
 import com.example.weatherapp.model.HourlyWeather
 import com.example.weatherapp.model.TempUnit
 import com.example.weatherapp.model.WeatherData
+import com.example.weatherapp.model.WindSpeedUnit
 import com.example.weatherapp.network.WeatherAPI
 import com.example.weatherapp.viewmodel.AppPreferences
 import kotlin.math.roundToInt
@@ -63,3 +64,10 @@ fun convertTemperature(temperature: Double, unit: TempUnit): Double {
 
     }
 }
+
+fun formatWindSpeed(windSpeed: Double) =
+    when (AppPreferences.preferences.windSpeedUnit) {
+        WindSpeedUnit.METERS_PER_SECOND -> windSpeed.roundToInt()
+        WindSpeedUnit.KILOMETERS_PER_HOUR -> (windSpeed * 3.6).roundToInt()
+        WindSpeedUnit.MILES_PER_HOUR -> (windSpeed * 2.237).roundToInt()
+    }
