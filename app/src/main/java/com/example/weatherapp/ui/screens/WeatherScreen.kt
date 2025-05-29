@@ -33,6 +33,7 @@ fun WeatherScreen(
     mainViewModel: MainViewModel
 ) {
     val uiState = mainViewModel.uiState
+    Log.d("WeatherScreen", "WeatherScreen: $uiState")
 
     if (uiState.isLoading) {
         Box(
@@ -51,56 +52,55 @@ fun WeatherScreen(
         return
     }
 
-    if (uiState.errorResId != null) {
+    if (uiState.favoriteLocations.isEmpty()) {
         LaunchedEffect(Unit) {
             navController.navigate("search")
         }
         return
     }
 
-    if (uiState.favoriteLocations.isNotEmpty()) {
-        val pagerState = rememberPagerState(
-            initialPage = uiState.pageIndex,
-            pageCount = { uiState.favoriteLocations.size }
+    val pagerState = rememberPagerState(
+        initialPage = uiState.pageIndex,
+        pageCount = { uiState.favoriteLocations.size }
+    )
+
+    LaunchedEffect(Unit) {
+        delay(1000)
+        mainViewModel.clearPreview()
+    }
+
+    LaunchedEffect(pagerState.currentPage) {
+        mainViewModel.changePageIndex(pagerState.currentPage)
+    }
+
+    val currentIndex = pagerState.currentPage.coerceIn(uiState.favoriteLocations.indices)
+    val locationWeather = uiState.favoriteLocations[currentIndex]
+    val currentWeather = locationWeather.weather
+    if (currentWeather == null) return
+    val languageCode = rememberCurrentLanguageCode()
+    val title = formatLocationName(locationWeather.location, languageCode = languageCode)
+    Log.d("WeatherScreen", "WeatherScreen conditionid: ${currentWeather.current.conditionId}")
+    Box(modifier = Modifier.fillMaxSize()) {
+        BackgroundImage(
+            if (AppPreferences.preferences.selectedBackgroundPreset != WeatherPreset.DYNAMIC) {
+                WeatherVisualsObject.visualsForPreset(AppPreferences.preferences.selectedBackgroundPreset)
+            } else {
+                currentWeather.current.weatherVisuals
+            }
         )
-
-        LaunchedEffect(Unit) {
-            delay(1000)
-            mainViewModel.clearPreview()
-        }
-
-        LaunchedEffect(pagerState.currentPage) {
-            mainViewModel.changePageIndex(pagerState.currentPage)
-        }
-
-        val currentIndex = pagerState.currentPage.coerceIn(uiState.favoriteLocations.indices)
-        val locationWeather = uiState.favoriteLocations[currentIndex]
-        val currentWeather = locationWeather.weather
-        val languageCode = rememberCurrentLanguageCode()
-        val title = formatLocationName(locationWeather.location, languageCode = languageCode)
-        Log.d("WeatherScreen", "WeatherScreen conditionid: ${currentWeather.current.conditionId}")
-        Box(modifier = Modifier.fillMaxSize()) {
-            BackgroundImage(
-                if (AppPreferences.preferences.selectedBackgroundPreset != WeatherPreset.DYNAMIC) {
-                    WeatherVisualsObject.visualsForPreset(AppPreferences.preferences.selectedBackgroundPreset)
-                } else {
-                    currentWeather.current.weatherVisuals
-                }
+        Column(modifier = Modifier.fillMaxSize()) {
+            AppBar(
+                title = title,
+                onSearchIconPress = { navController.navigate("search") },
+                onSettingsIconPress = { navController.navigate("settings") },
+                totalPages = uiState.favoriteLocations.size,
+                currentPage = pagerState.currentPage
             )
-            Column(modifier = Modifier.fillMaxSize()) {
-                AppBar(
-                    title = title,
-                    onSearchIconPress = { navController.navigate("search") },
-                    onSettingsIconPress = { navController.navigate("settings") },
-                    totalPages = uiState.favoriteLocations.size,
-                    currentPage = pagerState.currentPage
+            HorizontalPager(state = pagerState) { pageIndex ->
+                WeatherPage(
+                    locationWeather = uiState.favoriteLocations[pageIndex],
+                    onRefresh = { mainViewModel.refreshWeather(pageIndex) }
                 )
-                HorizontalPager(state = pagerState) { pageIndex ->
-                    WeatherPage(
-                        locationWeather = uiState.favoriteLocations[pageIndex],
-                        onRefresh = { mainViewModel.refreshWeather(pageIndex) }
-                    )
-                }
             }
         }
     }

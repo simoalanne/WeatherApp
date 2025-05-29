@@ -39,6 +39,7 @@ fun WeatherPage(
     onRefresh: () -> Unit
 ) {
     val currentWeather = locationWeather.weather
+    if (currentWeather == null) return
     val weather24Hours =
         currentWeather.dailyForecasts.flatMap { it.hourlyWeathers }.takeWhile {
             it.time.isBefore(currentWeather.current.time.plusHours(24))
