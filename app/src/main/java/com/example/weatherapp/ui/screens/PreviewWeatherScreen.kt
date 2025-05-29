@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
+import com.example.weatherapp.model.OpenMeteoCodes
 import com.example.weatherapp.model.WeatherPreset
 import com.example.weatherapp.model.WeatherVisualsObject
 import com.example.weatherapp.ui.composables.BackgroundImage
@@ -46,7 +47,12 @@ fun PreviewWeatherScreen(
             weatherVisuals = if (AppPreferences.preferences.selectedBackgroundPreset != WeatherPreset.DYNAMIC) {
                 WeatherVisualsObject.visualsForPreset(AppPreferences.preferences.selectedBackgroundPreset)
             } else {
-                currentWeather.current.weatherVisuals
+                WeatherVisualsObject.visualsForPreset(
+                    OpenMeteoCodes.presetForWeatherCode(
+                        currentWeather.current.weatherCode,
+                        currentWeather.current.isDay
+                    )
+                )
             }
         )
         Column(modifier = Modifier.fillMaxSize()) {
@@ -56,8 +62,7 @@ fun PreviewWeatherScreen(
                 onStarClick = { mainViewModel.changePreviewToFavorite() }
             )
             WeatherPage(
-                locationWeather = preview,
-                onRefresh = { mainViewModel.refreshWeather() }
+                locationWeather = preview
             )
         }
     }

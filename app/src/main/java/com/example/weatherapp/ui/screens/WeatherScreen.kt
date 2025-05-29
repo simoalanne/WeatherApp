@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.example.weatherapp.R
+import com.example.weatherapp.model.OpenMeteoCodes
 import com.example.weatherapp.model.WeatherPreset
 import com.example.weatherapp.model.WeatherVisualsObject
 import com.example.weatherapp.ui.composables.AppBar
@@ -39,19 +40,18 @@ fun WeatherScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background),
-
-            ) {
+                .background(MaterialTheme.colorScheme.background)
+        ) {
             Text(
                 stringResource(R.string.loading),
                 color = MaterialTheme.colorScheme.onBackground
             )
             LinearProgressIndicator()
-
         }
         return
     }
 
+    // If no favorite locations, navigate to search
     if (uiState.favoriteLocations.isEmpty()) {
         LaunchedEffect(Unit) {
             navController.navigate("search")
@@ -64,28 +64,46 @@ fun WeatherScreen(
         pageCount = { uiState.favoriteLocations.size }
     )
 
+    // when user adds a preview as favorite that causes navigation to this screen,
+    // however cause there is navigation delay this needs to be delayed to avoid
+    // showing the preview screen UI with false state when it's still navigating to here
     LaunchedEffect(Unit) {
         delay(1000)
         mainViewModel.clearPreview()
     }
 
+    // sync vm state with pager state
     LaunchedEffect(pagerState.currentPage) {
         mainViewModel.changePageIndex(pagerState.currentPage)
     }
 
+    // query refresh every 10 seconds or when the page changes
     val currentIndex = pagerState.currentPage.coerceIn(uiState.favoriteLocations.indices)
+    LaunchedEffect(currentIndex) {
+        while (true) {
+            Log.d("WeatherScreen", "Refreshing weather for page $currentIndex")
+            mainViewModel.refreshWeather()
+            delay(10_000)
+        }
+    }
+
     val locationWeather = uiState.favoriteLocations[currentIndex]
     val currentWeather = locationWeather.weather
-    if (currentWeather == null) return
+
     val languageCode = rememberCurrentLanguageCode()
     val title = formatLocationName(locationWeather.location, languageCode = languageCode)
-    Log.d("WeatherScreen", "WeatherScreen conditionid: ${currentWeather.current.conditionId}")
+
     Box(modifier = Modifier.fillMaxSize()) {
         BackgroundImage(
-            if (AppPreferences.preferences.selectedBackgroundPreset != WeatherPreset.DYNAMIC) {
+            if (AppPreferences.preferences.selectedBackgroundPreset != WeatherPreset.DYNAMIC || currentWeather == null) {
                 WeatherVisualsObject.visualsForPreset(AppPreferences.preferences.selectedBackgroundPreset)
             } else {
-                currentWeather.current.weatherVisuals
+                WeatherVisualsObject.visualsForPreset(
+                    OpenMeteoCodes.presetForWeatherCode(
+                        currentWeather.current.weatherCode,
+                        currentWeather.current.isDay
+                    )
+                )
             }
         )
         Column(modifier = Modifier.fillMaxSize()) {
@@ -98,8 +116,7 @@ fun WeatherScreen(
             )
             HorizontalPager(state = pagerState) { pageIndex ->
                 WeatherPage(
-                    locationWeather = uiState.favoriteLocations[pageIndex],
-                    onRefresh = { mainViewModel.refreshWeather(pageIndex) }
+                    locationWeather = uiState.favoriteLocations[pageIndex]
                 )
             }
         }

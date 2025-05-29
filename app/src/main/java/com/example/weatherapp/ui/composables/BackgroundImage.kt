@@ -1,5 +1,6 @@
 package com.example.weatherapp.ui.composables
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,6 +19,7 @@ import com.example.weatherapp.model.WeatherVisuals
 
 @Composable
 fun BackgroundImage(weatherVisuals: WeatherVisuals) {
+    Log.d("BackgroundImage", "weatherVisuals: $weatherVisuals")
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
             painter = painterResource(weatherVisuals.backgroundResId),

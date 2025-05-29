@@ -43,7 +43,6 @@ enum class LocationRole {
 fun LocationWeather.toWeatherEntity(): WeatherEntity {
     return WeatherEntity(
         locationKey = "${location.englishName},${location.countryCode}",
-        json = GsonProvider.gson.toJson(weather),
-        timestamp = System.currentTimeMillis()
+        json = GsonProvider.gson.toJson(weather)
     )
 }
