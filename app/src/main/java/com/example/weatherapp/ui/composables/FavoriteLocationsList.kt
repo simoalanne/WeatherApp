@@ -27,7 +27,8 @@ import com.example.weatherapp.model.LocationWeather
 fun FavoriteLocationsList(
     favoriteLocations: List<LocationAndRole>,
     onLocationPress: (Int) -> Unit,
-    onLocationDelete: (LocationAndRole) -> Unit
+    onLocationDelete: (LocationAndRole) -> Unit,
+    shouldPlayAnimation: Boolean = true
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -38,6 +39,7 @@ fun FavoriteLocationsList(
                 start = if (index % 2 == 0) Offset.LEFT else Offset.RIGHT,
                 initialDelayMs = 450,
                 contentKey = location,
+                shouldPlayAnimation = shouldPlayAnimation,
                 content = {
                     LocationItem(
                         location = location.location,

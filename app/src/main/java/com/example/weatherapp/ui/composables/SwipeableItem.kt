@@ -21,9 +21,7 @@ enum class Offset {
     CENTER
 }
 
-/**
- * Composable that adds a
- */
+
 @Composable
 fun SwipeableItem(
     contentKey: Any,
@@ -31,7 +29,8 @@ fun SwipeableItem(
     start: Offset = Offset.LEFT,
     end: Offset = Offset.CENTER,
     initialDelayMs: Int = 0,
-    onAnimationEnd: () -> Unit = {}
+    onAnimationEnd: () -> Unit = {},
+    shouldPlayAnimation: Boolean = true,
 ) {
     var isInitialLoad by remember { mutableStateOf(true) }
     val containerWidth = LocalWindowInfo.current.containerSize.width.toFloat()
@@ -49,6 +48,11 @@ fun SwipeableItem(
     val offsetX = remember { Animatable(startOffset) }
 
     LaunchedEffect(contentKey) {
+        if (!shouldPlayAnimation) {
+            isInitialLoad = false
+            onAnimationEnd()
+            return@LaunchedEffect
+        }
         if (isInitialLoad) {
             onAnimationEnd()
             isInitialLoad = false
