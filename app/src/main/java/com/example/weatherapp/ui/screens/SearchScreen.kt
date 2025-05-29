@@ -124,94 +124,103 @@ fun SearchScreen(
                 .padding(16.dp),
             verticalArrangement = spacedBy(16.dp)
         ) {
-            Row(
-                horizontalArrangement = if (isFocused) spacedBy(8.dp) else Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = spacedBy(16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(175.dp)
             ) {
-                SearchTextField(
-                    query = query, onQueryChange = { query = it }, onSearch = {
-                        if (query.isNotBlank()) searchScreenVm.geocode(
-                            query.trim().lowercase(),
-                        )
-                    }, modifier = Modifier
-                        .focusRequester(focusRequester)
-                        .weight(0.5f),
-                    interactionSource = interactionSource
-                )
-                if (isFocused) {
-                    TextButton(
-                        onClick = {
-                            searchScreenVm.clearLocations()
-                            query = ""
-                            focusManager.clearFocus()
+                Row(
+                    horizontalArrangement = if (isFocused) spacedBy(8.dp) else Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    SearchTextField(
+                        query = query, onQueryChange = { query = it }, onSearch = {
+                            if (query.isNotBlank()) searchScreenVm.geocode(
+                                query.trim().lowercase(),
+                            )
+                        }, modifier = Modifier
+                            .focusRequester(focusRequester)
+                            .weight(0.5f),
+                        interactionSource = interactionSource
+                    )
+                    if (isFocused) {
+                        TextButton(
+                            onClick = {
+                                searchScreenVm.clearLocations()
+                                query = ""
+                                focusManager.clearFocus()
+                            }
+                        ) {
+                            Text(stringResource(R.string.cancel_search))
                         }
+                    }
+                }
+                if (!isFocused) {
+                    Text(
+                        stringResource(R.string.or),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        style = MaterialTheme.typography.titleMedium,
+                        textDecoration = TextDecoration.Underline
+                    )
+                    Button(
+                        onClick = { navController.navigate("map") },
                     ) {
-                        Text(stringResource(R.string.cancel_search))
+                        Text(stringResource(R.string.search_from_map))
+                    }
+                }
+                if (error != null) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(MaterialTheme.shapes.medium)
+                            .background(MaterialTheme.colorScheme.surfaceContainer)
+                            .padding(16.dp)
+                    ) {
+                        Text(
+                            text = stringResource(error),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    if (searchResult != null) {
+                        SwipeableItem(
+                            contentKey = searchResult,
+                            onAnimationEnd = { currentSearchResult = searchResult },
+                            content = {
+                                LocationItem(
+                                    location = currentSearchResult,
+                                    onLocationTap = {
+                                        if (mainViewModel.uiState.previewLocation?.location == currentSearchResult) {
+                                            navController.navigate("preview")
+                                            return@LocationItem
+                                        }
+                                        val alreadyFavoriteIndex =
+                                            mainViewModel.uiState.favoriteLocations.indexOfFirst {
+                                                it.location.englishName == searchResult.englishName
+                                            }
+                                        if (alreadyFavoriteIndex != -1) {
+                                            mainViewModel.changePageIndex(alreadyFavoriteIndex)
+                                            navController.popBackStack()
+                                        } else {
+                                            mainViewModel.previewLocation(searchResult)
+                                        }
+                                    }
+                                )
+                            })
                     }
                 }
             }
-            if (!isFocused) {
-                Text(
-                    stringResource(R.string.or),
-                    color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.titleMedium,
-                    textDecoration = TextDecoration.Underline
-                )
-                Button(
-                    onClick = { navController.navigate("map") },
-                ) {
-                    Text(stringResource(R.string.search_from_map))
-                }
-            }
-            if (error != null) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(MaterialTheme.shapes.medium)
-                        .background(MaterialTheme.colorScheme.surfaceContainer)
-                        .padding(16.dp)
-                ) {
-                    Text(
-                        text = stringResource(error),
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-            }
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                if (searchResult != null) {
-                    SwipeableItem(
-                        contentKey = searchResult,
-                        onAnimationEnd = { currentSearchResult = searchResult },
-                        content = {
-                            LocationItem(
-                                location = currentSearchResult,
-                                onLocationTap = {
-                                    if (mainViewModel.uiState.previewLocation?.location == currentSearchResult) {
-                                        navController.navigate("preview")
-                                        return@LocationItem
-                                    }
-                                    val alreadyFavoriteIndex =
-                                        mainViewModel.uiState.favoriteLocations.indexOfFirst {
-                                            it.location.englishName == searchResult.englishName
-                                        }
-                                    if (alreadyFavoriteIndex != -1) {
-                                        mainViewModel.changePageIndex(alreadyFavoriteIndex)
-                                        navController.popBackStack()
-                                    } else {
-                                        mainViewModel.previewLocation(searchResult)
-                                    }
-                                }
-                            )
-                        })
-                }
-            }
-            Margin(50)
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.Start,
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
                     stringResource(R.string.favorite_locations),
@@ -231,6 +240,7 @@ fun SearchScreen(
                                 it.role
                             )
                         },
+                        shouldPlayAnimation = isInitialLoad,
                         onLocationPress = { index ->
                             mainViewModel.changePageIndex(index)
                             navController.popBackStack()

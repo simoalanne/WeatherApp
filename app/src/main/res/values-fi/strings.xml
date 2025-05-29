@@ -7,7 +7,7 @@
     <string name="last_update">viimeksi päivitetty</string>
     <string name="local_time">paikallinen kellonaika</string>
     <string name="search_for_city">Hae kaupunkia tai paikkaa</string>
-    <string name="manage_cities">Hallitse kaupunkeja</string>
+    <string name="manage_cities">Kaupunkien haku</string>
     <string name="search">Hae</string>
     <string name="settings">Asetukset</string>
     <string name="now">Nyt</string>
