@@ -129,14 +129,12 @@ class MainViewModel : ViewModel() {
         uiState = uiState.copy(previewLocation = null)
     }
 
-    fun refreshWeather(changeIsRefreshing: Boolean = true) {
+    fun refreshWeather(index: Int = 0) {
         viewModelScope.launch {
             try {
-                uiState = uiState.copy(isRefreshing = changeIsRefreshing, errorResId = null)
-
                 val isPreview = uiState.previewLocation != null
                 val target = uiState.previewLocation
-                    ?: uiState.favoriteLocations.getOrNull(uiState.pageIndex)
+                    ?: uiState.favoriteLocations.getOrNull(index)
                     ?: return@launch
 
                 val needsRefresh = when (val weather = target.weather) {
@@ -224,7 +222,36 @@ class MainViewModel : ViewModel() {
     }
 
     fun changePageIndex(index: Int) {
-        uiState = uiState.copy(pageIndex = index)
+        val leftNeighbor = (index - 1).coerceAtLeast(0)
+        val rightNeighbor = (index + 1).coerceAtMost(uiState.favoriteLocations.lastIndex)
+
+        uiState = uiState.copy(
+            pageIndex = index,
+            favoriteLocations = uiState.favoriteLocations.mapIndexed { i, locationWeather ->
+                if (i != index && i != leftNeighbor && i != rightNeighbor) {
+                    Log.d(
+                        "MainViewModel",
+                        "Freeing weather data for ${locationWeather.location.englishName}"
+                    )
+                    locationWeather.copy(weather = null)
+                } else {
+                    refreshWeather(i)
+                    locationWeather
+                }
+            }
+        )
+    }
+
+    fun setAllButCurrentWeatherToNull() {
+        uiState = uiState.copy(
+            favoriteLocations = uiState.favoriteLocations.mapIndexed { index, locationWeather ->
+                if (index != uiState.pageIndex) {
+                    locationWeather.copy(weather = null)
+                } else {
+                    locationWeather
+                }
+            }
+        )
     }
 
     fun locateUser() {
@@ -235,7 +262,8 @@ class MainViewModel : ViewModel() {
                 )
                 if (uiState.favoriteLocations.any { it.location == userLocation.location && it.role == LocationRole.USER }) {
                     Log.d(
-                        "MainViewModel", "User location already in favorites, nothing to update"
+                        "MainViewModel",
+                        "User location already in favorites, nothing to update"
                     )
                     return@launch
                 }
@@ -245,7 +273,8 @@ class MainViewModel : ViewModel() {
                 val userLocationWithWeather = LocationWeather(
                     userLocation.location, userWeather!!, userLocation.role
                 )
-                val newLocations = listOf(userLocationWithWeather) + uiState.favoriteLocations
+                val newLocations =
+                    listOf(userLocationWithWeather) + uiState.favoriteLocations
                 uiState = uiState.copy(
                     favoriteLocations = newLocations,
                 )
