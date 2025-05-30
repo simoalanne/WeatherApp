@@ -112,7 +112,14 @@ class MainActivity : ComponentActivity() {
                         composable("search") {
                             SearchScreen(navController, mainVm, searchScreenVm)
                         }
-                        composable("settings") {
+                        composable(
+                            route = "settings?expandLocationColumn={expandLocationColumn}",
+                            arguments = listOf(
+                                navArgument("expandLocationColumn") {
+                                    type = NavType.BoolType
+                                    defaultValue = false
+                                })
+                        ) {
                             SettingsScreen(navController, settingsVm, mainVm)
                         }
                         composable("map") {

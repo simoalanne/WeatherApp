@@ -12,7 +12,6 @@ import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Air
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Thermostat
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -57,6 +56,8 @@ fun SettingsScreen(
     val settingsState = settingsViewModel.settingsState
     val context = LocalContext.current
     val currentLanguage = getAppLanguage(context)
+    val expandLocationDropDownInitially = navController.currentBackStackEntry
+        ?.arguments?.getBoolean("expandLocationColumn") == true
 
     fun handleOptionSelected(option: WeatherInfoOption) {
         if (option in settingsState.selectedWeatherInfoOptions) {
@@ -127,7 +128,7 @@ fun SettingsScreen(
                         backgroundColor = Color.DarkGray
                     )
                 },
-                List(WeatherPreset.entries.size) {
+                options = List(WeatherPreset.entries.size) {
                     DropdownOption(
                         label = WeatherPreset.entries[it].localizedLabel(),
                         value = WeatherPreset.entries[it]
@@ -236,6 +237,7 @@ fun SettingsScreen(
                     settingsViewModel.setTimeFormat(it)
                 })
             CurrentLocation(
+                shouldBeExpanded = expandLocationDropDownInitially,
                 userLocation =
                     mainViewModel.uiState.favoriteLocations.find { it.role == LocationRole.USER }?.location,
                 handleUserLocate = {

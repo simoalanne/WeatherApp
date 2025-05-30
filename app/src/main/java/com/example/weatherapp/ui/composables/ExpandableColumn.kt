@@ -30,10 +30,11 @@ import com.example.weatherapp.R
 fun ExpandableColumn(
     label: String,
     leadingIcon: @Composable () -> Unit = {},
+    isExpandedInitially: Boolean = false,
     expandedContent: @Composable () -> Unit
 ) {
 
-    var expanded by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(isExpandedInitially) }
 
     Column(
         modifier = Modifier

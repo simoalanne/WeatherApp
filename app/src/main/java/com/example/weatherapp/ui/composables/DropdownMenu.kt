@@ -29,7 +29,7 @@ fun <T> DropdownMenu(
 ) {
     ExpandableColumn(
         label = label,
-        leadingIcon = leadingIcon
+        leadingIcon = leadingIcon,
     ) {
         Column(
             modifier = Modifier

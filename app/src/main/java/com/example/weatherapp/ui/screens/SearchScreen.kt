@@ -229,7 +229,7 @@ fun SearchScreen(
                 if (mainViewModel.uiState.favoriteLocations.isEmpty()) {
                     NoLocationsCta(
                         onSearchClick = { focusRequester.requestFocus() },
-                        onSettingsClick = { navController.navigate("settings") }
+                        onSettingsClick = { navController.navigate("settings?expandLocationColumn=${true}") }
                     )
                 } else {
                     FavoriteLocationsList(
