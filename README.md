@@ -57,9 +57,6 @@ Weather App is a Jetpack Compose-based weather application that offers a smooth,
   <img src="screenshots/Settings_Screen.png" width="200" alt="Settings Screen" style="margin: 10px;" />
 </div>
 
-
-
-
 ---
 
 ## 🎦 Screencast
