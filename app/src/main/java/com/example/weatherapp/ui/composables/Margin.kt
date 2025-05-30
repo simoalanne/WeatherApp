@@ -7,7 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 /**
- * Very simple abstraction to pager for vertical margin.
+ * Very simple abstraction for vertical margin.
  */
 // TODO: Pretty pointless especially with limited options like this
 @Composable
