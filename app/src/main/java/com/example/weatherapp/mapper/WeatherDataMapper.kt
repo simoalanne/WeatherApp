@@ -1,6 +1,5 @@
 package com.example.weatherapp.mapper
 
-import android.util.Log
 import com.example.weatherapp.R
 import com.example.weatherapp.model.CurrentWeather
 import com.example.weatherapp.model.DailyWeather
@@ -9,27 +8,37 @@ import com.example.weatherapp.model.Meta
 import com.example.weatherapp.model.OpenMeteoCodes
 import com.example.weatherapp.model.OpenMeteoResponse
 import com.example.weatherapp.model.WeatherData
-import com.example.weatherapp.model.WeatherVisualsObject
 import com.example.weatherapp.utils.getLocalDateTimeFromUnixTimestamp
 import com.example.weatherapp.utils.truncateToHours
 
+/**
+ * Converts the OpenMeteo response to a WeatherData object.
+ *
+ * @return The converted WeatherData object.
+ */
 fun OpenMeteoResponse.toWeatherData(): WeatherData {
 
     val meta = Meta(utcOffsetSeconds)
     val isDay = currentWeather.isDay == 1
     val currentTime = currentWeather.time
 
+    // get the correct sunrise and sunset time for the current day. if for some reason there isn't
+    // a valid sunrise or sunset use start of UNIX time as fallback
     val sunrise = (if (isDay) {
+        // get the first sunrise that is before the current time
         dailyWeather.sunrise.filter { it < currentTime }.minByOrNull { currentTime - it }
     } else {
+        // get the first sunset that is after the current time
         dailyWeather.sunrise.filter { it > currentTime }.minByOrNull { it - currentTime }
     })?.let { getLocalDateTimeFromUnixTimestamp(it, utcOffsetSeconds) }
         ?: getLocalDateTimeFromUnixTimestamp(0, 0)
 
 
     val sunset = (if (isDay) {
+        // get the first sunset that is after the current time
         dailyWeather.sunset.filter { it > currentTime }.minByOrNull { it - currentTime }
     } else {
+        // get the first sunrise that is before the current time
         dailyWeather.sunset.filter { it < currentTime }.minByOrNull { currentTime - it }
     })?.let { getLocalDateTimeFromUnixTimestamp(it, utcOffsetSeconds) }
         ?: getLocalDateTimeFromUnixTimestamp(0, 0)
@@ -47,6 +56,7 @@ fun OpenMeteoResponse.toWeatherData(): WeatherData {
         weatherCode = this.currentWeather.weatherCode,
     )
 
+    // group hours based on the date they fall on
     val hourlyWeatherGrouped = this.hourlyWeather.time.mapIndexed { index, time ->
         HourlyWeather(
             time = getLocalDateTimeFromUnixTimestamp(time, utcOffsetSeconds),
@@ -105,6 +115,9 @@ fun OpenMeteoResponse.toWeatherData(): WeatherData {
             hourlyWeathers = hourlyWeatherGrouped[date] ?: emptyList()
         )
 
+        // add sunrise and sunset as hourly weather entries using just the closest hourly weather's
+        // values where needed. It's not necessarily accurate but since they cant be null that's the
+        // best that can be done.
         val sunriseAndSunsetAsHourly =
             listOf(dailyWeather.sunrise, dailyWeather.sunset).mapIndexed { sunIndex, time ->
                 val entryToUse = dailyWeather.hourlyWeathers.find {

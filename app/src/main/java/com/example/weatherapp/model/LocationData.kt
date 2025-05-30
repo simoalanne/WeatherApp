@@ -22,6 +22,10 @@ data class LocationData(
         return listOf(englishName, countryCode).hashCode()
     }
 
+    // the reason the default method isn't good enough is because the geocoding API(s) both support
+    // geocoding down to address level but as this app only considers city level geocoding then obviously
+    // addresses in the same city should be considered equal which won't be the case if lat and lon
+    // is considered in equals check
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is LocationData) return false
@@ -29,6 +33,8 @@ data class LocationData(
     }
 }
 
+// The existing room entity can't really be used in viewmodel state because it has the auto generated id
+// and probably it's not a good idea to use entities directly in view models and rather just copy the data class
 fun LocationData.toLocationEntity(): LocationEntity {
     return LocationEntity(
         englishName = englishName,

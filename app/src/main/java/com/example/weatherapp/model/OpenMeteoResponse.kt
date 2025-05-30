@@ -3,6 +3,9 @@ package com.example.weatherapp.model
 import com.google.gson.annotations.SerializedName
 import kotlin.math.round
 
+/**
+ * Data class representing the response from the Open-Meteo API.
+ */
 data class OpenMeteoResponse(
     val latitude: Double,
     val longitude: Double,
@@ -16,6 +19,9 @@ data class OpenMeteoResponse(
     val dailyWeather: DailyWeatherResponse
 )
 
+/**
+ * Data class representing the current weather field.
+ */
 data class CurrentWeatherResponse(
     val time: Long,
     val temperature: Double,
@@ -25,6 +31,9 @@ data class CurrentWeatherResponse(
     val isDay: Int,
 )
 
+/**
+ * Data class representing the hourly weather field.
+ */
 data class HourlyWeatherResponse(
     val time: List<Long>,
     @SerializedName("temperature_2m")
@@ -52,6 +61,9 @@ data class HourlyWeatherResponse(
         }
 }
 
+/**
+ * Data class representing the daily weather field.
+ */
 data class DailyWeatherResponse(
     val time: List<Long>,
     @SerializedName("weathercode")

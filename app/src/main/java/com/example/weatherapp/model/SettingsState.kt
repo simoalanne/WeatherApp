@@ -1,6 +1,15 @@
 package com.example.weatherapp.model
 
-
+/**
+ * Data class representing the app settings.
+ *
+ * @param tempUnit The unit of temperature to use.
+ * @param timeFormat The time format to use.
+ * @param selectedWeatherInfoOptions The weather info options to show in each hourly forecast item.
+ * @param windSpeedUnit The unit of wind speed to use.
+ * @param selectedBackgroundPreset The background preset to use.
+ *
+ */
 data class SettingsState(
     val tempUnit: TempUnit = TempUnit.CELSIUS,
     val timeFormat: TimeFormat = TimeFormat.TWENTY_FOUR_HOUR,

@@ -5,6 +5,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import com.example.weatherapp.R
 
+/**
+ * Singleton object containing the weather visuals for each weather preset.
+ */
 object WeatherVisualsObject {
     private val cloudyColorFilterDay =
         ColorFilter.tint(Color.Black.copy(alpha = 0.3f), BlendMode.Darken)
@@ -47,6 +50,11 @@ object WeatherVisualsObject {
         )
     )
 
+    /**
+     * Returns the weather visuals for the given weather preset or "CLEAR_DAY" if the preset is
+     * not found. For dynamic weather visuals the DYNAMIC enum should not be passed here but resolved
+     * through [OpenMeteoCodes] enums method
+     */
     fun visualsForPreset(preset: WeatherPreset): WeatherVisuals {
         return visualsMap[preset] ?: visualsMap[WeatherPreset.CLEAR_DAY]!!
     }
