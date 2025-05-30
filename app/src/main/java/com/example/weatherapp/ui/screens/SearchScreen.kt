@@ -137,6 +137,7 @@ fun SearchScreen(
                 ) {
                     SearchTextField(
                         query = query, onQueryChange = { query = it }, onSearch = {
+                            mainViewModel.clearError()
                             if (query.isNotBlank()) searchScreenVm.geocode(
                                 query.trim().lowercase(),
                             )
@@ -170,7 +171,7 @@ fun SearchScreen(
                         Text(stringResource(R.string.search_from_map))
                     }
                 }
-                if (error != null) {
+                if (error != null || mainViewModel.uiState.errorResId!= null) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -179,7 +180,7 @@ fun SearchScreen(
                             .padding(16.dp)
                     ) {
                         Text(
-                            text = stringResource(error),
+                            text = stringResource(error ?: mainViewModel.uiState.errorResId ?: R.string.something_went_wrong),
                             color = MaterialTheme.colorScheme.onSurface
                         )
                     }
@@ -188,7 +189,7 @@ fun SearchScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                 ) {
-                    if (searchResult != null) {
+                    if (searchResult != null && error == null && mainViewModel.uiState.errorResId == null) {
                         SwipeableItem(
                             contentKey = searchResult,
                             onAnimationEnd = { currentSearchResult = searchResult },
