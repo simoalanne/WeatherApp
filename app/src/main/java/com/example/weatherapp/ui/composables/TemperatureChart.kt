@@ -35,6 +35,16 @@ import ir.ehsannarmani.compose_charts.models.GridProperties
 import ir.ehsannarmani.compose_charts.models.GridProperties.AxisProperties
 import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
 
+/**
+ * Composable for displaying a temperature chart of daily weathers min, max and average temperatures.
+ * It uses the compose-charts library to do so.
+ *
+ * @param dailyMinTemps The list of daily minimum temperatures.
+ * @param dailyMaxTemps The list of daily maximum temperatures.
+ * @param dailyMeanTemps The list of daily mean temperatures.
+ * @param weekDays The list of week days.
+ * @param tempUnit The temperature unit.
+ */
 @Composable
 fun TemperatureChart(
     dailyMinTemps: List<Double>,

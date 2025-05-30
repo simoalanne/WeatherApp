@@ -1,13 +1,11 @@
 package com.example.weatherapp.ui.composables
 
-import android.util.Log
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.MaterialTheme
@@ -20,7 +18,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
 
@@ -55,7 +52,7 @@ fun MarqueeText(text: String, modifier: Modifier = Modifier) {
                 durationMillis = (offset * 15).coerceAtLeast(1000),
                 easing = LinearEasing // constant speed
             ),
-            repeatMode = RepeatMode.Reverse // reverse direction when end is reached
+            repeatMode = RepeatMode.Reverse // TODO: looks bad should rather start over and pause on start and end
         ),
     )
 

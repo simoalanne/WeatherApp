@@ -1,7 +1,6 @@
 package com.example.weatherapp.ui.composables
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -23,6 +22,16 @@ import com.example.weatherapp.model.LocationData
 import com.example.weatherapp.model.LocationDisplayAccuracy
 import com.example.weatherapp.utils.rememberCurrentLanguageCode
 
+/**
+ * Reusable composable for displaying a location item in search screen either for the result or for a favorite location
+ *
+ * @param location The location data to display.
+ * @param leadingIcon The leading icon to display.
+ * @param onLocationTap The callback function to be invoked when the location is tapped.
+ * @param onLocationDoubleTap The callback function to be invoked when the location is double tapped.
+ * @param languageCode The language code to use for formatting the location name.
+ *
+ */
 @Composable
 fun LocationItem(
     location: LocationData?,

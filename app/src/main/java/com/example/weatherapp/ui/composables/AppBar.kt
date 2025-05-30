@@ -20,10 +20,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
 import com.example.weatherapp.R
 
+/**
+ * Composable for the app bar that's meant to be used in weather screen/view
+ *
+ * @param title The title of the app bar.
+ * @param onSearchIconPress Callback for when the search icon is pressed.
+ * @param onSettingsIconPress Callback for when the settings icon is pressed.
+ * @param totalPages The total number of pages.
+ * @param currentPage The current page.
+ */
 @Composable
 fun AppBar(
     title: String,

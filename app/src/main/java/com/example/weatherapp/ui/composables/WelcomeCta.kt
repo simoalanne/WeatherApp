@@ -14,7 +14,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -24,6 +23,10 @@ import androidx.compose.ui.unit.dp
 import com.example.weatherapp.R
 import kotlinx.coroutines.delay
 
+/**
+ * Composable for the welcome CTA. Displays a main title and automatically changing secondary
+ * header and a simple button asking user to get started.
+ */
 @Composable
 fun WelcomeCta(onGetStartedClick: () -> Unit) {
     val secondaryHeaders = listOf(

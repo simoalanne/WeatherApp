@@ -6,6 +6,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 
+/**
+ * Composable for the country flag.
+ *
+ * @param countryCode The country code of the flag.
+ * @param useCurvedFlag Whether to return curved flag or not.
+ * @param size The size of the flag (dp)
+ */
 @Composable
 fun CountryFlag(
     countryCode: String,

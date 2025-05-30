@@ -18,6 +18,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
+/**
+ * Composable for displaying app bar in weather preview screen.
+ *
+ * @param title The title to display.
+ * @param onBackPress The callback function to be invoked when the back button is clicked.
+ * @param onStarClick The callback function to be invoked when the star button is clicked.
+ */
 @Composable
 fun PreviewWeatherAppBar(
     title: String,

@@ -6,11 +6,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.example.weatherapp.utils.getTimeAtOffset
 import kotlinx.coroutines.delay
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
+/**
+ * Composable that returns the current time based on the timezone offset.
+ *
+ * @param timezoneOffset The timezone offset in seconds.
+ */
 @Composable
 fun rememberCurrentTime(timezoneOffset: Int): LocalDateTime {
     var currentTime by remember {

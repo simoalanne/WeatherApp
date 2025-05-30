@@ -13,7 +13,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.example.weatherapp.utils.formatDate
-import kotlin.math.roundToInt
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -25,6 +24,16 @@ import com.example.weatherapp.model.DailyWeather
 import com.example.weatherapp.utils.formatTemp
 import com.example.weatherapp.utils.rememberCurrentLocale
 
+/**
+ * Composable for the daily forecast item showing summary of the days weather and temperature
+ * and containing an expandable list of hourly weather.
+ *
+ * @param dailyWeather The daily weather.
+ * @param isExpanded Whether the hourly weathers from daily weather are expanded or not.
+ * @param onExpand Callback for when the expand button is pressed.
+ * @param timezoneOffset The timezone offset required to format the date.
+ *
+ */
 @Composable
 fun DailyForecastItem(
     dailyWeather: DailyWeather,
@@ -48,9 +57,7 @@ fun DailyForecastItem(
         if (isExpanded) stringResource(R.string.collapse) else stringResource(R.string.expand)
     Column {
         Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = formattedDate,

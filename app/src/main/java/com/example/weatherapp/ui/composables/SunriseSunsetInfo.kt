@@ -1,6 +1,5 @@
 package com.example.weatherapp.ui.composables
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement.Absolute.SpaceBetween
 import androidx.compose.foundation.layout.Arrangement.Absolute.spacedBy
@@ -18,7 +17,6 @@ import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -39,6 +37,16 @@ import java.time.Duration
 import java.time.LocalDateTime
 import kotlin.math.abs
 
+/**
+ * Composable for displaying sunrise to sunset or vice versa progress bar + local time + weather
+ * last updated time. The progress is calculated pixel wise based on the last updated time.
+ *
+ * @param sunrise The sunrise time.
+ * @param sunset The sunset time.
+ * @param currentTime The current time.
+ * @param lastUpdated The last updated time.
+ * @receiver
+ */
 @Composable
 fun SunriseSunsetInfo(
     sunrise: LocalDateTime,

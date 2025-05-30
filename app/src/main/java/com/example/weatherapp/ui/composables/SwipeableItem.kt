@@ -1,6 +1,5 @@
 package com.example.weatherapp.ui.composables
 
-import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
@@ -15,13 +14,20 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalWindowInfo
 import kotlinx.coroutines.delay
 
+// TODO: Misleading name
 enum class Offset {
     LEFT,
     RIGHT,
     CENTER
 }
 
-
+/**
+ * Composable for animating a slide of a composable from one offset to another.
+ *
+ * @param contentKey The key for the content.
+ * @param content The content to be animated.
+ */
+// TODO: Implement the actual swiping logic so this composable makes more sense
 @Composable
 fun SwipeableItem(
     contentKey: Any,

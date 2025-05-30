@@ -1,7 +1,5 @@
 package com.example.weatherapp.ui.composables
 
-import android.util.Log
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,9 +13,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,9 +27,14 @@ import com.example.weatherapp.model.TempUnit
 import com.example.weatherapp.utils.convertTemperature
 import com.example.weatherapp.utils.rememberCurrentLocale
 import com.example.weatherapp.viewmodel.AppPreferences
-import kotlinx.coroutines.delay
 import java.time.format.TextStyle
 
+/**
+ * Composable for displaying the weather information for a location.
+ *
+ * @param locationWeather The weather information for the location.
+ */
+// TODO: Spacing is inconsistent should rather just use columns and spacedBy()
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WeatherPage(
@@ -144,7 +145,6 @@ fun WeatherPage(
                 TempUnit.KELVIN -> "K"
             }
         )
-        // WeatherStatsGrid(current = currentWeather.current)
         Margin(margin = 100) // For better scroll at bottom
     }
 }

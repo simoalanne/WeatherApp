@@ -1,6 +1,5 @@
 package com.example.weatherapp.ui.composables
 
-import android.graphics.drawable.shapes.Shape
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -16,6 +15,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 
+/**
+ * Reusable composable for displaying an icon with a background.
+ *
+ * @param icon The icon to display.
+ * @param iconColor The color of the icon.
+ * @param backgroundColor The color of the background.
+ * @param contentDescription The content description of the icon.
+ * @param size The size of the icon.
+ * @param backgroundShape The shape of the background.
+ * @param iconRotation The rotation of the icon.
+ *
+ */
 @Composable
 fun IconWithBackground(
     icon: ImageVector,

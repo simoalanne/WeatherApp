@@ -6,6 +6,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.unit.sp
 
+/**
+ * Simple reusable text for values or labels texts in the hourly weather items or labels
+ */
 @Composable
 fun WeatherStatText(text: String, color: Color = Color.White) {
     Text(

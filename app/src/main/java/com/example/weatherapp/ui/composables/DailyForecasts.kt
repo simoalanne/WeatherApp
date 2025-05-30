@@ -18,11 +18,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.weatherapp.model.HourlyWeather
 import java.time.LocalDate
 import com.example.weatherapp.R
 import com.example.weatherapp.model.DailyWeather
 
+/**
+ * Composable for displaying the daily forecasts as a column of daily forecast items.
+ *
+ * @param dailyForecasts The list of daily forecasts to display.
+ * @param timezoneOffset The timezone offset to use for formatting the dates.
+ */
 @Composable
 fun DailyForecasts(dailyForecasts: List<DailyWeather>, timezoneOffset: Int) {
 
@@ -35,6 +40,7 @@ fun DailyForecasts(dailyForecasts: List<DailyWeather>, timezoneOffset: Int) {
             .background(Color(red = 0f, green = 0f, blue = 0f, alpha = 0.3f))
             .padding(horizontal = 8.dp, vertical = 16.dp)
     ) {
+
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
