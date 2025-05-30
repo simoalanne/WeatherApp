@@ -1,4 +1,4 @@
-# 📦 Weather App
+# ⛅ Weather App
 
 > A modern, customizable weather app built with Jetpack Compose, offering real-time forecasts, location support, and offline usage
 
@@ -50,13 +50,25 @@ Weather App is a Jetpack Compose-based weather application that offers a smooth,
 
 ## 📸 Screenshots
 
-![Screenshot 1](path/to/screenshot1.png)  
-![Screenshot 2](path/to/screenshot2.png)
+<div align="center">
+  <img src="screenshots/Weather_Screen_1.png" width="200" alt="Weather Screen 1" style="margin: 10px;" />
+  <img src="screenshots/Weather_Screen_2.png" width="200" alt="Weather Screen 2" style="margin: 10px;" />
+  <img src="screenshots/Search_Screen.png" width="200" alt="Search Screen" style="margin: 10px;" />
+  <img src="screenshots/Settings_Screen.png" width="200" alt="Settings Screen" style="margin: 10px;" />
+</div>
+
+
+
 
 ---
 
 ## 🎦 Screencast
-[![Screencast](https://img.youtube.com/vi/RfQ35aQOApA/0.jpg)](https://www.youtube.com/watch?v=RfQ35aQOApA)
+
+<div align="center">
+  <a href="https://www.youtube.com/watch?v=RfQ35aQOApA" target="_blank">
+    <img src="https://img.youtube.com/vi/RfQ35aQOApA/0.jpg" width="480" alt="Watch Screencast on YouTube" style="margin: 10px;" />
+  </a>
+</div>
 
 ---
 
