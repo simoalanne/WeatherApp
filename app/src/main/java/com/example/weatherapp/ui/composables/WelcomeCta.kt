@@ -26,7 +26,6 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun WelcomeCta(onGetStartedClick: () -> Unit) {
-    val welcomeMessage = stringResource(R.string.welcome_message)
     val secondaryHeaders = listOf(
         stringResource(R.string.secondary_header_1),
         stringResource(R.string.secondary_header_2),
@@ -47,7 +46,6 @@ fun WelcomeCta(onGetStartedClick: () -> Unit) {
     }
 
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(48.dp),
         modifier = Modifier
             .padding(16.dp)
