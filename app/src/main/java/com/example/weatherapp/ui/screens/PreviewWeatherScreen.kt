@@ -33,7 +33,7 @@ fun PreviewWeatherScreen(
         if (isInitialLoad) {
             isInitialLoad = false
         } else {
-            navController.navigate("weather")
+            navController.navigate("weather?pageIndex=${mainViewModel.uiState.pageIndex}")
         }
     }
     val preview = mainViewModel.uiState.previewLocation ?: return
