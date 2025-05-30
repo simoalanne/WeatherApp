@@ -5,21 +5,24 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.weatherapp.model.HourlyWeather
-import com.example.weatherapp.model.TempUnit
 import com.example.weatherapp.model.WeatherInfoOption
 import com.example.weatherapp.utils.formatTemp
 import com.example.weatherapp.utils.formatWindSpeed
 import com.example.weatherapp.viewmodel.AppPreferences
 import kotlin.math.abs
 
+/**
+ * Composable for displaying a single item in the hourly weather list. Would work better as a row
+ * than a column when there are lot of selected options.
+ *
+ * @param formattedTime The formatted time of the weather forecast.
+ * @param hourlyWeather The hourly weather forecast.
+ */
 @Composable
 fun WeatherListItem(formattedTime: String, hourlyWeather: HourlyWeather) {
     val selected = AppPreferences.preferences.selectedWeatherInfoOptions

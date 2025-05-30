@@ -27,6 +27,15 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.example.weatherapp.R
 
+/**
+ * Composable for displaying a search text field.
+ *
+ * @param query The current query.
+ * @param onQueryChange The callback function to be invoked when the query changes.
+ * @param onSearch The callback function to be invoked when the search button is clicked.
+ * @param modifier The modifier to be applied to the composable.
+ * @param interactionSource The interaction source for the text field.
+ */
 @Composable
 fun SearchTextField(
     query: String,

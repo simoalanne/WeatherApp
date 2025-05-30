@@ -6,6 +6,9 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
 
+/**
+ * Interface for the Open-Meteo API.
+ */
 interface WeatherAPI {
     @GET("v1/forecast")
     suspend fun getWeatherByCoordinates(

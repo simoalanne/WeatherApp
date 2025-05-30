@@ -19,6 +19,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.weatherapp.R
 
+/**
+ * Reusable composable for displaying a dropdown menu.
+ *
+ * @param label The label for the dropdown menu.
+ * @param leadingIcon The leading icon for the dropdown menu.
+ * @param options The list of options to display in the dropdown menu.
+ * @param selectedOptions The set of selected options.
+ * @param onOptionSelected The callback function to be invoked when an option is selected.
+ *
+ */
 @Composable
 fun <T> DropdownMenu(
     label: String,

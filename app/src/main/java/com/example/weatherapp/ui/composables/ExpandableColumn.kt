@@ -26,6 +26,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.weatherapp.R
 
+/**
+ * Reusable composable for displaying an expandable column.
+ * @param label The label for the column.
+ * @param leadingIcon The leading icon for the column.
+ * @param isExpandedInitially Whether the column should be expanded on initial render.
+ * @param expandedContent The content to be displayed when the column is expanded.
+ */
+// TODO: should allow for better control of styling
 @Composable
 fun ExpandableColumn(
     label: String,

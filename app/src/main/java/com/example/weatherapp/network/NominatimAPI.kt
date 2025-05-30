@@ -8,12 +8,18 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
 
+/**
+ * Interface for the Nominatim API. Nominatim is needed because the build in Geocoder class sucks
+ * at reverse geocoding.
+ */
 interface NominatimAPI {
     @GET("reverse")
     suspend fun reverseGeocode(
         @Query("lat") lat: Double,
         @Query("lon") lon: Double,
         @Query("format") format: String = "json",
+        // affects the accuracy of the results. Lower values return just country level results. for city
+        // level results this works the best
         @Query("zoom") zoom: Int = 14,
         @Query("accept-language") language: String = "en"
     ): NominatimResponse

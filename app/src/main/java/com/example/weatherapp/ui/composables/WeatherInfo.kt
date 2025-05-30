@@ -15,6 +15,16 @@ import androidx.compose.ui.unit.sp
 import com.example.weatherapp.utils.formatTemp
 import com.example.weatherapp.viewmodel.AppPreferences
 
+/**
+ * Composable for displaying current temperature, min and max temperatures and weather condition.
+ * Current is displayed in large font and min and max + condition in small font below the current.
+ *
+ * @param current The current temperature.
+ * @param min The minimum temperature.
+ * @param max The maximum temperature.
+ * @param condition The weather condition.
+ */
+// TODO: Confusing name. Not obvious what it does.
 @Composable
 fun WeatherInfo(
     current: Double,

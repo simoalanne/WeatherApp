@@ -15,6 +15,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.weatherapp.R
 
+/**
+ * Composable for displaying a CTA when there are no locations. Used in search screen.
+ *
+ * @param onSearchClick The callback function to be invoked when the search button is clicked.
+ * @param onSettingsClick The callback function to be invoked when the settings button is clicked.
+ */
 @Composable
 fun NoLocationsCta(onSearchClick: () -> Unit, onSettingsClick: () -> Unit) {
     Column(

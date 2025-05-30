@@ -23,6 +23,15 @@ import com.example.weatherapp.model.LocationData
 import com.example.weatherapp.model.LocationRole
 import com.example.weatherapp.model.LocationWeather
 
+/**
+ * Composable for displaying a list of favorite locations. Supports displaying a sliding animation
+ * when the locations are coming to the screen.
+ *
+ * @param favoriteLocations The list of favorite locations to display.
+ * @param onLocationPress The callback function to be invoked when a location is pressed.
+ * @param onLocationDelete The callback function to be invoked when a location is deleted.
+ * @param shouldPlayAnimation Whether the sliding animation should be played for the locations or not.
+ */
 @Composable
 fun FavoriteLocationsList(
     favoriteLocations: List<LocationAndRole>,

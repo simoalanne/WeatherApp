@@ -14,6 +14,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 
+/**
+ * Composable displaying a simple page indicator for a pager. Currently selected is highlighted.
+ *
+ * @param currentPage The current page index.
+ * @param totalPages The total number of pages.
+ */
 @Composable
 fun PageIndicator(currentPage: Int, totalPages: Int) {
     Row(

@@ -31,13 +31,26 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.shouldShowRationale
 
+/**
+ * Composable for the current location. Handles asking for location permissions and showing the status
+ * of the location.
+ *
+ * @param userLocation The user location.
+ * @param handleUserLocate Callback to call when user has given permissions but the location is null
+ * @param shouldBeExpanded Whether the column should be expanded or not. If navigating here through
+ * a cta button to enable location access should be set to true for better UX.
+ *
+ */
+// TODO: Function name is misleading should be changed. Also userLocation should just be a boolean cause value is not important
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun CurrentLocation(userLocation: LocationData?, handleUserLocate: () -> Unit, shouldBeExpanded: Boolean = false) {
+fun CurrentLocation(
+    userLocation: LocationData?, handleUserLocate: () -> Unit, shouldBeExpanded: Boolean = false
+) {
     val locationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     val context = LocalContext.current
 
-    // this could be stored to datastore if we wanted to show the permissions permanently denied message
+    // this could be stored to datastore if wanted to show the permissions permanently denied message
     // initially and not only after user clicks the locate me button.
     var hasRequestedPermission by remember { mutableStateOf(false) }
 
@@ -52,8 +65,7 @@ fun CurrentLocation(userLocation: LocationData?, handleUserLocate: () -> Unit, s
         label = stringResource(R.string.current_location),
         leadingIcon = {
             IconWithBackground(
-                Icons.Default.LocationOn,
-                backgroundColor = Color(0, 100, 0)
+                Icons.Default.LocationOn, backgroundColor = Color(0, 100, 0)
             )
         },
     ) {
@@ -71,8 +83,7 @@ fun CurrentLocation(userLocation: LocationData?, handleUserLocate: () -> Unit, s
                 }
             }
 
-            !locationPermissionState.status.isGranted &&
-                    locationPermissionState.status.shouldShowRationale || !hasRequestedPermission -> {
+            !locationPermissionState.status.isGranted && locationPermissionState.status.shouldShowRationale || !hasRequestedPermission -> {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.padding(16.dp)
@@ -90,8 +101,7 @@ fun CurrentLocation(userLocation: LocationData?, handleUserLocate: () -> Unit, s
                 }
             }
 
-            !locationPermissionState.status.isGranted &&
-                    !locationPermissionState.status.shouldShowRationale -> {
+            !locationPermissionState.status.isGranted && !locationPermissionState.status.shouldShowRationale -> {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
