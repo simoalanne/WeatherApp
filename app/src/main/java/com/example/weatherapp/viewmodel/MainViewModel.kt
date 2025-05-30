@@ -137,11 +137,14 @@ class MainViewModel : ViewModel() {
                     ?: uiState.favoriteLocations.getOrNull(index)
                     ?: return@launch
 
-                val needsRefresh = when (val weather = target.weather) {
-                    null -> true // No data yet, must fetch
+                val cachedWeather = target.weather
+                    ?: weatherDao.getWeather("${target.location.englishName},${target.location.countryCode}")
+                        ?.toWeather()
+                val needsRefresh = when (cachedWeather) {
+                    null -> true
                     else -> {
-                        val lastRefreshTime = weather.current.time
-                        val utcOffsetSeconds = weather.meta.utcOffsetSeconds
+                        val lastRefreshTime = cachedWeather.current.time
+                        val utcOffsetSeconds = cachedWeather.meta.utcOffsetSeconds
                         val nextExpectedRefreshTime = lastRefreshTime.plusMinutes(15)
                         val currentTime =
                             LocalDateTime.now(ZoneOffset.UTC).plusSeconds(utcOffsetSeconds.toLong())
@@ -149,14 +152,17 @@ class MainViewModel : ViewModel() {
                     }
                 }
 
-                if (!needsRefresh) {
-                    Log.d("MainViewModel", "Not refreshing — data still fresh.")
+                if (target.weather != null && !needsRefresh) {
                     return@launch
                 }
 
-                val weatherData = fetchWeatherDataForCoordinates(
-                    Coordinates(target.location.lat, target.location.lon)
-                ) ?: return@launch // In case fetch failed silently
+                val weatherData = if (needsRefresh) {
+                    fetchWeatherDataForCoordinates(
+                        Coordinates(target.location.lat, target.location.lon)
+                    ) ?: cachedWeather
+                } else {
+                    cachedWeather
+                }
 
                 uiState = if (isPreview) {
                     uiState.copy(previewLocation = target.copy(weather = weatherData))
