@@ -33,7 +33,7 @@ import com.google.accompanist.permissions.shouldShowRationale
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun CurrentLocation(userLocation: LocationData?, handleUserLocate: () -> Unit) {
+fun CurrentLocation(userLocation: LocationData?, handleUserLocate: () -> Unit, shouldBeExpanded: Boolean = false) {
     val locationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     val context = LocalContext.current
 
@@ -48,6 +48,7 @@ fun CurrentLocation(userLocation: LocationData?, handleUserLocate: () -> Unit) {
     }
 
     ExpandableColumn(
+        isExpandedInitially = shouldBeExpanded,
         label = stringResource(R.string.current_location),
         leadingIcon = {
             IconWithBackground(
