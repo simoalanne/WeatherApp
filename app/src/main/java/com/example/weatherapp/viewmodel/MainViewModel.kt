@@ -101,6 +101,7 @@ class MainViewModel : ViewModel() {
     }
 
     fun changePreviewToFavorite() {
+        uiState = uiState.copy(errorResId = null)
         val previewLocation = uiState.previewLocation ?: return
         if (uiState.favoriteLocations.any { it.location.englishName == previewLocation.location.englishName }) {
             Log.d("MainViewModel", "Location already in favorites: ${previewLocation.location}")
@@ -217,9 +218,13 @@ class MainViewModel : ViewModel() {
                 val weatherData = fetchWeatherDataForCoordinates(
                     Coordinates(locationData.lat, locationData.lon)
                 )
+                if (weatherData == null) {
+                    uiState = uiState.copy(errorResId = R.string.something_went_wrong)
+                    return@launch
+                }
                 uiState = uiState.copy(
                     previewLocation = LocationWeather(
-                        locationData, weatherData!!, LocationRole.FAVORITE
+                        locationData, weatherData, LocationRole.FAVORITE
                     )
                 )
             }
@@ -263,9 +268,14 @@ class MainViewModel : ViewModel() {
         )
     }
 
+    fun clearError() {
+        uiState = uiState.copy(errorResId = null)
+    }
+
     fun locateUser() {
         viewModelScope.launch {
             try {
+                uiState = uiState.copy(errorResId = null)
                 val userLocation = LocationAndRole(
                     locationService.getUserLocation(), LocationRole.USER
                 )
@@ -279,8 +289,12 @@ class MainViewModel : ViewModel() {
                 val userWeather = fetchWeatherDataForCoordinates(
                     Coordinates(userLocation.location.lat, userLocation.location.lon)
                 )
+                if (userWeather == null) {
+                    uiState = uiState.copy(errorResId = R.string.something_went_wrong)
+                    return@launch
+                }
                 val userLocationWithWeather = LocationWeather(
-                    userLocation.location, userWeather!!, userLocation.role
+                    userLocation.location, userWeather, userLocation.role
                 )
                 val newLocations =
                     listOf(userLocationWithWeather) + uiState.favoriteLocations.distinctBy { it.location.englishName }
