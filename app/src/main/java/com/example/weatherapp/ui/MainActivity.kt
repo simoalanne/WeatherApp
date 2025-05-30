@@ -23,6 +23,8 @@ import com.example.weatherapp.ui.screens.WeatherScreen
 import com.example.weatherapp.ui.theme.WeatherAppTheme
 import com.google.android.gms.location.LocationServices
 import androidx.compose.runtime.LaunchedEffect
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.example.weatherapp.MyApplication
 import com.example.weatherapp.location.LocationService
 import com.example.weatherapp.settingsDataStore
@@ -64,8 +66,7 @@ class MainActivity : ComponentActivity() {
                     settingsVm.loadSettings()
                 }
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = Color.Transparent
+                    modifier = Modifier.fillMaxSize(), color = Color.Transparent
                 ) {
                     NavHost(
                         navController = navController,
@@ -75,8 +76,7 @@ class MainActivity : ComponentActivity() {
                                 null
                             }
                             slideInHorizontally(
-                                initialOffsetX = { it },
-                                animationSpec = tween(500)
+                                initialOffsetX = { it }, animationSpec = tween(500)
                             )
                         },
                         exitTransition = {
@@ -84,24 +84,26 @@ class MainActivity : ComponentActivity() {
                                 null
                             }
                             slideOutHorizontally(
-                                targetOffsetX = { -it / 2 },
-                                animationSpec = tween(500)
+                                targetOffsetX = { -it / 2 }, animationSpec = tween(500)
                             )
                         },
                         popEnterTransition = {
                             slideInHorizontally(
-                                initialOffsetX = { -it / 2 },
-                                animationSpec = tween(500)
+                                initialOffsetX = { -it / 2 }, animationSpec = tween(500)
                             )
                         },
                         popExitTransition = {
                             slideOutHorizontally(
-                                targetOffsetX = { it },
-                                animationSpec = tween(500)
+                                targetOffsetX = { it }, animationSpec = tween(500)
                             )
-                        }
-                    ) {
-                        composable("weather") {
+                        }) {
+                        composable(
+                            route = "weather?pageIndex={pageIndex}", arguments = listOf(
+                                navArgument("pageIndex") {
+                                    type = NavType.IntType
+                                    defaultValue = mainVm.uiState.pageIndex
+                                })
+                        ) {
                             WeatherScreen(navController, mainVm)
                         }
                         composable("preview") {

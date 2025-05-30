@@ -1,27 +1,29 @@
 package com.example.weatherapp.ui.screens
 
 import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavController
-import com.example.weatherapp.R
 import com.example.weatherapp.model.OpenMeteoCodes
 import com.example.weatherapp.model.WeatherPreset
 import com.example.weatherapp.model.WeatherVisualsObject
 import com.example.weatherapp.ui.composables.AppBar
 import com.example.weatherapp.ui.composables.BackgroundImage
 import com.example.weatherapp.ui.composables.WeatherPage
+import com.example.weatherapp.ui.composables.WelcomeCta
 import com.example.weatherapp.utils.formatLocationName
 import com.example.weatherapp.utils.rememberCurrentLanguageCode
 import com.example.weatherapp.viewmodel.AppPreferences
@@ -34,33 +36,39 @@ fun WeatherScreen(
     mainViewModel: MainViewModel
 ) {
     val uiState = mainViewModel.uiState
-    Log.d("WeatherScreen", "WeatherScreen: $uiState")
+    val isEmptyOrLoading = uiState.favoriteLocations.isEmpty() || uiState.isLoading
 
-    if (uiState.isLoading) {
+    if (isEmptyOrLoading) {
+        var randomPreset by remember { mutableStateOf(WeatherPreset.entries.random()) }
+        LaunchedEffect(Unit) {
+            while (true) {
+                delay(10000)
+                randomPreset = WeatherPreset.entries.filter { it != randomPreset }.random()
+            }
+        }
         Box(
+            contentAlignment = Alignment.Center,
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
         ) {
-            Text(
-                stringResource(R.string.loading),
-                color = MaterialTheme.colorScheme.onBackground
+            BackgroundImage(
+                WeatherVisualsObject.visualsForPreset(randomPreset)
             )
-            LinearProgressIndicator()
+            if (uiState.isLoading) {
+                CircularProgressIndicator(color = Color.White)
+            }
+            if (uiState.favoriteLocations.isEmpty() && !uiState.isLoading) {
+                WelcomeCta { navController.navigate("search") }
+            }
         }
         return
     }
 
-    // If no favorite locations, navigate to search
-    if (uiState.favoriteLocations.isEmpty()) {
-        LaunchedEffect(Unit) {
-            navController.navigate("search")
-        }
-        return
-    }
+    val pageIndex = navController.currentBackStackEntry
+        ?.arguments?.getInt("pageIndex") ?: uiState.pageIndex
 
     val pagerState = rememberPagerState(
-        initialPage = uiState.pageIndex,
+        initialPage = pageIndex,
         pageCount = { uiState.favoriteLocations.size }
     )
 
@@ -78,7 +86,7 @@ fun WeatherScreen(
     }
 
     // query refresh every 10 seconds or when the page changes
-    val currentIndex = pagerState.currentPage.coerceIn(uiState.favoriteLocations.indices)
+    val currentIndex = pagerState.currentPage
     LaunchedEffect(currentIndex) {
         while (true) {
             Log.d("WeatherScreen", "Refreshing weather for page $currentIndex")

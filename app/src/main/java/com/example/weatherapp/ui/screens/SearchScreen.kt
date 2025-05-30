@@ -97,10 +97,9 @@ fun SearchScreen(
                 containerColor = Color.Transparent
             ), navigationIcon = {
                 IconButton(onClick = {
-                    if (mainViewModel.uiState.favoriteLocations.isNotEmpty()) {
-                        navController.popBackStack()
-                    }
-                }) {
+                    navController.popBackStack()
+                }
+                ) {
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowBack,
                         tint = MaterialTheme.colorScheme.onBackground,
@@ -242,8 +241,7 @@ fun SearchScreen(
                         },
                         shouldPlayAnimation = isInitialLoad,
                         onLocationPress = { index ->
-                            mainViewModel.changePageIndex(index)
-                            navController.popBackStack()
+                            navController.navigate("weather?pageIndex=$index")
                         },
                         onLocationDelete = { location ->
                             mainViewModel.removeFavoriteLocation(
@@ -251,7 +249,6 @@ fun SearchScreen(
                             )
                         }
                     )
-                    Margin(100)
                 }
             }
         }

@@ -68,5 +68,6 @@ fun FavoriteLocationsList(
                 }
             )
         }
+        Margin(50)
     }
 }
