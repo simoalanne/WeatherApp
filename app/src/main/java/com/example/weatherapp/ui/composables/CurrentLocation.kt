@@ -20,6 +20,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -32,6 +36,10 @@ import com.google.accompanist.permissions.shouldShowRationale
 fun CurrentLocation(userLocation: LocationData?, handleUserLocate: () -> Unit) {
     val locationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     val context = LocalContext.current
+
+    // this could be stored to datastore if we wanted to show the permissions permanently denied message
+    // initially and not only after user clicks the locate me button.
+    var hasRequestedPermission by remember { mutableStateOf(false) }
 
     LaunchedEffect(locationPermissionState.status.isGranted, userLocation) {
         if (locationPermissionState.status.isGranted && userLocation == null) {
@@ -63,15 +71,17 @@ fun CurrentLocation(userLocation: LocationData?, handleUserLocate: () -> Unit) {
             }
 
             !locationPermissionState.status.isGranted &&
-                    locationPermissionState.status.shouldShowRationale -> {
+                    locationPermissionState.status.shouldShowRationale || !hasRequestedPermission -> {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.padding(16.dp)) {
+                    modifier = Modifier.padding(16.dp)
+                ) {
                     Text(
                         stringResource(R.string.location_permissions_required_message),
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     TextButton(onClick = {
+                        hasRequestedPermission = true
                         locationPermissionState.launchPermissionRequest()
                     }) {
                         Text(stringResource(R.string.locate_me))
