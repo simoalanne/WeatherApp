@@ -196,7 +196,10 @@ class MainViewModel : ViewModel() {
                     locationWeather.location != location
                 }
                 weatherDao.deleteWeather("${location.englishName},${location.countryCode}")
-                uiState = uiState.copy(favoriteLocations = newLocations)
+                uiState = uiState.copy(
+                    favoriteLocations = newLocations,
+                    pageIndex = uiState.pageIndex.coerceAtMost(newLocations.lastIndex)
+                )
                 Log.d("MainViewModel", "Removed favorite location: $location")
             } catch (e: Exception) {
                 Log.e("MainViewModel", "Error removing favorite location", e)

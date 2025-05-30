@@ -97,7 +97,8 @@ fun WeatherScreen(
         }
     }
 
-    val locationWeather = uiState.favoriteLocations[currentIndex]
+    val locationWeather =
+        uiState.favoriteLocations[currentIndex.coerceAtMost(uiState.favoriteLocations.size - 1)]
     val currentWeather = locationWeather.weather
 
     val languageCode = rememberCurrentLanguageCode()
