@@ -15,6 +15,8 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.resumeWithException
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+import com.google.android.gms.tasks.CancellationTokenSource
 
 /**
  * This class turns the build in awkward callback and java based Geocoder API into a more
@@ -55,7 +57,11 @@ class LocationService(context: Context) {
      */
     suspend fun getUserLocation(): LocationData {
         try {
-            val location = fusedClient.lastLocation.await()
+            val location = fusedClient.lastLocation.await() ?: fusedClient.getCurrentLocation(
+                Priority.PRIORITY_HIGH_ACCURACY,
+                CancellationTokenSource().token
+            ).await()
+            
 
             if (location == null) {
                 throw UserLocatingException(UserLocatingErrorCode.NO_USER_LOCATION_FOUND)
