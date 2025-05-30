@@ -1,14 +1,10 @@
 package com.example.weatherapp.model
 
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import com.example.weatherapp.R
 
 /**
- * Enum class for custom weather icons replacing the default ones from OpenWeatherMap.
- * Some weather conditions have different icon for day and night. The icons are resolved
- * from the weather code in the OpenWeatherMap API response.
+ * Enum class handling mapping of weather codes from Open-Meteo to custom weather icons and
+ * condition strings.
  */
 enum class OpenMeteoCodes(
     val codes: Set<Int>,
@@ -137,17 +133,34 @@ enum class OpenMeteoCodes(
     );
 
     companion object {
+        /**
+         * Returns the condition string resource ID for the given weather code.
+         *
+         * @param code The weather code.
+         * @return The condition string resource ID.
+         */
         fun getConditionFromCode(code: Int): Int {
             val entry = entries.find { code in it.codes }
             return entry?.conditionMap?.get(code) ?: R.string.weather_condition_clear_sky
         }
 
+        /**
+         * Returns the icon resource ID for the given weather code and day/night flag.
+         *
+         * @param code The weather code.
+         * @param isDay Whether the weather is in the day.
+         * @return The icon resource ID.
+         */
         fun getIconFromCode(code: Int, isDay: Boolean): Int {
             val entry = entries.find { code in it.codes }
             return if (isDay) entry?.iconResDayId ?: R.drawable.sun else entry?.iconResNightId
                 ?: R.drawable.moon
         }
 
+        /**
+         * Returns a [WeatherPreset] for the given weather code and day/night flag. This can then be
+         * used to get corresponding visuals for the weather.
+         */
         fun presetForWeatherCode(code: Int, isDay: Boolean): WeatherPreset {
             return when (code) {
                 0, 1 -> if (isDay) WeatherPreset.CLEAR_DAY else WeatherPreset.CLEAR_NIGHT

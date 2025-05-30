@@ -4,6 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.example.weatherapp.R
 
+/**
+ * Enum class representing the different weather presets the background can be.
+ */
 enum class WeatherPreset {
     DYNAMIC,
     CLEAR_DAY,
@@ -17,6 +20,10 @@ enum class WeatherPreset {
     STORMY
 }
 
+/**
+ * Extension function to get the localized label for a weather preset. Enum class shouldn't be
+ * Composable so this is a better pattern.
+ */
 @Composable
 fun WeatherPreset.localizedLabel(): String {
     return when (this) {

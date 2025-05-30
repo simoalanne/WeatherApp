@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 /**
- * Database representation of @see[LocationData]. use LocationData.toLocationEntity() to convert
+ * Database representation of [LocationData]. use extension functions for each to convert to and from
  */
 @Entity(tableName = "locations")
 data class LocationEntity(

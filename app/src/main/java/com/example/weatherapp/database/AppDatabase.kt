@@ -7,17 +7,22 @@ import androidx.room.RoomDatabase
 import com.example.weatherapp.model.LocationEntity
 import com.example.weatherapp.model.WeatherEntity
 
-// Magic code to create the database
-// Don't care how it works as long as it works
+/**
+ * Database class for the app. Two tables:
+ * - LocationEntity: contains the locations the user has added
+ * - WeatherEntity: contains the weather data for the locations the user has added or for the physical location
+ */
 @Database(entities = [LocationEntity::class, WeatherEntity::class],  version = 4)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun locationDao(): LocationDao
     abstract fun weatherDao(): WeatherDao
 
     companion object {
+        // the database is a singleton which is thread safe
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
+        // build the database if it doesn't exist and return it
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(

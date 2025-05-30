@@ -2,6 +2,18 @@ package com.example.weatherapp.model
 
 import com.example.weatherapp.GsonProvider
 
+/**
+ * Data class representing the main UI state.
+ * @param favoriteLocations The list of favorite locations.
+ * @param previewLocation The preview location.
+ * @param isLoading Whether the UI is loading.
+ * @param isRefreshing Whether the UI is refreshing weather data.
+ * @param errorResId The resource ID of the error message.
+ * @param pageIndex The current page index.
+ */
+// The isRefreshing is no longer important. the errorResId should rather be an enum value
+// additionally generic error here doesn't even mean much. errors on individual weather level would
+// make more sense.
 data class MainUiState(
     val favoriteLocations: List<LocationWeather> = emptyList(),
     val previewLocation: LocationWeather? = null,
@@ -17,6 +29,7 @@ data class MainUiState(
  * @param weather The weather data for the location.
  * @param role The role of the location.
  */
+// role has no need to be enum since it has shrunk down to just user and favorite. could be boolean instead
 data class LocationWeather(
     val location: LocationData,
     val weather: WeatherData?,
@@ -29,17 +42,17 @@ data class LocationAndRole(
 )
 
 /**
- * Data class representing a location role.
- * - USER: The location is the user's current physical location. Weather should be fetched on app start.
- * - FAVORITE: The location is a favorite location. Weather should be fetched on app start.
- * - PREVIEW: When user is just looking at some weather and it's not user or favorite.
+ * Data class representing a location role. could be replaced by boolean.
  */
 enum class LocationRole {
     USER,
     FAVORITE,
-    PREVIEW
 }
 
+/**
+ * Extension function to convert a [LocationWeather] to a [WeatherEntity]. the weather data is simply
+ * converted to raw json string so it can be stored in the database.
+ */
 fun LocationWeather.toWeatherEntity(): WeatherEntity {
     return WeatherEntity(
         locationKey = "${location.englishName},${location.countryCode}",

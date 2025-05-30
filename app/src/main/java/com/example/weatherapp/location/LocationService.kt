@@ -61,7 +61,7 @@ class LocationService(context: Context) {
                 Priority.PRIORITY_HIGH_ACCURACY,
                 CancellationTokenSource().token
             ).await()
-            
+
 
             if (location == null) {
                 throw UserLocatingException(UserLocatingErrorCode.NO_USER_LOCATION_FOUND)
@@ -116,6 +116,11 @@ class LocationService(context: Context) {
     private suspend fun geocodeAction(action: GeocodeAction): LocationData = coroutineScope {
         val newAction = if (action is GeocodeAction.Reverse) {
             try {
+                // if the action is reverse the query string sent to the geocoder comes from nominatim
+                // this is bit stupid and not guaranteed to be consistent but the problem was thar since
+                // reverse geocoder in the geocoding class is just bad then it can't be used. For example
+                // it would not differentiate cities in many countries and would just return the state
+                // instead of the actual city.
                 val geoAddress =
                     NominatimAPI.service.reverseGeocode(action.lat, action.lon).address.geoAddress
                 Log.d("LocationService", "Reverse geocoded $action to $geoAddress")
@@ -180,7 +185,7 @@ class LocationService(context: Context) {
                     is GeocodeAction.Forward -> {
                         getFromLocationName(action.locationName, 1, listener)
                     }
-
+                    // This is never used in the final version of the app (Replaced by Nominatim)
                     is GeocodeAction.Reverse -> {
                         getFromLocation(action.lat, action.lon, 1, listener)
                     }
@@ -188,7 +193,12 @@ class LocationService(context: Context) {
             }
         }
 
-
+    /**
+     * Turns a pair of addresses into a [LocationData] object.
+     *
+     * @return The resulting location as a [LocationData] object.
+     * @throws [GeocodingException] if geocoding fails.
+     */
     private fun Pair<Address, Address>.toLocationData(): LocationData {
         val (enAddress, fiAddress) = this
         enAddress.isValid()
@@ -198,6 +208,9 @@ class LocationService(context: Context) {
             finnishName = fiAddress.formatAddress(Locale("fi")),
             lat = enAddress.latitude,
             lon = enAddress.longitude,
+            // Convert UK nations to countries because that information is more valuable than
+            // something being just in the UK. The country code used here is not an official one
+            // but rather what FlagCDN what this app uses for async images expects for these "countries"
             countryCode = when (enAddress.adminArea) {
                 "England" -> "gb-eng"
                 "Scotland" -> "gb-sct"
@@ -208,6 +221,13 @@ class LocationService(context: Context) {
         )
     }
 
+    /**
+     * Checks if the address is valid. Its considered valid if it has either a city or region.
+     * essentially anything but just a country is considered valid. This however does cause a side-effect
+     * where England, Scotland etc alone are considered valid.
+     */
+    // TODO: England, Scotland, Wales and Northern Ireland should not be considered valid cause they're too broad
+    // TODO: Additionally some mini countries like vatican or monaco etc should be considered valid
     private fun Address.isValid() {
         val isValidCity = locality != null && countryName != null
         val isValidRegion = adminArea != null && countryName != null
@@ -216,6 +236,13 @@ class LocationService(context: Context) {
         }
     }
 
+    /**
+     * Formats the address for the given locale. For the Finnish locale it handles translating
+     * the admin are name to correct Finnish form.
+     *
+     * @param locale The locale to format the address for.
+     * @return The formatted address.
+     */
     private fun Address.formatAddress(locale: Locale = Locale.ENGLISH): String {
         val countryName = if (countryCode == "GB") {
             if (locale.language == "fi") {
@@ -240,15 +267,31 @@ class LocationService(context: Context) {
     }
 }
 
+/**
+ * Custom exception for user locating.
+ *
+ * @param errorCode The error code enum for the error.
+ */
 class UserLocatingException(val errorCode: UserLocatingErrorCode) : Exception()
 
+/**
+ * Enum representing the different error statuses that can occur when locating the user.
+ */
 enum class UserLocatingErrorCode {
     NO_LOCATION_PERMISSION,
     NO_USER_LOCATION_FOUND,
 }
 
+/**
+ * Custom exception for geocoding.
+ *
+ * @param errorCode The error code enum for the error.
+ */
 class GeocodingException(val errorCode: GeocodingErrorCode) : Exception()
 
+/**
+ * Enum representing the different error statuses that can occur when geocoding.
+ */
 enum class GeocodingErrorCode {
     NO_RESULTS,
     INVALID_ADDRESS,
