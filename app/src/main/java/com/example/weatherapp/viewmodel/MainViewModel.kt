@@ -87,7 +87,7 @@ class MainViewModel : ViewModel() {
                         weather = cachedWeather?.toWeather(),
                         role = location.role
                     )
-                }
+                }.distinctBy { it.location.englishName }
 
                 uiState = uiState.copy(
                     favoriteLocations = weatherLocationList,
@@ -283,7 +283,7 @@ class MainViewModel : ViewModel() {
                     userLocation.location, userWeather!!, userLocation.role
                 )
                 val newLocations =
-                    listOf(userLocationWithWeather) + uiState.favoriteLocations
+                    listOf(userLocationWithWeather) + uiState.favoriteLocations.distinctBy { it.location.englishName }
                 uiState = uiState.copy(
                     favoriteLocations = newLocations,
                 )
