@@ -85,7 +85,7 @@ fun WeatherScreen(
         mainViewModel.changePageIndex(pagerState.currentPage)
     }
 
-    // query refresh every 10 seconds or when the page changes
+    // query weather data every 2.5 seconds. Because weather data for a location
     val currentIndex = pagerState.currentPage
     LaunchedEffect(currentIndex) {
         while (true) {
@@ -93,7 +93,7 @@ fun WeatherScreen(
             // index needed here since there could be a race condition where the page index in vm
             // is not updated when this is called
             mainViewModel.refreshWeather(currentIndex)
-            delay(10_000)
+            delay(2500)
         }
     }
 

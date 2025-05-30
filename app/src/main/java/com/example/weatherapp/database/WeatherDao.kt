@@ -19,4 +19,7 @@ interface WeatherDao {
 
     @Query("DELETE FROM weather WHERE locationKey = :key")
     suspend fun deleteWeather(key: String)
+
+    @Query("DELETE FROM weather")
+    suspend fun deleteAllWeather()
 }
