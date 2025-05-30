@@ -44,7 +44,7 @@ fun PreviewWeatherScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
         BackgroundImage(
-            weatherVisuals = if (AppPreferences.preferences.selectedBackgroundPreset != WeatherPreset.DYNAMIC) {
+            targetPreset = if (AppPreferences.preferences.selectedBackgroundPreset != WeatherPreset.DYNAMIC) {
                 WeatherVisualsObject.visualsForPreset(AppPreferences.preferences.selectedBackgroundPreset)
             } else {
                 WeatherVisualsObject.visualsForPreset(
