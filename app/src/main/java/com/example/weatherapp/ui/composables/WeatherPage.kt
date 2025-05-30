@@ -5,11 +5,13 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
@@ -38,7 +40,17 @@ fun WeatherPage(
     locationWeather: LocationWeather
 ) {
     val currentWeather = locationWeather.weather
-    if (currentWeather == null) return
+    if (currentWeather == null) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            CircularProgressIndicator(color = Color.White)
+        }
+        return
+    }
     val weather24Hours =
         currentWeather.dailyForecasts.flatMap { it.hourlyWeathers }.takeWhile {
             it.time.isBefore(currentWeather.current.time.plusHours(24))

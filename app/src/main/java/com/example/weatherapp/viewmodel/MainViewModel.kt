@@ -92,6 +92,17 @@ class MainViewModel : ViewModel() {
                 uiState = uiState.copy(
                     favoriteLocations = weatherLocationList,
                 )
+                // it is somehow possible to corrupt the database where it has null data or something
+                // to fix just nuke everything and start over. This should never trigger in "normal"
+                // usage. This is likely related with edge case where favorite location contains
+                // physical location but it's hard to pinpoint exactly whats the real issue
+                // error at: java.lang.NullPointerException: fromJson(...) must not be null
+                // at com.example.weatherapp.model.WeatherEntityKt.toWeather(WeatherEntity.kt:14)
+                // TODO: Investigate
+            } catch (e: NullPointerException) {
+                Log.e("MainViewModel", "NullPointerException: ${e.message}, deleting all data")
+                weatherDao.deleteAllWeather()
+                locationDao.deleteAll()
             } catch (e: Exception) {
                 Log.e("MainViewModel", "Error loading initial data: ${e.message}")
             } finally {
@@ -134,9 +145,8 @@ class MainViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val isPreview = uiState.previewLocation != null
-                val target = uiState.previewLocation
-                    ?: uiState.favoriteLocations.getOrNull(index)
-                    ?: return@launch
+                val target = uiState.previewLocation ?: uiState.favoriteLocations.getOrNull(index)
+                ?: return@launch
 
                 val cachedWeather = target.weather
                     ?: weatherDao.getWeather("${target.location.englishName},${target.location.countryCode}")
@@ -171,8 +181,7 @@ class MainViewModel : ViewModel() {
                     uiState.copy(
                         favoriteLocations = uiState.favoriteLocations.map {
                             if (it == target) it.copy(weather = weatherData) else it
-                        }
-                    )
+                        })
                 }
 
                 weatherDao.upsertWeather(
@@ -252,8 +261,7 @@ class MainViewModel : ViewModel() {
                     refreshWeather(i)
                     locationWeather
                 }
-            }
-        )
+            })
     }
 
     fun setAllButCurrentWeatherToNull() {
@@ -264,8 +272,7 @@ class MainViewModel : ViewModel() {
                 } else {
                     locationWeather
                 }
-            }
-        )
+            })
     }
 
     fun clearError() {
@@ -281,8 +288,7 @@ class MainViewModel : ViewModel() {
                 )
                 if (uiState.favoriteLocations.any { it.location == userLocation.location && it.role == LocationRole.USER }) {
                     Log.d(
-                        "MainViewModel",
-                        "User location already in favorites, nothing to update"
+                        "MainViewModel", "User location already in favorites, nothing to update"
                     )
                     return@launch
                 }
