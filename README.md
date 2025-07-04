@@ -9,24 +9,19 @@
 - [About](#about)
 - [Features](#features)
 - [Screenshots](#screenshots)
-- [Screencast](#screencast)
 - [Getting Started](#getting-started)
 - [Usage](#usage)
 - [Configuration](#configuration)
 - [Tech Stack](#tech-stack)
-- [Known Issues](#known-issues)
-- [License](#license)
-- [Contributing](#contributing)
-- [Contact](#contact)
 
 ---
 
 ## 📖 About
 
-Weather App is a Jetpack Compose-based weather application that offers a smooth, customizable, and visually pretty experience. Users can view weather forecasts based on their location or favorites, search globally, and customize settings like language, temperature units, and time format.
+Weather App is a Jetpack Compose-based weather application that offers a smooth, customizable, and visually rich experience. Users can view weather forecasts based on their location or favorites, search globally, and customize settings like language, temperature units, and time format.
 
 - Solves: Viewing weather in a quick, personalized way with offline and multi-location support.
-- For: Users who want a clean, modern weather UI with useful statistics and customization and no paywalled features
+- For: Users who want a clean, modern weather UI with useful statistics and customization as well as no ads or features behind paywall.
 
 ---
 
@@ -59,28 +54,18 @@ Weather App is a Jetpack Compose-based weather application that offers a smooth,
 
 ---
 
-## 🎦 Screencast
-
-<div align="center">
-  <a href="https://www.youtube.com/watch?v=RfQ35aQOApA" target="_blank">
-    <img src="https://img.youtube.com/vi/RfQ35aQOApA/0.jpg" width="480" alt="Watch Screencast on YouTube" style="margin: 10px;" />
-  </a>
-</div>
-
----
-
 ## 🚀 Getting Started
 
 ### Prerequisites
 
 - Android Studio
+- Android SDK 33 (Android 13)
 
 ### Installation
 
 ```bash
-git clone https://github.com/simoalanne/4A00EZ65-3005-mobile-development-alanne-simo
-cd 4A00EZ65-3005-mobile-development-alanne-simo
-
+git clone https://github.com/simoalanne/WeatherApp
+cd WeatherApp
 # Open in Android Studio and sync Gradle
 ```
 
@@ -91,13 +76,13 @@ To run the app:
 
 - Open the project in Android Studio
 
-- Launch the emulator or connect your own device that has at least SDK 33 / Android 13
+- Launch the emulator or use your own android device
 
 ---
 
 ## 🛠 Configuration
 
-No API keys are required. All APIs (Open-Meteo, Nominatim) are public
+No configuration required at this time
 
 ---
 
@@ -124,29 +109,5 @@ No API keys are required. All APIs (Open-Meteo, Nominatim) are public
 - **Images**: Coil
 
 - **Animations**: Lottie Compose  
-
----
-
-## 🐞 Known Issues
-
-- No known issues so far. Feel free to report them in case you find them
-
----
-
-## 📜 License
-
-Standard MIT License.
-
----
-
-## 🤝 Contributing
-
-Pull requests are welcome.
-
----
-
-## 📫 Contact
-
-Project maintained by [Simo Alanne](mailto:simo.alanne@gmail.com).
 
 ---
