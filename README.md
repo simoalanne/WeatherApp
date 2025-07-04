@@ -6,13 +6,13 @@
 
 ## 🧠 Table of Contents
 
-- [About](#about)
-- [Features](#features)
-- [Screenshots](#screenshots)
-- [Getting Started](#getting-started)
-- [Usage](#usage)
-- [Configuration](#configuration)
-- [Tech Stack](#tech-stack)
+- [About](#-about)
+- [Features](#-features)
+- [Screenshots](#-screenshots)
+- [Getting Started](#-getting-started)
+- [Usage](#-usage)
+- [Configuration](#-configuration)
+- [Tech Stack](#-tech-stack)
 
 ---
 
