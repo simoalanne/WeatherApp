@@ -92,7 +92,12 @@ fun TemperatureChart(
             modifier = Modifier
                 .fillMaxSize()
                 .height(300.dp),
-            data = remember {
+            // Keys are important here really for the initial launch of the app to ensure the cached data
+            // from db that gets loaded first gets actually replaced with the newly fetched data.
+            // adding them also fixes a rare crash that would happen at app launch if the temperature
+            // difference between old and new data was large enough would crash the app due to minValue
+            // and maxValue being recomputed while the actual data wasn't.
+            data = remember(dailyMinTemps, dailyMaxTemps, dailyMeanTemps) {
                 listOf(
                     Line(
                         label = hottestLabel,
@@ -101,8 +106,7 @@ fun TemperatureChart(
                         firstGradientFillColor = Color(255, 183, 77, 200),
                         secondGradientFillColor = Color(255, 183, 77, 100),
                         dotProperties = DotProperties(
-                            enabled = true,
-                            color = SolidColor(Color.White)
+                            enabled = true, color = SolidColor(Color.White)
                         ),
                     ),
                     Line(
@@ -112,8 +116,7 @@ fun TemperatureChart(
                         firstGradientFillColor = Color(76, 175, 80, 200),
                         secondGradientFillColor = Color(76, 175, 80, 100),
                         dotProperties = DotProperties(
-                            enabled = true,
-                            color = SolidColor(Color.White)
+                            enabled = true, color = SolidColor(Color.White)
                         )
                     ),
                     Line(
@@ -123,47 +126,36 @@ fun TemperatureChart(
                         firstGradientFillColor = Color(30, 136, 229, 200),
                         secondGradientFillColor = Color(30, 136, 229, 100),
                         dotProperties = DotProperties(
-                            enabled = true,
-                            color = SolidColor(Color.White)
+                            enabled = true, color = SolidColor(Color.White)
                         )
                     ),
                 )
             },
             indicatorProperties = HorizontalIndicatorProperties(
                 textStyle = TextStyle.Default.copy(
-                    fontSize = 12.sp,
-                    color = Color.White
-                ),
-                contentBuilder = {
+                    fontSize = 12.sp, color = Color.White
+                ), contentBuilder = {
                     "$it $tempUnit"
-                },
-                indicators = indicators
+                }, indicators = indicators
             ),
             minValue = minValue.toDouble(),
             maxValue = maxValue.toDouble(),
             labelProperties = LabelProperties(
-                labels = weekDays,
-                enabled = true,
-                textStyle = TextStyle.Default.copy(
-                    fontSize = 12.sp,
-                    color = Color.White
-                ),
-                rotation = Rotation(degree = 0f)
+                labels = weekDays, enabled = true, textStyle = TextStyle.Default.copy(
+                    fontSize = 12.sp, color = Color.White
+                ), rotation = Rotation(degree = 0f)
             ),
             labelHelperProperties = LabelHelperProperties(
                 textStyle = TextStyle.Default.copy(
-                    fontSize = 12.sp,
-                    color = Color.White
+                    fontSize = 12.sp, color = Color.White
                 )
             ),
             gridProperties = GridProperties(
-                enabled = true,
-                xAxisProperties = AxisProperties(
+                enabled = true, xAxisProperties = AxisProperties(
                     enabled = true,
                     color = SolidColor(Color.White.copy(alpha = 0.5f)),
                     lineCount = totalIntervals
-                ),
-                yAxisProperties = AxisProperties(
+                ), yAxisProperties = AxisProperties(
                     enabled = true,
                     color = SolidColor(Color.White.copy(alpha = 0.5f)),
                     lineCount = weekDays.size
