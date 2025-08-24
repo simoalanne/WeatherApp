@@ -16,7 +16,10 @@ data class SettingsState(
     val selectedWeatherInfoOptions: Set<WeatherInfoOption> = setOf(
         WeatherInfoOption.WEATHER_ICON,
         WeatherInfoOption.TEMPERATURE,
+        WeatherInfoOption.FEELS_LIKE,
         WeatherInfoOption.WIND_GUSTS,
+        WeatherInfoOption.WIND_DIRECTION,
+        WeatherInfoOption.PROBABILITY_OF_PRECIPITATION,
         WeatherInfoOption.HUMIDITY,
         WeatherInfoOption.LABELS_AS_ICONS
     ),
