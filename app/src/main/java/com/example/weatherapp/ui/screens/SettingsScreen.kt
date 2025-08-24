@@ -9,6 +9,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Air
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Language
@@ -60,17 +61,23 @@ fun SettingsScreen(
         ?.arguments?.getBoolean("expandLocationColumn") == true
 
     fun handleOptionSelected(option: WeatherInfoOption) {
+        val labelOptions =
+            setOf(WeatherInfoOption.LABELS_AS_ICONS, WeatherInfoOption.LABELS_AS_TEXT)
+
         if (option in settingsState.selectedWeatherInfoOptions) {
             val newSelection = settingsState.selectedWeatherInfoOptions - option
-            // There has to always be one option selected that is not the "LABELS" option. This prevents a scenario
-            // where no data would be rendered
-            if (newSelection.isNotEmpty() && !(newSelection.size == 1 && WeatherInfoOption.LABELS in newSelection)) {
-                settingsViewModel.setSelectedOptions(newSelection)
-            }
+            if (newSelection.isEmpty() || (newSelection.size == 1 && newSelection.first() in labelOptions)) return
+            settingsViewModel.setSelectedOptions(newSelection)
         } else {
-            settingsViewModel.setSelectedOptions(
-                settingsState.selectedWeatherInfoOptions + option
-            )
+            // Both of the label options can't be selected at the same time. if one already is the other
+            // should be deselected
+            if (option in labelOptions) {
+                val newSelection =
+                    (settingsState.selectedWeatherInfoOptions.filterNot { it in labelOptions } + option).toSet()
+                settingsViewModel.setSelectedOptions(newSelection)
+            } else {
+                settingsViewModel.setSelectedOptions(settingsState.selectedWeatherInfoOptions + option)
+            }
         }
     }
 
@@ -198,12 +205,12 @@ fun SettingsScreen(
                         WeatherInfoOption.FEELS_LIKE
                     ),
                     DropdownOption(
-                        stringResource(R.string.wind_direction),
-                        WeatherInfoOption.WIND_DIRECTION
-                    ),
-                    DropdownOption(
                         stringResource(R.string.wind_gusts),
                         WeatherInfoOption.WIND_GUSTS
+                    ),
+                    DropdownOption(
+                        stringResource(R.string.wind_direction),
+                        WeatherInfoOption.WIND_DIRECTION
                     ),
                     DropdownOption(
                         stringResource(R.string.probability_of_precipitation),
@@ -214,8 +221,12 @@ fun SettingsScreen(
                         WeatherInfoOption.HUMIDITY
                     ),
                     DropdownOption(
-                        stringResource(R.string.show_labels),
-                        WeatherInfoOption.LABELS
+                        stringResource(R.string.show_labels_as_text),
+                        WeatherInfoOption.LABELS_AS_TEXT
+                    ),
+                    DropdownOption(
+                        stringResource(R.string.show_labels_as_icons),
+                        WeatherInfoOption.LABELS_AS_ICONS
                     )
                 ),
                 selectedOptions = settingsState.selectedWeatherInfoOptions,
@@ -224,7 +235,7 @@ fun SettingsScreen(
             DropdownMenu(
                 label = stringResource(R.string.time_format), leadingIcon = {
                     IconWithBackground(
-                        icon = Icons.Default.Timer, backgroundColor = Color.DarkGray
+                        icon = Icons.Default.AccessTime, backgroundColor = Color.DarkGray
                     )
                 }, options = listOf(
                     DropdownOption(

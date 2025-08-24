@@ -89,7 +89,6 @@ fun WeatherScreen(
     val currentIndex = pagerState.currentPage
     LaunchedEffect(currentIndex) {
         while (true) {
-            Log.d("WeatherScreen", "Refreshing weather for page $currentIndex")
             // index needed here since there could be a race condition where the page index in vm
             // is not updated when this is called
             mainViewModel.refreshWeather(currentIndex)

@@ -1,5 +1,6 @@
 package com.example.weatherapp.ui.composables
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.shape.CircleShape
@@ -26,6 +27,7 @@ import kotlin.math.abs
 @Composable
 fun WeatherListItem(formattedTime: String, hourlyWeather: HourlyWeather) {
     val selected = AppPreferences.preferences.selectedWeatherInfoOptions
+    Log.d("WeatherListItem", "selected: $selected")
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -46,7 +48,7 @@ fun WeatherListItem(formattedTime: String, hourlyWeather: HourlyWeather) {
         if (WeatherInfoOption.WIND_DIRECTION in selected) {
             IconWithBackground(
                 icon = Icons.Filled.ArrowUpward,
-                iconColor = Color(30, 144, 255),
+                iconColor = Color(0, 255, 0),
                 backgroundColor = Color(255, 255, 255, 128),
                 iconRotation = hourlyWeather.windDirection.toDouble(),
                 size = 16,

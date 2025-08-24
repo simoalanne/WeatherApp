@@ -111,7 +111,6 @@
     <string name="weather_icon">Weather icon</string>
     <string name="temperature">Temperature</string>
     <string name="time">Time</string>
-    <string name="show_labels">Show labels</string>
     <string name="wind_speed_unit">Wind speed unit</string>
     <string name="meters_per_second">Meters per second (m/s)</string>
     <string name="kilometers_per_hour">Kilometers per hour (km/h)</string>
@@ -136,4 +135,6 @@
     <string name="secondary_header_5">What else… Dynamic backgrounds in case you haven\'t noticed…</string>
     <string name="secondary_header_6">How long are we planning to just look at this text changing?</string>
     <string name="secondary_header_7">Okay no more new text… Time to get started!</string>
+    <string name="show_labels_as_text">Weather stat infos as text</string>
+    <string name="show_labels_as_icons">Weather stat infos as icons</string>
 </resources>
