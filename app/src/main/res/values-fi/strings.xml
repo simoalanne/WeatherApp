@@ -110,7 +110,6 @@
     <string name="weather_icon">Sääkuvake</string>
     <string name="temperature">Lämpötila</string>
     <string name="time">Aika</string>
-    <string name="show_labels">Näytä selitteet</string>
     <string name="wind_speed_unit">Tuulennopeuden yksikkö</string>
     <string name="meters_per_second">Metriä sekunnissa (m/s)</string>
     <string name="kilometers_per_hour">Kilometriä tunnissa (km/h)</string>
@@ -135,4 +134,6 @@
     <string name="secondary_header_5">Mitäs muuta… Taustakuva on dynaaminen jos et sattunut vielä huomaamaan</string>
     <string name="secondary_header_6">Kuinka kauan ajattelit vain odottaa tässä tekstien vaihtumista?</string>
     <string name="secondary_header_7">Enempää tekstiä ei tule. Aika aloittaa!</string>
+    <string name="show_labels_as_text">Säätilastojen selitteet tekstinä</string>
+    <string name="show_labels_as_icons">Säätilastojen selitteet kuvakkeina</string>
 </resources>

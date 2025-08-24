@@ -37,7 +37,6 @@ fun WeatherList(
     hourlyWeathers: List<HourlyWeather>,
     isNext24Hours: Boolean = true
 ) {
-    val showLabels = WeatherInfoOption.LABELS in AppPreferences.preferences.selectedWeatherInfoOptions
     val horizontalScrollBlocker = remember {
         object : NestedScrollConnection {
             override fun onPostScroll(
@@ -58,9 +57,7 @@ fun WeatherList(
             // similar to what I've ended up using in the end.
             .nestedScroll(horizontalScrollBlocker)
     ) {
-        if (showLabels) {
-            WeatherItemLabels()
-        }
+        WeatherItemLabels()
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier

@@ -18,7 +18,7 @@ data class SettingsState(
         WeatherInfoOption.TEMPERATURE,
         WeatherInfoOption.WIND_GUSTS,
         WeatherInfoOption.HUMIDITY,
-        WeatherInfoOption.LABELS
+        WeatherInfoOption.LABELS_AS_ICONS
     ),
     val windSpeedUnit: WindSpeedUnit = WindSpeedUnit.METERS_PER_SECOND,
     val selectedBackgroundPreset: WeatherPreset = WeatherPreset.DYNAMIC
@@ -43,7 +43,8 @@ enum class WeatherInfoOption {
     WIND_GUSTS,
     PROBABILITY_OF_PRECIPITATION,
     HUMIDITY,
-    LABELS // whether to show labels for the selected options or no
+    LABELS_AS_ICONS,
+    LABELS_AS_TEXT
 }
 
 enum class WindSpeedUnit {
