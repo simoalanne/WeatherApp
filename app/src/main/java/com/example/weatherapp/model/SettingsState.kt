@@ -24,7 +24,8 @@ data class SettingsState(
         WeatherInfoOption.LABELS_AS_ICONS
     ),
     val windSpeedUnit: WindSpeedUnit = WindSpeedUnit.METERS_PER_SECOND,
-    val selectedBackgroundPreset: WeatherPreset = WeatherPreset.DYNAMIC
+    val selectedBackgroundPreset: WeatherPreset = WeatherPreset.DYNAMIC,
+    val hasSeenOnboarding: Boolean = false
 )
 
 enum class TempUnit {

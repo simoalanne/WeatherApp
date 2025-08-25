@@ -1,9 +1,12 @@
 package com.example.weatherapp.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement.Absolute.spacedBy
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -12,9 +15,11 @@ import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Air
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Thermostat
 import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -23,6 +28,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,12 +52,14 @@ import com.example.weatherapp.ui.composables.CountryFlag
 import com.example.weatherapp.ui.composables.CurrentLocation
 import com.example.weatherapp.ui.composables.DropdownMenu
 import com.example.weatherapp.ui.composables.DropdownOption
+import com.example.weatherapp.ui.composables.ExpandableColumn
 import com.example.weatherapp.ui.composables.IconWithBackground
 import com.example.weatherapp.ui.composables.Margin
 import com.example.weatherapp.utils.changeAppLanguage
 import com.example.weatherapp.utils.getAppLanguage
 import com.example.weatherapp.viewmodel.MainViewModel
 import com.example.weatherapp.viewmodel.SettingsViewModel
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,8 +69,27 @@ fun SettingsScreen(
     val settingsState = settingsViewModel.settingsState
     val context = LocalContext.current
     val currentLanguage = getAppLanguage(context)
-    val expandLocationDropDownInitially = navController.currentBackStackEntry
-        ?.arguments?.getBoolean("expandLocationColumn") == true
+    val expandLocationDropDownInitially =
+        navController.currentBackStackEntry?.arguments?.getBoolean("expandLocationColumn") == true
+    val scrollState = rememberScrollState()
+    var expandLocationDropDownInitiallyCopy by remember { mutableStateOf(false) }
+
+    LaunchedEffect(expandLocationDropDownInitially) {
+        // Animate location menu opening. it's bit "robotic" cause animateScrollTo() is so fast
+        // but good enough at least for now.
+        val animStartDelay = 250L
+        val openLocationDropDownDelay = 50L
+        val scrollToBottomDelay = 400L
+        delay(animStartDelay)
+        if (expandLocationDropDownInitially) {
+            scrollState.animateScrollTo(scrollState.maxValue)
+            delay(openLocationDropDownDelay)
+            expandLocationDropDownInitiallyCopy = true
+            // Scroll once more down because expanding column allows to scroll even more
+            delay(scrollToBottomDelay)
+            scrollState.animateScrollTo(scrollState.maxValue)
+        }
+    }
 
     fun handleOptionSelected(option: WeatherInfoOption) {
         val labelOptions =
@@ -107,7 +138,7 @@ fun SettingsScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
+                .verticalScroll(scrollState),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = spacedBy(24.dp),
         ) {
@@ -131,8 +162,7 @@ fun SettingsScreen(
                 label = stringResource(R.string.weather_screen_background_image),
                 leadingIcon = {
                     IconWithBackground(
-                        icon = Icons.Default.Image,
-                        backgroundColor = Color.DarkGray
+                        icon = Icons.Default.Image, backgroundColor = Color.DarkGray
                     )
                 },
                 options = List(WeatherPreset.entries.size) {
@@ -144,8 +174,7 @@ fun SettingsScreen(
                 selectedOptions = setOf(settingsState.selectedBackgroundPreset),
                 onOptionSelected = {
                     settingsViewModel.setSelectedBackgroundPreset(it)
-                }
-            )
+                })
             DropdownMenu(
                 label = stringResource(R.string.temperature_unit), leadingIcon = {
                     IconWithBackground(
@@ -163,75 +192,51 @@ fun SettingsScreen(
                     IconWithBackground(
                         icon = Icons.Default.Air, backgroundColor = Color.DarkGray
                     )
-                },
-                options = listOf(
+                }, options = listOf(
                     DropdownOption(
-                        stringResource(R.string.meters_per_second),
-                        WindSpeedUnit.METERS_PER_SECOND
-                    ),
-                    DropdownOption(
+                        stringResource(R.string.meters_per_second), WindSpeedUnit.METERS_PER_SECOND
+                    ), DropdownOption(
                         stringResource(R.string.kilometers_per_hour),
                         WindSpeedUnit.KILOMETERS_PER_HOUR
-                    ),
-                    DropdownOption(
-                        stringResource(R.string.miles_per_hour),
-                        WindSpeedUnit.MILES_PER_HOUR
+                    ), DropdownOption(
+                        stringResource(R.string.miles_per_hour), WindSpeedUnit.MILES_PER_HOUR
                     )
-                ),
-                selectedOptions = setOf(settingsState.windSpeedUnit),
-                onOptionSelected = {
+                ), selectedOptions = setOf(settingsState.windSpeedUnit), onOptionSelected = {
                     settingsViewModel.setWindSpeedUnit(it.name)
-                }
-            )
+                })
             DropdownMenu(
                 label = stringResource(R.string.hourly_forecast_details),
                 leadingIcon = {
                     IconWithBackground(
-                        icon = Icons.AutoMirrored.Filled.List,
-                        backgroundColor = Color.DarkGray
+                        icon = Icons.AutoMirrored.Filled.List, backgroundColor = Color.DarkGray
                     )
                 },
                 options = listOf(
                     DropdownOption(
-                        stringResource(R.string.weather_icon),
-                        WeatherInfoOption.WEATHER_ICON
-                    ),
-                    DropdownOption(
-                        stringResource(R.string.temperature),
-                        WeatherInfoOption.TEMPERATURE
-                    ),
-                    DropdownOption(
-                        stringResource(R.string.feels_like),
-                        WeatherInfoOption.FEELS_LIKE
-                    ),
-                    DropdownOption(
-                        stringResource(R.string.wind_gusts),
-                        WeatherInfoOption.WIND_GUSTS
-                    ),
-                    DropdownOption(
-                        stringResource(R.string.wind_direction),
-                        WeatherInfoOption.WIND_DIRECTION
-                    ),
-                    DropdownOption(
+                        stringResource(R.string.weather_icon), WeatherInfoOption.WEATHER_ICON
+                    ), DropdownOption(
+                        stringResource(R.string.temperature), WeatherInfoOption.TEMPERATURE
+                    ), DropdownOption(
+                        stringResource(R.string.feels_like), WeatherInfoOption.FEELS_LIKE
+                    ), DropdownOption(
+                        stringResource(R.string.wind_gusts), WeatherInfoOption.WIND_GUSTS
+                    ), DropdownOption(
+                        stringResource(R.string.wind_direction), WeatherInfoOption.WIND_DIRECTION
+                    ), DropdownOption(
                         stringResource(R.string.probability_of_precipitation),
                         WeatherInfoOption.PROBABILITY_OF_PRECIPITATION
-                    ),
-                    DropdownOption(
-                        stringResource(R.string.humidity),
-                        WeatherInfoOption.HUMIDITY
-                    ),
-                    DropdownOption(
+                    ), DropdownOption(
+                        stringResource(R.string.humidity), WeatherInfoOption.HUMIDITY
+                    ), DropdownOption(
                         stringResource(R.string.show_labels_as_text),
                         WeatherInfoOption.LABELS_AS_TEXT
-                    ),
-                    DropdownOption(
+                    ), DropdownOption(
                         stringResource(R.string.show_labels_as_icons),
                         WeatherInfoOption.LABELS_AS_ICONS
                     )
                 ),
                 selectedOptions = settingsState.selectedWeatherInfoOptions,
-                onOptionSelected = { handleOptionSelected(it) }
-            )
+                onOptionSelected = { handleOptionSelected(it) })
             DropdownMenu(
                 label = stringResource(R.string.time_format), leadingIcon = {
                     IconWithBackground(
@@ -248,12 +253,29 @@ fun SettingsScreen(
                     settingsViewModel.setTimeFormat(it)
                 })
             CurrentLocation(
-                shouldBeExpanded = expandLocationDropDownInitially,
-                userLocation =
-                    mainViewModel.uiState.favoriteLocations.find { it.role == LocationRole.USER }?.location,
+                shouldBeExpanded = expandLocationDropDownInitiallyCopy,
+                userLocation = mainViewModel.uiState.favoriteLocations.find { it.role == LocationRole.USER }?.location,
                 handleUserLocate = {
                     mainViewModel.locateUser()
                 })
+            ExpandableColumn(label = stringResource(R.string.onboarding), leadingIcon = {
+                IconWithBackground(
+                    icon = Icons.Default.Info, backgroundColor = Color.Blue
+                )
+            }) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Button(onClick = {
+                        navController.navigate("onboarding")
+                    }) {
+                        Text(stringResource(R.string.show_onboarding))
+                    }
+                }
+            }
             Margin(100)
         }
     }

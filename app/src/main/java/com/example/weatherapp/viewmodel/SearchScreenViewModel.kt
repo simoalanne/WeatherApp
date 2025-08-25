@@ -15,13 +15,8 @@ import kotlinx.coroutines.launch
 /**
  * View model for the search screen.
  */
-class SearchScreenViewModel : ViewModel() {
+class SearchScreenViewModel(private val locationService: LocationService) : ViewModel() {
     var uiState by mutableStateOf(SearchUiState())
-    private lateinit var locationService: LocationService
-
-    fun setLocationService(locationService: LocationService) {
-        this.locationService = locationService
-    }
 
     fun geocode(query: String) {
         viewModelScope.launch {

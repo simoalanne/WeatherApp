@@ -40,27 +40,21 @@ import java.time.ZoneOffset
  * - Providing UI state data for most of the screens such as WeatherScreen and SearchScreen
  * - Keeping database and the UI state in sync
  */
-class MainViewModel : ViewModel() {
-    private lateinit var locationService: LocationService
-    private lateinit var locationDao: LocationDao
-    private lateinit var weatherDao: WeatherDao
-
-    fun setLocationService(service: LocationService) {
-        locationService = service
-    }
-
-    fun setLocationDao(dao: LocationDao) {
-        locationDao = dao
-    }
-
-    fun setWeatherDao(dao: WeatherDao) {
-        weatherDao = dao
-    }
+class MainViewModel(
+    private val locationService: LocationService,
+    private val locationDao: LocationDao,
+    private val weatherDao: WeatherDao,
+    private val onInitialDataLoaded: (doesUserHaveFavoriteLocations: Boolean) -> Unit = {}
+) : ViewModel() {
 
     var uiState by mutableStateOf(MainUiState())
         private set
 
-    fun loadInitialData() {
+    init {
+        loadInitialData()
+    }
+
+    private fun loadInitialData() {
         viewModelScope.launch {
             try {
                 uiState = uiState.copy(isLoading = true, errorResId = null)
@@ -92,13 +86,9 @@ class MainViewModel : ViewModel() {
                 uiState = uiState.copy(
                     favoriteLocations = weatherLocationList,
                 )
-                // it is somehow possible to corrupt the database where it has null data or something
-                // to fix just nuke everything and start over. This should never trigger in "normal"
-                // usage. This is likely related with edge case where favorite location contains
-                // physical location but it's hard to pinpoint exactly whats the real issue
-                // error at: java.lang.NullPointerException: fromJson(...) must not be null
-                // at com.example.weatherapp.model.WeatherEntityKt.toWeather(WeatherEntity.kt:14)
-                // TODO: Investigate
+
+                // This should never trigger but it's possible to have the data corrupted needing to
+                // fully delete all of it
             } catch (e: NullPointerException) {
                 Log.e("MainViewModel", "NullPointerException: ${e.message}, deleting all data")
                 weatherDao.deleteAllWeather()
@@ -107,6 +97,8 @@ class MainViewModel : ViewModel() {
                 Log.e("MainViewModel", "Error loading initial data: ${e.message}")
             } finally {
                 uiState = uiState.copy(isLoading = false)
+                Log.d("MainViewModel", "Initial data loaded")
+                onInitialDataLoaded(uiState.favoriteLocations.isNotEmpty())
             }
         }
     }

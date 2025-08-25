@@ -1,18 +1,12 @@
 package com.example.weatherapp.ui
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -21,14 +15,20 @@ import androidx.navigation.compose.rememberNavController
 import com.example.weatherapp.ui.screens.SearchScreen
 import com.example.weatherapp.ui.screens.WeatherScreen
 import com.example.weatherapp.ui.theme.WeatherAppTheme
-import com.google.android.gms.location.LocationServices
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.example.weatherapp.MyApplication
 import com.example.weatherapp.location.LocationService
+import com.example.weatherapp.model.WeatherPreset
+import com.example.weatherapp.model.WeatherVisualsObject
 import com.example.weatherapp.settingsDataStore
+import com.example.weatherapp.ui.composables.BackgroundImage
 import com.example.weatherapp.ui.screens.MapScreen
+import com.example.weatherapp.ui.screens.OnboardingScreen
 import com.example.weatherapp.ui.screens.PreviewWeatherScreen
 import com.example.weatherapp.ui.screens.SettingsScreen
 import com.example.weatherapp.viewmodel.MainViewModel
@@ -47,64 +47,89 @@ class MainActivity : ComponentActivity() {
                 val locationService = LocationService(applicationContext)
                 val dataStore = applicationContext.settingsDataStore
 
-                // Create the view models
-                val mainVm: MainViewModel = viewModel()
-                val searchScreenVm: SearchScreenViewModel = viewModel()
-                val settingsVm: SettingsViewModel = viewModel()
+                var doesUserHaveFavoriteLocations: Boolean? by remember { mutableStateOf(null) }
+                var hasUserSeenOnboarding: Boolean? by remember { mutableStateOf(null) }
 
-                val navController: NavHostController = rememberNavController()
-
-                LaunchedEffect(Unit) {
-                    // Inject the dependencies manually, no Hilt or other fancy tools required for now
-                    mainVm.setLocationDao(locationDao)
-                    mainVm.setWeatherDao(weatherDao)
-                    mainVm.setLocationService(locationService)
-                    settingsVm.setDataStore(dataStore)
-                    searchScreenVm.setLocationService(locationService)
-
-                    mainVm.loadInitialData()
-                    settingsVm.loadSettings()
+                val mainVm: MainViewModel = viewModel {
+                    MainViewModel(locationService, locationDao, weatherDao, onInitialDataLoaded = {
+                        doesUserHaveFavoriteLocations = it
+                    })
                 }
-                Surface(
-                    modifier = Modifier.fillMaxSize(), color = Color.Transparent
-                ) {
+                val searchScreenVm: SearchScreenViewModel =
+                    viewModel { SearchScreenViewModel(locationService) }
+                val settingsVm: SettingsViewModel = viewModel {
+                    SettingsViewModel(dataStore, onSettingsLoaded = {
+                        hasUserSeenOnboarding = it
+                    })
+                }
+                val startDestination: String? =
+                    remember(doesUserHaveFavoriteLocations, hasUserSeenOnboarding) {
+                        if (doesUserHaveFavoriteLocations == null || hasUserSeenOnboarding == null) {
+                            return@remember null
+                        }
+                        if (doesUserHaveFavoriteLocations == true) {
+                            return@remember "weather"
+                        }
+                        if (hasUserSeenOnboarding == false) {
+                            return@remember "onboarding"
+                        }
+                        return@remember "search"
+                    }
+                if (startDestination == null) {
+                    BackgroundImage(
+                        WeatherVisualsObject.visualsForPreset(WeatherPreset.entries.random())
+                    )
+                } else {
+                    val navController: NavHostController = rememberNavController()
+                    val tweenTime = 500
+                    val forwardEnter = slideInHorizontally(
+                        initialOffsetX = { it }, // from right
+                        animationSpec = tween(tweenTime)
+                    )
+                    val forwardExit = slideOutHorizontally(
+                        targetOffsetX = { -it / 2 }, // to left
+                        animationSpec = tween(tweenTime)
+                    )
+
+                    val backwardEnter = slideInHorizontally(
+                        initialOffsetX = { -it / 2 }, // from left
+                        animationSpec = tween(tweenTime)
+                    )
+                    val backwardExit = slideOutHorizontally(
+                        targetOffsetX = { it }, // to right
+                        animationSpec = tween(tweenTime)
+                    )
                     NavHost(
                         navController = navController,
-                        startDestination = "weather",
+                        startDestination = startDestination,
                         enterTransition = {
                             if (initialState.destination.route == "preview" && targetState.destination.route == "weather") {
                                 null
                             }
-                            slideInHorizontally(
-                                initialOffsetX = { it }, animationSpec = tween(500)
-                            )
+                            forwardEnter
                         },
                         exitTransition = {
                             if (initialState.destination.route == "preview" && targetState.destination.route == "weather") {
                                 null
                             }
-                            slideOutHorizontally(
-                                targetOffsetX = { -it / 2 }, animationSpec = tween(500)
-                            )
+                            forwardExit
                         },
                         popEnterTransition = {
-                            slideInHorizontally(
-                                initialOffsetX = { -it / 2 }, animationSpec = tween(500)
-                            )
+                            backwardEnter
                         },
                         popExitTransition = {
-                            slideOutHorizontally(
-                                targetOffsetX = { it }, animationSpec = tween(500)
-                            )
+                            backwardExit
                         }) {
                         composable(
-                            route = "weather?pageIndex={pageIndex}", arguments = listOf(
-                                navArgument("pageIndex") {
-                                    type = NavType.IntType
-                                    defaultValue = mainVm.uiState.pageIndex
-                                })
+                            route = "weather?pageIndex={pageIndex}",
+                            arguments = listOf(navArgument("pageIndex") {
+                                type = NavType.IntType
+                                defaultValue = mainVm.uiState.pageIndex
+                            })
                         ) {
-                            WeatherScreen(navController, mainVm)
+                            WeatherScreen(
+                                navController, mainVm
+                            )
                         }
                         composable("preview") {
                             PreviewWeatherScreen(navController, mainVm)
@@ -124,6 +149,12 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("map") {
                             MapScreen(navController, mainVm, searchScreenVm)
+                        }
+                        composable("onboarding") {
+                            OnboardingScreen {
+                                settingsVm.onOnboardingComplete()
+                                navController.popBackStack()
+                            }
                         }
                     }
                 }

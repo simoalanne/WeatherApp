@@ -127,13 +127,14 @@
     <string name="weather_screen_background_image">Sääruudun taustakuva</string>
     <string name="get_started">Aloita</string>
     <string name="welcome_message">Todella omaperäinen sääsovellus</string>
-    <string name="secondary_header_1">Ominaisuudet? Todella yllättäviä ja omaperäisiä…</string>
-    <string name="secondary_header_2">Etsi mitä tahansa kaupunkia tai sijaintia tai näe oman kaupunkisi sää parilla klikkauksella</string>
-    <string name="secondary_header_3">Voit myös tallentaa suosikkisijaintisi myöhempään käytööön tai hakea sijainteja kartalta, koska miksi ei?</string>
+    <string name="secondary_header_1">Ominaisuudet? Todella yllättäviä ja ainutlaatuisia</string>
+    <string name="secondary_header_2">Etsi mitä tahansa kaupunkia tai sijaintia tai näe oman kaupunkisi sää parilla klikkauksella.</string>
+    <string name="secondary_header_3">Voit myös tallentaa suosikkisijaintisi myöhempään käytööön tai hakea sijainteja kartalta.</string>
     <string name="secondary_header_4">Saat itse valita mitä tietoa haluat nähdä. Asetuksissa on monipuoliset vaihtoehdot kustomointiin.</string>
-    <string name="secondary_header_5">Mitäs muuta… Taustakuva on dynaaminen jos et sattunut vielä huomaamaan</string>
-    <string name="secondary_header_6">Kuinka kauan ajattelit vain odottaa tässä tekstien vaihtumista?</string>
-    <string name="secondary_header_7">Enempää tekstiä ei tule. Aika aloittaa!</string>
+    <string name="secondary_header_5">Voit aina palata tähän mahtavaan ohjeeseen myöhemmin.</string>
+    <string name="secondary_header_6">Siinä kaikki mitä sinun tarvitsee tietää. Aika aloittaa sovelluksen käyttö!</string>
     <string name="show_labels_as_text">Säätilastojen selitteet tekstinä</string>
     <string name="show_labels_as_icons">Säätilastojen selitteet kuvakkeina</string>
+    <string name="onboarding">Ohjeet</string>
+    <string name="show_onboarding">Näytä ohjeet</string>
 </resources>
