@@ -130,11 +130,12 @@
     <string name="welcome_message">Extremely unique weather app</string>
     <string name="secondary_header_1">Features? Very surprising and original ones for sure…</string>
     <string name="secondary_header_2">Search any location or city you can think of or see you own city\'s weather in just a few clicks.</string>
-    <string name="secondary_header_3">You can also save your favorite locations for later use or search locations from a map because why not?</string>
+    <string name="secondary_header_3">You can also save your favorite locations for later use or search locations from a map.</string>
     <string name="secondary_header_4">You choose what information you want to see with detailed options available in the settings.</string>
-    <string name="secondary_header_5">What else… Dynamic backgrounds in case you haven\'t noticed…</string>
-    <string name="secondary_header_6">How long are we planning to just look at this text changing?</string>
-    <string name="secondary_header_7">Okay no more new text… Time to get started!</string>
+    <string name="secondary_header_5">You can always revisit this amazing onboarding later.</string>
+    <string name="secondary_header_6">That\'s everything you need to know. Time to start using the app!</string>
     <string name="show_labels_as_text">Weather stat infos as text</string>
     <string name="show_labels_as_icons">Weather stat infos as icons</string>
+    <string name="onboarding">Onboarding</string>
+    <string name="show_onboarding">Show onboarding</string>
 </resources>

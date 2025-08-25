@@ -1,7 +1,7 @@
 package com.example.weatherapp.ui.screens
 
 import android.util.Log
-import androidx.compose.animation.animateContentSize
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
@@ -30,7 +30,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -54,6 +53,7 @@ import com.example.weatherapp.ui.composables.Margin
 import com.example.weatherapp.ui.composables.NoLocationsCta
 import com.example.weatherapp.ui.composables.SwipeableItem
 import com.example.weatherapp.utils.rememberCurrentLanguageCode
+import com.example.weatherapp.viewmodel.AppPreferences
 import com.example.weatherapp.viewmodel.MainViewModel
 import com.example.weatherapp.viewmodel.SearchScreenViewModel
 import com.example.weatherapp.viewmodel.SettingsViewModel
@@ -65,6 +65,14 @@ fun SearchScreen(
     mainViewModel: MainViewModel,
     searchScreenVm: SearchScreenViewModel,
 ) {
+    BackHandler(enabled = mainViewModel.uiState.favoriteLocations.isEmpty()) {
+        // only block nav to weather screen
+        val previousScreen = navController.previousBackStackEntry?.destination?.route
+        Log.d("SearchScreen", "previousScreen: $previousScreen")
+        if (previousScreen?.contains("weather") == false) {
+            navController.popBackStack()
+        }
+    }
     var query by remember { mutableStateOf("") }
     var isInitialLoad by remember { mutableStateOf(true) }
     val searchResult = searchScreenVm.uiState.searchResult
@@ -97,7 +105,9 @@ fun SearchScreen(
                 containerColor = Color.Transparent
             ), navigationIcon = {
                 IconButton(onClick = {
-                    navController.popBackStack()
+                    if (mainViewModel.uiState.favoriteLocations.isNotEmpty()) {
+                        navController.popBackStack()
+                    }
                 }
                 ) {
                     Icon(

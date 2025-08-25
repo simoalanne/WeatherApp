@@ -3,9 +3,12 @@ package com.example.weatherapp.ui.composables
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -14,6 +17,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,56 +44,77 @@ import java.time.format.TextStyle
 fun WeatherPage(
     locationWeather: LocationWeather
 ) {
-    val currentWeather = locationWeather.weather
+    val currentWeather = remember(locationWeather) { locationWeather.weather }
+
     if (currentWeather == null) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier
-                .fillMaxSize()
+            modifier = Modifier.fillMaxSize()
         ) {
             CircularProgressIndicator(color = Color.White)
         }
         return
     }
-    val weather24Hours =
-        currentWeather.dailyForecasts.flatMap { it.hourlyWeathers }.takeWhile {
-            it.time.isBefore(currentWeather.current.time.plusHours(24))
-        }
-    val currentTime = rememberCurrentTime(currentWeather.meta.utcOffsetSeconds)
-    val tempUnit = AppPreferences.preferences.tempUnit
 
-    Column(
+    val weather24Hours = remember(currentWeather) {
+        currentWeather.dailyForecasts
+            .flatMap { it.hourlyWeathers }
+            .takeWhile { it.time.isBefore(currentWeather.current.time.plusHours(24)) }
+    }
+
+    val currentTime = rememberCurrentTime(currentWeather.meta.utcOffsetSeconds)
+    val tempUnit = remember { AppPreferences.preferences.tempUnit }
+
+    val dailyMinTemps = remember(currentWeather, tempUnit) {
+        currentWeather.dailyForecasts.map { convertTemperature(it.minTemperature, tempUnit) }
+    }
+    val dailyMaxTemps = remember(currentWeather, tempUnit) {
+        currentWeather.dailyForecasts.map { convertTemperature(it.maxTemperature, tempUnit) }
+    }
+    val dailyMeanTemps = remember(currentWeather, tempUnit) {
+        currentWeather.dailyForecasts.map { convertTemperature(it.meanTemperature, tempUnit) }
+    }
+
+    val currentLocale = rememberCurrentLocale()
+    val weekDays = remember(currentWeather) {
+        currentWeather.dailyForecasts.map {
+            it.date.dayOfWeek.getDisplayName(TextStyle.SHORT, currentLocale)
+                .replaceFirstChar { char -> char.uppercaseChar() }
+        }
+    }
+
+    val tempUnitSymbol = remember(tempUnit) {
+        when (tempUnit) {
+            TempUnit.CELSIUS -> "°C"
+            TempUnit.FAHRENHEIT -> "°F"
+            TempUnit.KELVIN -> "K"
+        }
+    }
+
+    LazyColumn(
         modifier = Modifier
-            .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
+            .fillMaxSize()
             .padding(horizontal = 16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Margin(margin = 20)
-        WeatherInfo(
-            current = currentWeather.current.temperature,
-            min = currentWeather.dailyForecasts.first().minTemperature,
-            max = currentWeather.dailyForecasts.first().maxTemperature,
-            condition = stringResource(currentWeather.current.conditionId)
-        )
-        Margin(margin = 20)
-        Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier
-                .clip(RoundedCornerShape(12.dp))
-                .background(
-                    Color(
-                        red = 0f,
-                        green = 0f,
-                        blue = 0f,
-                        alpha = 0.3f
-                    )
-                )
-                .padding(horizontal = 8.dp, vertical = 16.dp)
-        ) {
+        item {
+            WeatherInfo(
+                current = currentWeather.current.temperature,
+                min = currentWeather.dailyForecasts.first().minTemperature,
+                max = currentWeather.dailyForecasts.first().maxTemperature,
+                condition = stringResource(currentWeather.current.conditionId)
+            )
+        }
+
+        item {
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color(0f, 0f, 0f, 0.3f))
+                    .padding(horizontal = 8.dp, vertical = 16.dp)
             ) {
                 Text(
                     text = stringResource(R.string.next_24_hours),
@@ -98,53 +123,41 @@ fun WeatherPage(
                 )
                 HorizontalDivider(
                     color = Color.White.copy(alpha = 0.5f),
-                    thickness = 0.5f.dp
+                    thickness = 0.5.dp
                 )
+                WeatherList(hourlyWeathers = weather24Hours)
             }
-            WeatherList(hourlyWeathers = weather24Hours)
         }
-        Margin(margin = 8)
-        DailyForecasts(
-            currentWeather.dailyForecasts,
-            currentWeather.meta.utcOffsetSeconds
-        )
-        Margin(margin = 8)
-        SunriseSunsetInfo(
-            sunrise = currentWeather.current.sunrise,
-            sunset = currentWeather.current.sunset,
-            currentTime = currentTime,
-            lastUpdated = currentWeather.current.time
-        )
-        Margin(margin = 8)
-        TemperatureChart(
-            dailyMinTemps = currentWeather.dailyForecasts.map {
-                convertTemperature(
-                    it.minTemperature,
-                    tempUnit
-                )
-            },
-            dailyMaxTemps = currentWeather.dailyForecasts.map {
-                convertTemperature(
-                    it.maxTemperature,
-                    tempUnit
-                )
-            },
-            dailyMeanTemps = currentWeather.dailyForecasts.map {
-                convertTemperature(
-                    it.meanTemperature,
-                    tempUnit
-                )
-            },
-            weekDays = currentWeather.dailyForecasts.map {
-                it.date.dayOfWeek.getDisplayName(TextStyle.SHORT, rememberCurrentLocale())
-                    .lowercase().replaceFirstChar { char -> char.uppercase() }
-            },
-            tempUnit = when (tempUnit) {
-                TempUnit.CELSIUS -> "°C"
-                TempUnit.FAHRENHEIT -> "°F"
-                TempUnit.KELVIN -> "K"
-            }
-        )
-        Margin(margin = 100) // For better scroll at bottom
+
+        item {
+            DailyForecasts(
+                dailyForecasts = currentWeather.dailyForecasts,
+                timezoneOffset = currentWeather.meta.utcOffsetSeconds
+            )
+        }
+
+        item {
+            SunriseSunsetInfo(
+                sunrise = currentWeather.current.sunrise,
+                sunset = currentWeather.current.sunset,
+                currentTime = currentTime,
+                lastUpdated = currentWeather.current.time
+            )
+        }
+
+        item {
+            TemperatureChart(
+                dailyMinTemps = dailyMinTemps,
+                dailyMaxTemps = dailyMaxTemps,
+                dailyMeanTemps = dailyMeanTemps,
+                weekDays = weekDays,
+                tempUnit = tempUnitSymbol
+            )
+        }
+
+        // Spacer at bottom for nicer scrolling
+        item {
+            Spacer(Modifier.height(100.dp))
+        }
     }
 }

@@ -51,7 +51,7 @@ fun TemperatureChart(
     dailyMaxTemps: List<Double>,
     dailyMeanTemps: List<Double>,
     weekDays: List<String>,
-    tempUnit: String
+    tempUnit: String,
 ) {
     val coldestLabel = stringResource(R.string.coldest)
     val hottestLabel = stringResource(R.string.hottest)
@@ -162,7 +162,7 @@ fun TemperatureChart(
                 )
             ),
             animationMode = AnimationMode.Together(delayBuilder = {
-                it * 500L
+                it * 250L
             }),
         )
     }

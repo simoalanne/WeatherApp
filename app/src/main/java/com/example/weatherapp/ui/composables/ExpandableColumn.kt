@@ -42,7 +42,7 @@ fun ExpandableColumn(
     expandedContent: @Composable () -> Unit
 ) {
 
-    var expanded by remember { mutableStateOf(isExpandedInitially) }
+    var expanded by remember(isExpandedInitially) { mutableStateOf(isExpandedInitially) }
 
     Column(
         modifier = Modifier

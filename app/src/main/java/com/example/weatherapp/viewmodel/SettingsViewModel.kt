@@ -1,5 +1,6 @@
 package com.example.weatherapp.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -20,15 +21,17 @@ import kotlinx.coroutines.launch
 /**
  * The view model responsible for app settings.
  */
-class SettingsViewModel : ViewModel() {
-    private lateinit var dataStore: DataStore<Preferences>
-
-    fun setDataStore(dataStore: DataStore<Preferences>) {
-        this.dataStore = dataStore
-    }
+class SettingsViewModel(
+    private val dataStore: DataStore<Preferences>,
+    private val onSettingsLoaded: (hasUserSeenOnboarding: Boolean) -> Unit
+) : ViewModel() {
 
     var settingsState by mutableStateOf(SettingsState())
         private set
+
+    init {
+        loadSettings()
+    }
 
     private fun Preferences.toSettingsState(): SettingsState {
         val unit = when (this[PreferencesKeys.TEMP_UNIT]) {
@@ -55,22 +58,15 @@ class SettingsViewModel : ViewModel() {
             this[PreferencesKeys.BACKGROUND_PRESET] ?: "DYNAMIC"
         )
 
-        return if (selectedOptions != null) {
-            SettingsState(
-                tempUnit = unit,
-                timeFormat = timeFormat,
-                selectedWeatherInfoOptions = selectedOptions,
-                windSpeedUnit = windSpeedUnit,
-                selectedBackgroundPreset = selectedBackgroundPreset
-            )
-        } else {
-            SettingsState(
-                tempUnit = unit,
-                timeFormat = timeFormat,
-                windSpeedUnit = windSpeedUnit,
-                selectedBackgroundPreset = selectedBackgroundPreset
-            )
-        }
+        return SettingsState(
+            tempUnit = unit,
+            timeFormat = timeFormat,
+            selectedWeatherInfoOptions = selectedOptions
+                ?: SettingsState().selectedWeatherInfoOptions,
+            windSpeedUnit = windSpeedUnit,
+            selectedBackgroundPreset = selectedBackgroundPreset,
+            hasSeenOnboarding = this[PreferencesKeys.HAS_SEEN_ONBOARDING] == "true"
+        )
     }
 
     fun loadSettings() {
@@ -79,6 +75,7 @@ class SettingsViewModel : ViewModel() {
                 val state = preferences.toSettingsState()
                 settingsState = state
                 AppPreferences.preferences = state
+                onSettingsLoaded(state.hasSeenOnboarding)
             }
         }
     }
@@ -123,6 +120,14 @@ class SettingsViewModel : ViewModel() {
             }
         }
     }
+
+    fun onOnboardingComplete() {
+        viewModelScope.launch {
+            dataStore.edit { preferences ->
+                preferences[PreferencesKeys.HAS_SEEN_ONBOARDING] = "true"
+            }
+        }
+    }
 }
 
 object PreferencesKeys {
@@ -131,6 +136,7 @@ object PreferencesKeys {
     val SELECTED_OPTIONS = stringPreferencesKey("selected_weather_info_options")
     val WIND_SPEED_UNIT = stringPreferencesKey("wind_speed_unit")
     val BACKGROUND_PRESET = stringPreferencesKey("background_preset")
+    val HAS_SEEN_ONBOARDING = stringPreferencesKey("has_seen_onboarding")
 }
 
 /**

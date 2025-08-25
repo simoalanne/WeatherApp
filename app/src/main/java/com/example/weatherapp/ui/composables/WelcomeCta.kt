@@ -36,14 +36,13 @@ fun WelcomeCta(onGetStartedClick: () -> Unit) {
         stringResource(R.string.secondary_header_4),
         stringResource(R.string.secondary_header_5),
         stringResource(R.string.secondary_header_6),
-        stringResource(R.string.secondary_header_7),
     )
 
     var currentSecondaryHeaderIndex by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(Unit) {
         while (true) {
-            delay(7500)
+            delay(4000)
             currentSecondaryHeaderIndex = (currentSecondaryHeaderIndex + 1) % secondaryHeaders.size
         }
     }
