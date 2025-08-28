@@ -19,7 +19,7 @@
         android:localeConfig="@xml/locales_config">
         <activity
             android:configChanges="layoutDirection|locale"
-            android:name="com.example.weatherapp.ui.MainActivity"
+            android:name="com.simoalanne.weatherapp.ui.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.WeatherApp">
             <intent-filter>

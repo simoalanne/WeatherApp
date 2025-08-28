@@ -8,17 +8,17 @@ plugins {
 }
 
 android {
-    namespace = "com.example.weatherapp"
+    namespace = "com.simoalanne.weatherapp"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.weatherapp"
+        applicationId = "com.simoalanne.weatherapp"
         // minSdk should be 33 because that makes app language switching much easier and possible
         // via system settings. That way don't have to override locale on app launch. Additionally
         // the Geocoder API this app uses no longer needs fallback code for older versions.
         minSdk = 33
         targetSdk = 35
-        versionCode = 3
+        versionCode = 2
         versionName = "2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -35,7 +35,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
