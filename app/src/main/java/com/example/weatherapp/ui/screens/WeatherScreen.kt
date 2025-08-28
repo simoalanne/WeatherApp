@@ -38,12 +38,6 @@ fun WeatherScreen(
     val pagerState = rememberPagerState(
         initialPage = pageIndex, pageCount = { uiState.favoriteLocations.size })
 
-    var optimizationTest by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        delay(0)
-        optimizationTest = true
-    }
-
     // when user adds a preview as favorite that causes navigation to this screen,
     // however cause there is navigation delay this needs to be delayed to avoid
     // showing the preview screen UI with false state when it's still navigating to here
@@ -96,14 +90,10 @@ fun WeatherScreen(
                     navController.navigate("settings")
                 }, totalPages = uiState.favoriteLocations.size, currentPage = pagerState.currentPage
             )
-            // this confirms that currently the weather page is too heavy which leads to animation
-            // stuttering at least on midrange devices.
-            if (optimizationTest) {
-                HorizontalPager(state = pagerState) { pageIndex ->
-                    WeatherPage(
-                        locationWeather = uiState.favoriteLocations[pageIndex]
-                    )
-                }
+            HorizontalPager(state = pagerState) { pageIndex ->
+                WeatherPage(
+                    locationWeather = uiState.favoriteLocations[pageIndex]
+                )
             }
         }
     }

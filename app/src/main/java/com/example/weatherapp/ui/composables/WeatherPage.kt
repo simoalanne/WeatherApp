@@ -91,73 +91,62 @@ fun WeatherPage(
             TempUnit.KELVIN -> "K"
         }
     }
-
-    LazyColumn(
+    Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState()) // enable scrolling
             .padding(horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        item {
-            WeatherInfo(
-                current = currentWeather.current.temperature,
-                min = currentWeather.dailyForecasts.first().minTemperature,
-                max = currentWeather.dailyForecasts.first().maxTemperature,
-                condition = stringResource(currentWeather.current.conditionId)
+        WeatherInfo(
+            current = currentWeather.current.temperature,
+            min = currentWeather.dailyForecasts.first().minTemperature,
+            max = currentWeather.dailyForecasts.first().maxTemperature,
+            condition = stringResource(currentWeather.current.conditionId)
+        )
+
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier
+                .clip(RoundedCornerShape(12.dp))
+                .background(Color(0f, 0f, 0f, 0.3f))
+                .padding(horizontal = 8.dp, vertical = 16.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.next_24_hours),
+                color = Color.White,
+                fontWeight = FontWeight.Bold
             )
+            HorizontalDivider(
+                color = Color.White.copy(alpha = 0.5f),
+                thickness = 0.5.dp
+            )
+            WeatherList(hourlyWeathers = weather24Hours)
         }
 
-        item {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color(0f, 0f, 0f, 0.3f))
-                    .padding(horizontal = 8.dp, vertical = 16.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.next_24_hours),
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold
-                )
-                HorizontalDivider(
-                    color = Color.White.copy(alpha = 0.5f),
-                    thickness = 0.5.dp
-                )
-                WeatherList(hourlyWeathers = weather24Hours)
-            }
-        }
+        DailyForecasts(
+            dailyForecasts = currentWeather.dailyForecasts,
+            timezoneOffset = currentWeather.meta.utcOffsetSeconds
+        )
 
-        item {
-            DailyForecasts(
-                dailyForecasts = currentWeather.dailyForecasts,
-                timezoneOffset = currentWeather.meta.utcOffsetSeconds
-            )
-        }
+        SunriseSunsetInfo(
+            sunrise = currentWeather.current.sunrise,
+            sunset = currentWeather.current.sunset,
+            currentTime = currentTime,
+            lastUpdated = currentWeather.current.time
+        )
 
-        item {
-            SunriseSunsetInfo(
-                sunrise = currentWeather.current.sunrise,
-                sunset = currentWeather.current.sunset,
-                currentTime = currentTime,
-                lastUpdated = currentWeather.current.time
-            )
-        }
-
-        item {
-            TemperatureChart(
-                dailyMinTemps = dailyMinTemps,
-                dailyMaxTemps = dailyMaxTemps,
-                dailyMeanTemps = dailyMeanTemps,
-                weekDays = weekDays,
-                tempUnit = tempUnitSymbol
-            )
-        }
+        TemperatureChart(
+            dailyMinTemps = dailyMinTemps,
+            dailyMaxTemps = dailyMaxTemps,
+            dailyMeanTemps = dailyMeanTemps,
+            weekDays = weekDays,
+            tempUnit = tempUnitSymbol
+        )
 
         // Spacer at bottom for nicer scrolling
-        item {
-            Spacer(Modifier.height(100.dp))
-        }
+        Spacer(Modifier.height(100.dp))
     }
+
 }
